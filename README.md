@@ -7,7 +7,7 @@ esi4j intends to help integrating [elasticsearch](http://www.elasticsearch.org/)
 * Object Search Engine Mapping (OSEM) using [elasticsearch-osem](https://github.com/aloiscochard/elasticsearch-osem)
 * Support for different data sources and data mirroring (Hibernate, JPA; extensible!)
 * Batch indexing of data sources
-* more?
+* see [Features page](https://github.com/molindo/esi4j/wiki/Features) for more
 
 ## Compass Migration
 
