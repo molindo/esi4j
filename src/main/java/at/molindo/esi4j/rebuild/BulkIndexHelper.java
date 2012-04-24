@@ -111,6 +111,7 @@ public class BulkIndexHelper {
 				try {
 					_failed += failed;
 					_indexed += indexed;
+					_nextCompleted.signal();
 					if (--_running == 0) {
 						_allCompleted.signal();
 					}
