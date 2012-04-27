@@ -38,14 +38,14 @@ import com.google.common.collect.Maps;
 
 public class DefaultEsi4J implements Esi4J {
 
-	private Settings _settings;
+	private final Settings _settings;
 	@SuppressWarnings("unused")
-	private Environment _environment;
+	private final Environment _environment;
 
-	private ConcurrentMap<String, Esi4JClient> _clients = Maps.newConcurrentMap();
-	private ConcurrentMap<String, InternalIndex> _indexes = Maps.newConcurrentMap();
+	private final ConcurrentMap<String, Esi4JClient> _clients = Maps.newConcurrentMap();
+	private final ConcurrentMap<String, InternalIndex> _indexes = Maps.newConcurrentMap();
 
-	private ConcurrentMap<String, Esi4JIndexManager> _indexManagers = Maps.newConcurrentMap();
+	private final ConcurrentMap<String, Esi4JIndexManager> _indexManagers = Maps.newConcurrentMap();
 
 	public DefaultEsi4J() {
 		this(ImmutableSettings.settingsBuilder().build(), true);
@@ -72,7 +72,7 @@ public class DefaultEsi4J implements Esi4J {
 		String[] clients = _settings.getAsArray("esi4j.clients", new String[] { Esi4J.DEFAULT_CLIENT });
 		for (String clientName : clients) {
 			Settings clientSettings = settingsBuilder().put(_settings)
-					.put(_settings.getByPrefix("esi4j.client." + clientName + ".")).build();
+					.put(Esi4JUtils.getSettings(_settings, "client." + clientName + ".", "esi4j.client.")).build();
 
 			Class<? extends Esi4JClientFactory> factoryClass = clientSettings.getAsClass("esi4j.client.type",
 					TransportClientFactory.class, "at.molindo.esi4j.core.impl.", "ClientFactory");

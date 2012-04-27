@@ -15,12 +15,14 @@
  */
 package at.molindo.esi4j.core.impl;
 
-import org.elasticsearch.client.Client;
 import org.elasticsearch.common.settings.Settings;
+import org.elasticsearch.common.transport.InetSocketTransportAddress;
 import org.elasticsearch.node.NodeBuilder;
 
 import at.molindo.esi4j.core.Esi4JClient;
 import at.molindo.esi4j.core.Esi4JClientFactory;
+import at.molindo.utils.collections.ArrayUtils;
+import at.molindo.utils.data.StringUtils;
 
 /**
  * Creates an {@link Esi4JClient} that uses a {@link TransportClient}. All
@@ -30,16 +32,32 @@ public class TransportClientFactory implements Esi4JClientFactory {
 
 	private final Settings _settings;
 	private final String _clusterName;
+	private final String[] _hosts;
 
 	public TransportClientFactory(Settings settings) {
 		_settings = settings;
 		_clusterName = settings.get("cluster.name", "esi4j");
+		// TODO make use of settings.getComponentSettings(..)
+		_hosts = settings.getAsArray("esi4j.client.transport.hosts");
+
+		if (ArrayUtils.empty(_hosts)) {
+			throw new IllegalArgumentException("hosts required");
+		}
 	}
 
 	@Override
 	public Esi4JClient create() {
-		Client client = new org.elasticsearch.client.transport.TransportClient(_settings);
+		org.elasticsearch.client.transport.TransportClient client = new org.elasticsearch.client.transport.TransportClient(
+				_settings);
+
+		String[] parts = new String[2];
+		for (String host : _hosts) {
+			if (StringUtils.split(host, ":", parts) == 1) {
+				parts[1] = "9300";
+			}
+			client.addTransportAddress(new InetSocketTransportAddress(parts[0], Integer.parseInt(parts[1])));
+		}
+
 		return new TransportClient(_clusterName, client);
 	}
-
 }
