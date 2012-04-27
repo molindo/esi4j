@@ -91,11 +91,13 @@ public final class HibernateRebuildSession<T> implements RebuildSession<T> {
 
 	@SuppressWarnings("unchecked")
 	private List<T> fetch(Criteria criteria, int first, int max) {
+		// TODO there are better ways to scroll than setFirstResult(..)
 		return criteria.setFirstResult(first).setMaxResults(max).setCacheable(false).list();
 	}
 
 	@SuppressWarnings("unchecked")
 	private List<T> fetch(Query query, int first, int max) {
+		// TODO there are better ways to scroll than setFirstResult(..)
 		return query.setFirstResult(first).setMaxResults(max).setCacheable(false).list();
 	}
 
