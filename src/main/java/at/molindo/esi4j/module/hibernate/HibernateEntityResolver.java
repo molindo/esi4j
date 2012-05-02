@@ -17,6 +17,7 @@ package at.molindo.esi4j.module.hibernate;
 
 import java.io.Serializable;
 import java.util.Date;
+import java.util.Map.Entry;
 
 import org.hibernate.CacheMode;
 import org.hibernate.EntityMode;
@@ -27,6 +28,7 @@ import org.hibernate.impl.SessionImpl;
 import org.hibernate.metadata.ClassMetadata;
 
 import at.molindo.esi4j.chain.Esi4JEntityResolver;
+import at.molindo.utils.collections.ClassMap;
 
 public class HibernateEntityResolver implements Esi4JEntityResolver {
 
@@ -35,11 +37,22 @@ public class HibernateEntityResolver implements Esi4JEntityResolver {
 	private final SessionFactory _sessionFactory;
 	private final ThreadLocal<Session> _localSession = new ThreadLocal<Session>();
 
+	private final ClassMap<String> _entityNames = ClassMap.create();
+
 	public HibernateEntityResolver(SessionFactory sessionFactory) {
 		if (sessionFactory == null) {
 			throw new NullPointerException("sessionFactory");
 		}
 		_sessionFactory = sessionFactory;
+
+		for (Entry<String, ClassMetadata> e : _sessionFactory.getAllClassMetadata().entrySet()) {
+
+			Class<?> mappedClass = e.getValue().getMappedClass(EntityMode.POJO);
+
+			if (mappedClass != null) {
+				_entityNames.put(mappedClass, e.getKey());
+			}
+		}
 	}
 
 	/**
@@ -49,12 +62,13 @@ public class HibernateEntityResolver implements Esi4JEntityResolver {
 	public ObjectKey toObjectKey(Object entity) {
 		Session session = _sessionFactory.getCurrentSession();
 
-		String entityName = session.getEntityName(entity);
+		String entityName = _entityNames.find(entity.getClass());
 
 		ClassMetadata meta = _sessionFactory.getClassMetadata(entityName);
 
 		EntityMode entityMode = session.getEntityMode();
 		Class<?> type = meta.getMappedClass(entityMode);
+
 		Serializable id = meta.getIdentifier(entity, (SessionImpl) session);
 		Long version = toLongVersion(meta.getVersion(entity, entityMode));
 
