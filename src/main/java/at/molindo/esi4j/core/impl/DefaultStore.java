@@ -15,6 +15,9 @@
  */
 package at.molindo.esi4j.core.impl;
 
+import java.util.Map.Entry;
+
+import org.elasticsearch.action.admin.cluster.state.ClusterStateResponse;
 import org.elasticsearch.action.admin.indices.create.CreateIndexRequestBuilder;
 import org.elasticsearch.action.admin.indices.create.CreateIndexResponse;
 import org.elasticsearch.action.admin.indices.exists.IndicesExistsResponse;
@@ -25,6 +28,7 @@ import at.molindo.esi4j.core.Esi4JClient;
 import at.molindo.esi4j.core.Esi4JIndex;
 import at.molindo.esi4j.core.Esi4JStore;
 import at.molindo.esi4j.core.internal.InternalIndex;
+import at.molindo.utils.data.StringUtils;
 
 public class DefaultStore implements Esi4JStore {
 
@@ -49,14 +53,17 @@ public class DefaultStore implements Esi4JStore {
 		_indexName = indexName;
 	}
 
+	@Override
 	public Esi4JClient getClient() {
 		return _client;
 	}
 
+	@Override
 	public String getIndexName() {
 		return _indexName;
 	}
 
+	@Override
 	public Esi4JIndex getIndex() {
 		return _index;
 	}
@@ -83,13 +90,16 @@ public class DefaultStore implements Esi4JStore {
 	protected void init(Esi4JIndex index) {
 		// create index
 
+		assertIndex(index);
+		_client.addStore(this);
+	}
+
+	void assertIndex(Esi4JIndex index) {
 		IndicesExistsResponse existsResponse = _client.getClient().admin().indices().prepareExists(_indexName)
 				.execute().actionGet();
 
 		if (!existsResponse.exists()) {
 			// create index
-
-			// TODO handle response
 			CreateIndexRequestBuilder request = _client.getClient().admin().indices().prepareCreate(_indexName);
 
 			Settings settings = ((InternalIndex) index).getSettings();
@@ -110,10 +120,27 @@ public class DefaultStore implements Esi4JStore {
 			if (settings != null && settings.getAsMap().size() > 0) {
 				_client.getClient().admin().indices().prepareUpdateSettings(_indexName).setSettings(settings).execute()
 						.actionGet();
+
+				ClusterStateResponse state = _client.getClient().admin().cluster().prepareState()
+						.setFilterIndices(_indexName).setFilterAll().setFilterMetaData(false).execute().actionGet();
+
+				Settings indexSettings = state.getState().getMetaData().getIndices().get(_indexName).getSettings();
+
+				for (Entry<String, String> e : settings.getAsMap().entrySet()) {
+					String key = e.getKey();
+					String localValue = e.getValue();
+					String indexValue = indexSettings.get(key.startsWith("index.") ? key : "index." + key);
+					if (!StringUtils.equals(localValue, indexValue)) {
+						throw new IllegalStateException("could not update value for settings key '" + key
+								+ "' - delete and rebuild index " + _indexName);
+					}
+				}
+
+				// TODO reset previously set settings to their defaults
+				// TODO try closing index to update settings
+
 			}
 		}
-
-		_client.addStore(this);
 	}
 
 	@Override
@@ -124,6 +151,7 @@ public class DefaultStore implements Esi4JStore {
 		return operation.execute(_client.getClient(), _indexName);
 	}
 
+	@Override
 	public void close() {
 		_client.removeStore(this);
 	}
