@@ -15,6 +15,7 @@
  */
 package at.molindo.esi4j.core.impl;
 
+import org.elasticsearch.cluster.ClusterName;
 import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.node.Node;
 import org.elasticsearch.node.NodeBuilder;
@@ -33,7 +34,7 @@ public class NodeClientFactory implements Esi4JClientFactory {
 
 	public NodeClientFactory(Settings settings) {
 		_settings = settings;
-		_clusterName = settings.get("cluster.name", "esi4j");
+		_clusterName = settings.get("cluster.name", ClusterName.DEFAULT.value());
 	}
 
 	@Override

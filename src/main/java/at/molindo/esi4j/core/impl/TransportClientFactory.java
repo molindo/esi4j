@@ -15,6 +15,7 @@
  */
 package at.molindo.esi4j.core.impl;
 
+import org.elasticsearch.cluster.ClusterName;
 import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.common.transport.InetSocketTransportAddress;
 import org.elasticsearch.node.NodeBuilder;
@@ -36,7 +37,7 @@ public class TransportClientFactory implements Esi4JClientFactory {
 
 	public TransportClientFactory(Settings settings) {
 		_settings = settings;
-		_clusterName = settings.get("cluster.name", "esi4j");
+		_clusterName = settings.get("cluster.name", ClusterName.DEFAULT.value());
 		// TODO make use of settings.getComponentSettings(..)
 		_hosts = settings.getAsArray("esi4j.client.transport.hosts");
 
