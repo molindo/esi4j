@@ -19,7 +19,9 @@ import org.elasticsearch.node.Node;
 
 public class NodeClient extends TransportClient {
 
-	private Node _node;
+	private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(NodeClient.class);
+
+	private final Node _node;
 
 	public NodeClient(String clusterName, Node node) {
 		super(clusterName, node.client());
@@ -30,6 +32,15 @@ public class NodeClient extends TransportClient {
 	@Override
 	public void close() {
 		_node.close();
+	}
+
+	@Override
+	protected void finalize() throws Throwable {
+		if (!_node.isClosed()) {
+			log.warn("node was not closed properly. cleaning up in finalize()");
+			close();
+		}
+		super.finalize();
 	}
 
 }
