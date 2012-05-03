@@ -34,21 +34,25 @@
 			<groupId>at.molindo</groupId>
 			<artifactId>elasticsearch-osem</artifactId>
 			<version>0.1-SNAPSHOT</version>
+			<optional>true</optional>
 		</dependency>
 		<dependency>
 			<groupId>org.hibernate</groupId>
 			<artifactId>hibernate-core</artifactId>
 			<version>${hibernate.version}</version>
+			<optional>true</optional>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-core</artifactId>
 			<version>${spring.version}</version>
+			<optional>true</optional>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-beans</artifactId>
 			<version>${spring.version}</version>
+			<optional>true</optional>
 		</dependency>
 		<dependency>
 			<groupId>com.google.guava</groupId>
@@ -70,18 +74,16 @@
 			<groupId>org.easymock</groupId>
 			<artifactId>easymock</artifactId>
 			<version>3.1</version>
+			<scope>test</scope>
 		</dependency>
-
 
 		<dependency>
 			<groupId>com.google.code.findbugs</groupId>
 			<artifactId>jsr305</artifactId>
-			<version>${findbugs.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>com.google.code.findbugs</groupId>
 			<artifactId>annotations</artifactId>
-			<version>${findbugs.version}</version>
 		</dependency>
 
 	</dependencies>
