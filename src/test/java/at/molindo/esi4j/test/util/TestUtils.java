@@ -46,7 +46,9 @@ public class TestUtils {
 		}
 
 		final File tmp = new File(SystemProperty.JAVA_IO_TMPDIR.getFile(), "esi4jtest-" + UUID.randomUUID().toString());
-		tmp.mkdirs();
+		if (!tmp.mkdirs()) {
+			throw new RuntimeException("failed to create temp dir: " + tmp);
+		}
 
 		Settings settings = ImmutableSettings.settingsBuilder().put("cluster.name", clusterName)
 				.put("path.data", new File(tmp, "data").toString()).put("path.logs", new File(tmp, "logs").toString())
