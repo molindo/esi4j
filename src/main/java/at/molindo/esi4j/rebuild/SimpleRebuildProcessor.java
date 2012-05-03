@@ -33,8 +33,10 @@ public class SimpleRebuildProcessor implements Esi4JRebuildProcessor {
 	private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(SimpleRebuildProcessor.class);
 
 	private static final int DEFAULT_BATCH_SIZE = 1000;
+	private static final int DEFAULT_MAX_RUNNING = 10;
 
 	private int _batchSize = DEFAULT_BATCH_SIZE;
+	private int _maxRunning = DEFAULT_MAX_RUNNING;
 
 	public SimpleRebuildProcessor() {
 	}
@@ -88,7 +90,7 @@ public class SimpleRebuildProcessor implements Esi4JRebuildProcessor {
 
 		try {
 
-			BulkIndexHelper h = new BulkIndexHelper(index);
+			BulkIndexHelper h = new BulkIndexHelper(index).setMaxRunning(getMaxRunning());
 
 			List<T> list;
 			while ((list = session.getNext(_batchSize)).size() > 0) {
@@ -113,16 +115,28 @@ public class SimpleRebuildProcessor implements Esi4JRebuildProcessor {
 		return _batchSize;
 	}
 
-	@Override
-	public void close() {
-	}
-
 	public SimpleRebuildProcessor setBatchSize(int batchSize) {
 		if (batchSize <= 0) {
 			throw new IllegalArgumentException("batchSize must be > 0, was " + batchSize);
 		}
 		_batchSize = batchSize;
 		return this;
+	}
+
+	public int getMaxRunning() {
+		return _maxRunning;
+	}
+
+	public SimpleRebuildProcessor setMaxRunning(int maxRunning) {
+		if (maxRunning <= 0) {
+			throw new IllegalArgumentException("maxRunning must be > 0, was " + maxRunning);
+		}
+		_maxRunning = maxRunning;
+		return this;
+	}
+
+	@Override
+	public void close() {
 	}
 
 }
