@@ -55,11 +55,16 @@ public class Esi4JBean implements FactoryBean<Esi4J>, DisposableBean {
 		if (_properties != null) {
 			settings.put(_properties);
 		}
+		settings = processSettings(settings);
 		_esi4j = new DefaultEsi4J(settings.build());
 
 		init(_esi4j);
 
 		return _esi4j;
+	}
+
+	protected Builder processSettings(Builder settings) {
+		return settings;
 	}
 
 	protected void init(DefaultEsi4J esi4j) {
