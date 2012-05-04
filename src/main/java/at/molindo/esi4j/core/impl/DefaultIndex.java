@@ -52,6 +52,7 @@ import at.molindo.esi4j.core.Esi4JIndexManager;
 import at.molindo.esi4j.core.Esi4JStore;
 import at.molindo.esi4j.core.Esi4JStore.StoreOperation;
 import at.molindo.esi4j.core.internal.InternalIndex;
+import at.molindo.esi4j.ex.Esi4JObjectFilteredException;
 import at.molindo.esi4j.mapping.TypeMapping;
 import at.molindo.esi4j.mapping.TypeMappings;
 import at.molindo.esi4j.util.ListenableActionFutureWrapper;
@@ -80,6 +81,7 @@ public class DefaultIndex implements InternalIndex {
 		setStore(store);
 	}
 
+	@Override
 	public String getName() {
 		return _name;
 	}
@@ -94,6 +96,7 @@ public class DefaultIndex implements InternalIndex {
 		return _store;
 	}
 
+	@Override
 	public void setStore(Esi4JStore store) {
 		if (store == null) {
 			throw new NullPointerException("store");
@@ -114,6 +117,7 @@ public class DefaultIndex implements InternalIndex {
 		_store.close();
 	}
 
+	@Override
 	public DefaultIndex addTypeMapping(TypeMapping typeMapping) {
 		_mappings.addMapping(typeMapping);
 		putMapping(typeMapping);
@@ -206,6 +210,7 @@ public class DefaultIndex implements InternalIndex {
 				});
 	}
 
+	@Override
 	public ListenableActionFuture<DeleteResponseWrapper> executeDelete(
 			IndexOperation<ListenableActionFuture<DeleteResponse>> deleteOperation) {
 		return ListenableActionFutureWrapper.wrap(execute(deleteOperation),
@@ -281,15 +286,17 @@ public class DefaultIndex implements InternalIndex {
 
 				for (Object o : iterable) {
 					TypeMapping mapping = helper.findTypeMapping(o);
-					String id = mapping.getIdString(o);
+					if (!mapping.isFiltered(o)) {
+						String id = mapping.getIdString(o);
 
-					IndexRequestBuilder index = client.prepareIndex(indexName, mapping.getTypeAlias());
-					if (id != null) {
-						index.setId(id);
+						IndexRequestBuilder index = client.prepareIndex(indexName, mapping.getTypeAlias());
+						if (id != null) {
+							index.setId(id);
+						}
+						mapping.getObjectSource(o).setSource(index);
+
+						request.add(index);
 					}
-					mapping.getObjectSource(o).setSource(index);
-
-					request.add(index);
 				}
 
 				return request.execute();
@@ -297,6 +304,7 @@ public class DefaultIndex implements InternalIndex {
 		});
 	}
 
+	@Override
 	public ListenableActionFuture<BulkResponseWrapper> executeBulk(
 			IndexOperation<ListenableActionFuture<BulkResponse>> bulkOperation) {
 		return ListenableActionFutureWrapper.wrap(execute(bulkOperation),
@@ -330,10 +338,12 @@ public class DefaultIndex implements InternalIndex {
 		return _mappings.findTypeMapping(hit.getType()).read(hit);
 	}
 
+	@Override
 	public Esi4JIndexManager getIndexManager() {
 		return _indexManager;
 	}
 
+	@Override
 	public void setIndexManager(Esi4JIndexManager indexManager) {
 		if (_indexManager != null) {
 			throw new IllegalStateException("indexManager already assigned");
@@ -355,6 +365,10 @@ public class DefaultIndex implements InternalIndex {
 		@Override
 		public ListenableActionFuture<IndexResponse> execute(Client client, String indexName, OperationHelper helper) {
 			final TypeMapping typeMapping = helper.findTypeMapping(_object);
+
+			if (typeMapping.isFiltered(_object)) {
+				throw new Esi4JObjectFilteredException(typeMapping, _object);
+			}
 
 			final String type = typeMapping.getTypeAlias();
 			final String id = typeMapping.getIdString(_object);
@@ -422,7 +436,7 @@ public class DefaultIndex implements InternalIndex {
 
 	private static final class Search implements IndexOperation<ListenableActionFuture<SearchResponse>> {
 
-		private QueryBuilder _query;
+		private final QueryBuilder _query;
 		private final Class<?> _type;
 
 		private final int _from;
@@ -461,7 +475,7 @@ public class DefaultIndex implements InternalIndex {
 
 	private static final class Count implements IndexOperation<ListenableActionFuture<CountResponse>> {
 
-		private QueryBuilder _query;
+		private final QueryBuilder _query;
 		private final Class<?> _type;
 
 		private Count(QueryBuilder query, Class<?> type) {

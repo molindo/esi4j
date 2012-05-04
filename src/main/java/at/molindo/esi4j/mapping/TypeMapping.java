@@ -19,6 +19,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import javax.annotation.Nonnull;
+
 import org.elasticsearch.action.get.GetResponse;
 import org.elasticsearch.index.get.GetField;
 import org.elasticsearch.search.SearchHit;
@@ -70,6 +72,17 @@ public abstract class TypeMapping {
 	 */
 	public Class<?> getTypeClass() {
 		return _typeClass;
+	}
+
+	/**
+	 * Simple filtering of entities. esi4j core library will always respect this
+	 * filtering when working with mapped objects. Users are still free to
+	 * persist entities anyway.
+	 * 
+	 * @return <code>true</code> if entity must not be persisted to index
+	 */
+	public boolean isFiltered(@Nonnull Object entity) {
+		return false;
 	}
 
 	/**

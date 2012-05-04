@@ -57,6 +57,11 @@ public abstract class AbstractTypeMapping<Type, Id> extends TypeMapping {
 	}
 
 	@Override
+	public final boolean isFiltered(Object entity) {
+		return filter(cast(entity));
+	}
+
+	@Override
 	public final Object getId(Object o) {
 		return id(cast(o));
 	}
@@ -146,6 +151,10 @@ public abstract class AbstractTypeMapping<Type, Id> extends TypeMapping {
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}
+	}
+
+	protected boolean filter(Type o) {
+		return false;
 	}
 
 	protected abstract Id id(Type o);
