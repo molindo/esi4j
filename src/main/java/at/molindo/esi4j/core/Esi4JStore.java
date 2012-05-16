@@ -15,7 +15,6 @@
  */
 package at.molindo.esi4j.core;
 
-import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
 
 import org.elasticsearch.client.Client;
@@ -31,8 +30,8 @@ public interface Esi4JStore {
 	/**
 	 * the esi4j index currently using this store (must not change)
 	 */
-	@CheckForNull
-	Esi4JIndex getIndex();
+	// @CheckForNull
+	// Esi4JIndex getIndex();
 
 	<T> T execute(StoreOperation<T> operation);
 
@@ -43,6 +42,10 @@ public interface Esi4JStore {
 	 */
 	void setIndex(Esi4JIndex index);
 
+	/**
+	 * @return the {@link Esi4JClient} used by this store (must not change)
+	 */
+	@Nonnull
 	Esi4JClient getClient();
 
 	void close();

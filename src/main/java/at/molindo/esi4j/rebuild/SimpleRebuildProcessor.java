@@ -19,8 +19,7 @@ import java.util.List;
 
 import org.elasticsearch.client.Client;
 
-import at.molindo.esi4j.core.Esi4JIndex.IndexOperation;
-import at.molindo.esi4j.core.Esi4JIndex.OperationHelper;
+import at.molindo.esi4j.core.Esi4JOperation;
 import at.molindo.esi4j.core.internal.InternalIndex;
 import at.molindo.esi4j.mapping.TypeMapping;
 import at.molindo.esi4j.module.Esi4JModule;
@@ -56,10 +55,10 @@ public class SimpleRebuildProcessor implements Esi4JRebuildProcessor {
 		}
 
 		// optimize index after rebuild
-		index.execute(new IndexOperation<Void>() {
+		index.execute(new Esi4JOperation<Void>() {
 
 			@Override
-			public Void execute(Client client, String indexName, OperationHelper helper) {
+			public Void execute(Client client, String indexName, OperationContext context) {
 				client.admin().indices().prepareOptimize(indexName).execute().actionGet();
 				return null;
 			}
@@ -75,11 +74,11 @@ public class SimpleRebuildProcessor implements Esi4JRebuildProcessor {
 
 		RebuildSession<T> session = module.startRebuildSession(type);
 
-		index.execute(new IndexOperation<Void>() {
+		index.execute(new Esi4JOperation<Void>() {
 
 			@Override
-			public Void execute(Client client, String indexName, OperationHelper helper) {
-				TypeMapping mapping = helper.findTypeMapping(type);
+			public Void execute(Client client, String indexName, Esi4JOperation.OperationContext context) {
+				TypeMapping mapping = context.findTypeMapping(type);
 				client.admin().indices().prepareDeleteMapping(indexName).setType(mapping.getTypeAlias()).execute()
 						.actionGet();
 				return null;

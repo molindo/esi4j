@@ -17,6 +17,9 @@ package at.molindo.esi4j.core.impl;
 
 import static org.elasticsearch.common.settings.ImmutableSettings.settingsBuilder;
 
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentMap;
 
 import org.elasticsearch.common.collect.Tuple;
@@ -31,9 +34,13 @@ import at.molindo.esi4j.core.Esi4JClientFactory;
 import at.molindo.esi4j.core.Esi4JFactory;
 import at.molindo.esi4j.core.Esi4JIndex;
 import at.molindo.esi4j.core.Esi4JIndexManager;
+import at.molindo.esi4j.core.Esi4JManagedIndex;
 import at.molindo.esi4j.core.internal.InternalIndex;
+import at.molindo.esi4j.multi.impl.DefaultManagedMultiIndex;
 import at.molindo.esi4j.util.Esi4JUtils;
+import at.molindo.utils.collections.CollectionUtils;
 
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
 public class DefaultEsi4J implements Esi4J {
@@ -117,6 +124,57 @@ public class DefaultEsi4J implements Esi4J {
 	}
 
 	@Override
+	public Esi4JIndex findIndex(Class<?> type) {
+		return (Esi4JIndex) findMultiIndex(type);
+	}
+
+	@Override
+	public Esi4JManagedIndex getMultiIndex(String... names) {
+		return getMultiIndex(Arrays.asList(names));
+	}
+
+	@Override
+	public Esi4JManagedIndex getMultiIndex(List<String> names) {
+		if (CollectionUtils.empty(names)) {
+			return new DefaultManagedMultiIndex(_indexes.values());
+		} else if (names.size() == 1) {
+			String name = names.get(0);
+			if ("*".equals(name)) {
+				return new DefaultManagedMultiIndex(_indexes.values());
+			} else {
+				return getIndex(name);
+			}
+		} else {
+			List<InternalIndex> indices = Lists.newArrayListWithCapacity(names.size());
+			for (String name : names) {
+				indices.add(getIndex(name));
+			}
+			return new DefaultManagedMultiIndex(indices);
+		}
+	}
+
+	@Override
+	public Esi4JManagedIndex findMultiIndex(Class<?>... types) {
+		return findMultiIndex(Arrays.asList(types));
+	}
+
+	@Override
+	public Esi4JManagedIndex findMultiIndex(List<Class<? extends Object>> types) {
+		List<String> names = Lists.newArrayListWithCapacity(_indexes.size());
+
+		for (Entry<String, InternalIndex> e : _indexes.entrySet()) {
+			for (Class<?> type : types) {
+				if (e.getValue().isMapped(type)) {
+					names.add(e.getKey());
+					break;
+				}
+			}
+		}
+
+		return getMultiIndex(names);
+	}
+
+	@Override
 	public void close() {
 		for (Esi4JClient client : _clients.values()) {
 			client.close();
@@ -125,11 +183,11 @@ public class DefaultEsi4J implements Esi4J {
 
 	@Override
 	public void registerIndexManger(Esi4JIndexManager indexManager) {
-		Esi4JIndex index = indexManager.getIndex();
+		Esi4JManagedIndex index = indexManager.getIndex();
 		String indexName = index.getName();
 
 		if (_indexManagers.putIfAbsent(indexName, indexManager) == null) {
-			((InternalIndex) index).setIndexManager(indexManager);
+			index.setIndexManager(indexManager);
 		} else {
 			throw new IllegalStateException("already an index manager registered for index " + indexName);
 		}

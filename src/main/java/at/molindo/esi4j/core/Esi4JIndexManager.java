@@ -24,7 +24,7 @@ public interface Esi4JIndexManager {
 	/**
 	 * @return managed index (never null, never changes)
 	 */
-	Esi4JIndex getIndex();
+	Esi4JManagedIndex getIndex();
 
 	public Class<?>[] getTypes();
 

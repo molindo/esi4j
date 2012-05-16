@@ -22,7 +22,7 @@ import org.elasticsearch.index.VersionType;
 
 import at.molindo.esi4j.chain.Esi4JEntityResolver;
 import at.molindo.esi4j.chain.Esi4JEntityTask;
-import at.molindo.esi4j.core.Esi4JIndex.OperationHelper;
+import at.molindo.esi4j.core.Esi4JOperation.OperationContext;
 import at.molindo.esi4j.mapping.TypeMapping;
 
 public final class IndexEntityTask extends AbstractEntityTask {
@@ -48,10 +48,10 @@ public final class IndexEntityTask extends AbstractEntityTask {
 	}
 
 	@Override
-	public void addToBulk(BulkRequestBuilder bulk, String indexName, OperationHelper helper) {
+	public void addToBulk(BulkRequestBuilder bulk, String indexName, OperationContext context) {
 		Object entity = getEntity();
 		if (entity != null) {
-			TypeMapping mapping = helper.findTypeMapping(entity);
+			TypeMapping mapping = context.findTypeMapping(entity);
 
 			String id = mapping.getIdString(entity);
 			if (!mapping.isFiltered(entity)) {

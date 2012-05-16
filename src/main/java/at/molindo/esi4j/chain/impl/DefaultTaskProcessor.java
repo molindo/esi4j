@@ -23,8 +23,7 @@ import org.elasticsearch.client.Client;
 import at.molindo.esi4j.chain.Esi4JEntityTask;
 import at.molindo.esi4j.chain.Esi4JTaskProcessor;
 import at.molindo.esi4j.core.Esi4JIndex;
-import at.molindo.esi4j.core.Esi4JIndex.IndexOperation;
-import at.molindo.esi4j.core.Esi4JIndex.OperationHelper;
+import at.molindo.esi4j.core.Esi4JOperation;
 
 public class DefaultTaskProcessor extends AbstractTaskProcessor implements Esi4JTaskProcessor {
 
@@ -34,10 +33,10 @@ public class DefaultTaskProcessor extends AbstractTaskProcessor implements Esi4J
 
 	@Override
 	public void processTasks(final Esi4JEntityTask[] tasks) {
-		getIndex().executeBulk(new IndexOperation<ListenableActionFuture<BulkResponse>>() {
+		getIndex().executeBulk(new Esi4JOperation<ListenableActionFuture<BulkResponse>>() {
 
 			@Override
-			public ListenableActionFuture<BulkResponse> execute(Client client, String indexName, OperationHelper helper) {
+			public ListenableActionFuture<BulkResponse> execute(Client client, String indexName, OperationContext helper) {
 				BulkRequestBuilder bulk = client.prepareBulk();
 
 				for (int i = 0; i < tasks.length; i++) {

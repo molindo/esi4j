@@ -31,8 +31,7 @@ import org.elasticsearch.client.Client;
 
 import at.molindo.esi4j.chain.Esi4JEntityResolver;
 import at.molindo.esi4j.chain.Esi4JEntityTask;
-import at.molindo.esi4j.core.Esi4JIndex.IndexOperation;
-import at.molindo.esi4j.core.Esi4JIndex.OperationHelper;
+import at.molindo.esi4j.core.Esi4JOperation;
 import at.molindo.utils.collections.ArrayUtils;
 
 public class QueuedTaskExecutor implements ThreadFactory, RejectedExecutionHandler {
@@ -140,11 +139,11 @@ public class QueuedTaskExecutor implements ThreadFactory, RejectedExecutionHandl
 
 			// TODO handle response
 			executor.getTaskProcessor().getIndex()
-					.executeBulk(new IndexOperation<ListenableActionFuture<BulkResponse>>() {
+					.executeBulk(new Esi4JOperation<ListenableActionFuture<BulkResponse>>() {
 
 						@Override
 						public ListenableActionFuture<BulkResponse> execute(Client client, String indexName,
-								OperationHelper helper) {
+								OperationContext helper) {
 							BulkRequestBuilder bulk = client.prepareBulk();
 
 							for (int i = 0; i < _tasks.length; i++) {

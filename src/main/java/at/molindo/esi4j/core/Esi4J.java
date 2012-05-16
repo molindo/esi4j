@@ -15,6 +15,8 @@
  */
 package at.molindo.esi4j.core;
 
+import java.util.List;
+
 /**
  * Facade for elasticsearch integration. Usually only one instance per
  * application.
@@ -41,11 +43,40 @@ public interface Esi4J {
 	Esi4JIndex getIndex();
 
 	/**
-	 * @return the default index
+	 * @return the index with given name
 	 * @throws IllegalStateException
 	 *             if index with given name isn't configured
 	 */
 	Esi4JIndex getIndex(String name);
+
+	/**
+	 * @see #findMultiIndex(Class...)
+	 * @throws ClassCastException
+	 *             if type is mapped to multiple indexes
+	 */
+	Esi4JIndex findIndex(Class<?> type);
+
+	/**
+	 * @see #getMultiIndex(List)
+	 */
+	Esi4JManagedIndex getMultiIndex(String... names);
+
+	/**
+	 * @param names
+	 * @return {@link Esi4JSearchIndex} spanning all named indexes
+	 */
+	Esi4JManagedIndex getMultiIndex(List<String> names);
+
+	/**
+	 * @see #findMultiIndex(List)
+	 */
+	Esi4JManagedIndex findMultiIndex(Class<?>... types);
+
+	/**
+	 * @param types
+	 * @return an {@link Esi4JSearchIndex} spanning all indexes with given types
+	 */
+	Esi4JManagedIndex findMultiIndex(List<Class<? extends Object>> types);
 
 	void registerIndexManger(Esi4JIndexManager indexManager);
 

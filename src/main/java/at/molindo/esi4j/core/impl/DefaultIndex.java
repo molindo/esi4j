@@ -23,32 +23,23 @@ import org.elasticsearch.action.admin.indices.mapping.put.PutMappingResponse;
 import org.elasticsearch.action.admin.indices.refresh.RefreshResponse;
 import org.elasticsearch.action.bulk.BulkRequestBuilder;
 import org.elasticsearch.action.bulk.BulkResponse;
-import org.elasticsearch.action.count.CountRequestBuilder;
-import org.elasticsearch.action.count.CountResponse;
 import org.elasticsearch.action.delete.DeleteResponse;
 import org.elasticsearch.action.get.GetResponse;
 import org.elasticsearch.action.index.IndexRequestBuilder;
 import org.elasticsearch.action.index.IndexResponse;
-import org.elasticsearch.action.search.SearchRequestBuilder;
-import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.client.Client;
 import org.elasticsearch.common.settings.Settings;
-import org.elasticsearch.index.query.QueryBuilder;
-import org.elasticsearch.search.SearchHit;
 
 import at.molindo.esi4j.action.BulkResponseWrapper;
-import at.molindo.esi4j.action.CountResponseWrapper;
 import at.molindo.esi4j.action.DeleteResponseWrapper;
 import at.molindo.esi4j.action.GetResponseWrapper;
 import at.molindo.esi4j.action.IndexResponseWrapper;
-import at.molindo.esi4j.action.SearchResponseWrapper;
 import at.molindo.esi4j.action.impl.DefaultBulkResponseWrapper;
-import at.molindo.esi4j.action.impl.DefaultCountResponseWrapper;
 import at.molindo.esi4j.action.impl.DefaultDeleteResponseWrapper;
 import at.molindo.esi4j.action.impl.DefaultGetResponseWrapper;
 import at.molindo.esi4j.action.impl.DefaultIndexResponseWrapper;
-import at.molindo.esi4j.action.impl.DefaultSearchResponseWrapper;
 import at.molindo.esi4j.core.Esi4JIndexManager;
+import at.molindo.esi4j.core.Esi4JOperation;
 import at.molindo.esi4j.core.Esi4JStore;
 import at.molindo.esi4j.core.Esi4JStore.StoreOperation;
 import at.molindo.esi4j.core.internal.InternalIndex;
@@ -58,7 +49,7 @@ import at.molindo.esi4j.mapping.TypeMappings;
 import at.molindo.esi4j.util.ListenableActionFutureWrapper;
 import at.molindo.utils.data.Function;
 
-public class DefaultIndex implements InternalIndex {
+public class DefaultIndex extends AbstractIndex implements InternalIndex {
 
 	private final String _name;
 	private final Settings _settings;
@@ -118,6 +109,25 @@ public class DefaultIndex implements InternalIndex {
 	}
 
 	@Override
+	public TypeMapping findTypeMapping(Object o) {
+		return _mappings.findTypeMapping(o);
+	}
+
+	@Override
+	public TypeMapping findTypeMapping(Class<?> type) {
+		return _mappings.findTypeMapping(type);
+	}
+
+	@Override
+	public TypeMapping findTypeMapping(String indexName, String typeAlias) {
+		if (!getStore().getIndexName().equals(indexName)) {
+			throw new IllegalArgumentException("unexpected indexName, was " + indexName + ", expected "
+					+ getStore().getIndexName());
+		}
+		return _mappings.findTypeMapping(typeAlias);
+	}
+
+	@Override
 	public DefaultIndex addTypeMapping(TypeMapping typeMapping) {
 		_mappings.addMapping(typeMapping);
 		putMapping(typeMapping);
@@ -127,6 +137,16 @@ public class DefaultIndex implements InternalIndex {
 	@Override
 	public void updateMapping(Class<?> type) {
 		putMapping(_mappings.findTypeMapping(type));
+	}
+
+	@Override
+	public boolean isMapped(Class<?> type) {
+		return _mappings.getTypeMapping(type) != null;
+	}
+
+	@Override
+	public boolean isMapped(Object o) {
+		return _mappings.getTypeMapping(o) != null;
 	}
 
 	@Override
@@ -158,24 +178,13 @@ public class DefaultIndex implements InternalIndex {
 	}
 
 	@Override
-	public <T> T execute(final IndexOperation<T> operation) {
-		return _store.execute(new StoreOperation<T>() {
-
-			@Override
-			public T execute(Client client, String indexName) {
-				return operation.execute(client, indexName, new Helper());
-			}
-		});
-	}
-
-	@Override
 	public ListenableActionFuture<IndexResponseWrapper> index(final Object o) {
 		return executeIndex(new Index(o));
 	}
 
 	@Override
 	public ListenableActionFuture<IndexResponseWrapper> executeIndex(
-			IndexOperation<ListenableActionFuture<IndexResponse>> indexOperation) {
+			Esi4JOperation<ListenableActionFuture<IndexResponse>> indexOperation) {
 
 		return ListenableActionFutureWrapper.wrap(execute(indexOperation),
 				new Function<IndexResponse, IndexResponseWrapper>() {
@@ -196,7 +205,7 @@ public class DefaultIndex implements InternalIndex {
 
 	@Override
 	public ListenableActionFuture<GetResponseWrapper> executeGet(
-			IndexOperation<ListenableActionFuture<GetResponse>> getOperation) {
+			Esi4JOperation<ListenableActionFuture<GetResponse>> getOperation) {
 
 		return ListenableActionFutureWrapper.wrap(execute(getOperation),
 				new Function<GetResponse, GetResponseWrapper>() {
@@ -212,7 +221,7 @@ public class DefaultIndex implements InternalIndex {
 
 	@Override
 	public ListenableActionFuture<DeleteResponseWrapper> executeDelete(
-			IndexOperation<ListenableActionFuture<DeleteResponse>> deleteOperation) {
+			Esi4JOperation<ListenableActionFuture<DeleteResponse>> deleteOperation) {
 		return ListenableActionFutureWrapper.wrap(execute(deleteOperation),
 				new Function<DeleteResponse, DeleteResponseWrapper>() {
 
@@ -235,53 +244,11 @@ public class DefaultIndex implements InternalIndex {
 	}
 
 	@Override
-	public ListenableActionFuture<SearchResponseWrapper> search(QueryBuilder query, Class<?> type) {
-		return executeSearch(new Search(query, type));
-	}
-
-	@Override
-	public ListenableActionFuture<SearchResponseWrapper> search(QueryBuilder query, Class<?> type, int from, int size) {
-		return executeSearch(new Search(query, type, from, size));
-	}
-
-	@Override
-	public ListenableActionFuture<SearchResponseWrapper> executeSearch(
-			IndexOperation<ListenableActionFuture<SearchResponse>> searchOperation) {
-		return ListenableActionFutureWrapper.wrap(execute(searchOperation),
-				new Function<SearchResponse, SearchResponseWrapper>() {
-
-					@Override
-					public SearchResponseWrapper apply(SearchResponse response) {
-						return new DefaultSearchResponseWrapper(response, DefaultIndex.this);
-					}
-				});
-	}
-
-	@Override
-	public ListenableActionFuture<CountResponseWrapper> count(QueryBuilder query, Class<?> type) {
-		return executeCount(new Count(query, type));
-	}
-
-	@Override
-	public ListenableActionFuture<CountResponseWrapper> executeCount(
-			IndexOperation<ListenableActionFuture<CountResponse>> countOperation) {
-
-		return ListenableActionFutureWrapper.wrap(execute(countOperation),
-				new Function<CountResponse, CountResponseWrapper>() {
-
-					@Override
-					public CountResponseWrapper apply(CountResponse response) {
-						return new DefaultCountResponseWrapper(response);
-					}
-				});
-	}
-
-	@Override
 	public ListenableActionFuture<BulkResponseWrapper> bulkIndex(final Iterable<?> iterable) {
-		return executeBulk(new IndexOperation<ListenableActionFuture<BulkResponse>>() {
+		return executeBulk(new Esi4JOperation<ListenableActionFuture<BulkResponse>>() {
 
 			@Override
-			public ListenableActionFuture<BulkResponse> execute(Client client, String indexName, OperationHelper helper) {
+			public ListenableActionFuture<BulkResponse> execute(Client client, String indexName, OperationContext helper) {
 				BulkRequestBuilder request = client.prepareBulk();
 
 				for (Object o : iterable) {
@@ -306,7 +273,7 @@ public class DefaultIndex implements InternalIndex {
 
 	@Override
 	public ListenableActionFuture<BulkResponseWrapper> executeBulk(
-			IndexOperation<ListenableActionFuture<BulkResponse>> bulkOperation) {
+			Esi4JOperation<ListenableActionFuture<BulkResponse>> bulkOperation) {
 		return ListenableActionFutureWrapper.wrap(execute(bulkOperation),
 				new Function<BulkResponse, BulkResponseWrapper>() {
 
@@ -334,11 +301,6 @@ public class DefaultIndex implements InternalIndex {
 	}
 
 	@Override
-	public Object read(SearchHit hit) {
-		return _mappings.findTypeMapping(hit.getType()).read(hit);
-	}
-
-	@Override
 	public Esi4JIndexManager getIndexManager() {
 		return _indexManager;
 	}
@@ -352,7 +314,7 @@ public class DefaultIndex implements InternalIndex {
 		_indexManager = indexManager;
 	}
 
-	private static final class Index implements IndexOperation<ListenableActionFuture<IndexResponse>> {
+	private static final class Index implements Esi4JOperation<ListenableActionFuture<IndexResponse>> {
 		private final Object _object;
 
 		private Index(Object object) {
@@ -363,7 +325,7 @@ public class DefaultIndex implements InternalIndex {
 		}
 
 		@Override
-		public ListenableActionFuture<IndexResponse> execute(Client client, String indexName, OperationHelper helper) {
+		public ListenableActionFuture<IndexResponse> execute(Client client, String indexName, OperationContext helper) {
 			final TypeMapping typeMapping = helper.findTypeMapping(_object);
 
 			if (typeMapping.isFiltered(_object)) {
@@ -379,7 +341,7 @@ public class DefaultIndex implements InternalIndex {
 		}
 	}
 
-	private static final class Get implements IndexOperation<ListenableActionFuture<GetResponse>> {
+	private static final class Get implements Esi4JOperation<ListenableActionFuture<GetResponse>> {
 
 		private final Class<?> _type;
 		private final Object _id;
@@ -396,7 +358,7 @@ public class DefaultIndex implements InternalIndex {
 		}
 
 		@Override
-		public ListenableActionFuture<GetResponse> execute(Client client, String indexName, OperationHelper helper) {
+		public ListenableActionFuture<GetResponse> execute(Client client, String indexName, OperationContext helper) {
 			final TypeMapping typeMapping = helper.findTypeMapping(_type);
 
 			final String type = typeMapping.getTypeAlias();
@@ -406,7 +368,7 @@ public class DefaultIndex implements InternalIndex {
 		}
 	}
 
-	private static final class Delete implements IndexOperation<ListenableActionFuture<DeleteResponse>> {
+	private static final class Delete implements Esi4JOperation<ListenableActionFuture<DeleteResponse>> {
 
 		private final Class<?> _type;
 		private final Object _id;
@@ -423,7 +385,7 @@ public class DefaultIndex implements InternalIndex {
 		}
 
 		@Override
-		public ListenableActionFuture<DeleteResponse> execute(Client client, String indexName, OperationHelper helper) {
+		public ListenableActionFuture<DeleteResponse> execute(Client client, String indexName, OperationContext helper) {
 			final TypeMapping typeMapping = helper.findTypeMapping(_type);
 
 			final String type = typeMapping.getTypeAlias();
@@ -431,87 +393,6 @@ public class DefaultIndex implements InternalIndex {
 
 			return client.prepareDelete(indexName, type, id).execute();
 
-		}
-	}
-
-	private static final class Search implements IndexOperation<ListenableActionFuture<SearchResponse>> {
-
-		private final QueryBuilder _query;
-		private final Class<?> _type;
-
-		private final int _from;
-		private final int _size;
-
-		private Search(QueryBuilder query, Class<?> type) {
-			this(query, type, 0, Integer.MAX_VALUE);
-		}
-
-		private Search(QueryBuilder query, Class<?> type, int from, int size) {
-			if (type == null) {
-				throw new NullPointerException("type");
-			}
-			if (query == null) {
-				throw new NullPointerException("query");
-			}
-			_query = query;
-			_type = type;
-			_from = from;
-			_size = size;
-		}
-
-		@Override
-		public ListenableActionFuture<SearchResponse> execute(Client client, String indexName, OperationHelper helper) {
-			final TypeMapping typeMapping = helper.findTypeMapping(_type);
-
-			final String type = typeMapping.getTypeAlias();
-
-			SearchRequestBuilder builder = client.prepareSearch(indexName).setTypes(type).setQuery(_query)
-					.setFrom(_from).setSize(_size);
-
-			return builder.execute();
-		}
-
-	}
-
-	private static final class Count implements IndexOperation<ListenableActionFuture<CountResponse>> {
-
-		private final QueryBuilder _query;
-		private final Class<?> _type;
-
-		private Count(QueryBuilder query, Class<?> type) {
-			if (type == null) {
-				throw new NullPointerException("type");
-			}
-			if (query == null) {
-				throw new NullPointerException("query");
-			}
-			_query = query;
-			_type = type;
-		}
-
-		@Override
-		public ListenableActionFuture<CountResponse> execute(Client client, String indexName, OperationHelper helper) {
-			final TypeMapping typeMapping = helper.findTypeMapping(_type);
-
-			final String type = typeMapping.getTypeAlias();
-
-			CountRequestBuilder builder = client.prepareCount(indexName).setTypes(type).setQuery(_query);
-
-			return builder.execute();
-		}
-
-	}
-
-	private final class Helper implements OperationHelper {
-
-		@Override
-		public TypeMapping findTypeMapping(Object o) {
-			return _mappings.findTypeMapping(o);
-		}
-
-		@Override
-		public TypeMapping findTypeMapping(Class<?> type) {
-			return _mappings.findTypeMapping(type);
 		}
 	}
 

@@ -19,7 +19,7 @@ import java.io.Serializable;
 
 import org.elasticsearch.action.bulk.BulkRequestBuilder;
 
-import at.molindo.esi4j.core.Esi4JIndex.OperationHelper;
+import at.molindo.esi4j.core.Esi4JOperation.OperationContext;
 
 /**
  * A task to be processed by an {@link Esi4JTaskProcessor}. A task needs to be
@@ -43,7 +43,7 @@ public interface Esi4JEntityTask extends Serializable, Cloneable {
 	/**
 	 * add necessary index operations to bulk request
 	 */
-	void addToBulk(BulkRequestBuilder bulk, String indexName, OperationHelper helper);
+	void addToBulk(BulkRequestBuilder bulk, String indexName, OperationContext context);
 
 	/**
 	 * @return a clone of this task

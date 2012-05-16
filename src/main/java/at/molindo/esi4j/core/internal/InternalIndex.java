@@ -16,22 +16,23 @@
 package at.molindo.esi4j.core.internal;
 
 import org.elasticsearch.common.settings.Settings;
-import org.elasticsearch.search.SearchHit;
 
+import at.molindo.esi4j.action.SearchHitWrapper.SearchHitReader;
 import at.molindo.esi4j.core.Esi4JIndex;
-import at.molindo.esi4j.core.Esi4JIndexManager;
+import at.molindo.esi4j.core.Esi4JOperation.OperationContext;
 import at.molindo.esi4j.core.Esi4JStore;
 import at.molindo.esi4j.mapping.TypeMapping;
 
-public interface InternalIndex extends Esi4JIndex {
+/**
+ * private API, do not use unless you really know what you are doing
+ */
+public interface InternalIndex extends Esi4JIndex, OperationContext, SearchHitReader {
 
 	InternalIndex addTypeMapping(TypeMapping typeMapping);
 
 	void updateMapping(Class<?> type);
 
 	void updateMapping(String typeAlias);
-
-	Class<?>[] getMappedTypes();
 
 	/**
 	 * @return the current {@link Esi4JStore} backing this index, never null
@@ -52,13 +53,9 @@ public interface InternalIndex extends Esi4JIndex {
 	 */
 	void setStore(Esi4JStore store);
 
-	Object read(SearchHit searchHit);
-
 	/**
 	 * @return the index's settings or null if default
 	 */
 	Settings getSettings();
-
-	void setIndexManager(Esi4JIndexManager indexManager);
 
 }

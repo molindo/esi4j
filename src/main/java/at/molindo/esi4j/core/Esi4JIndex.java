@@ -17,70 +17,48 @@ package at.molindo.esi4j.core;
 
 import org.elasticsearch.action.ListenableActionFuture;
 import org.elasticsearch.action.bulk.BulkResponse;
-import org.elasticsearch.action.count.CountResponse;
 import org.elasticsearch.action.delete.DeleteResponse;
 import org.elasticsearch.action.get.GetResponse;
 import org.elasticsearch.action.index.IndexResponse;
-import org.elasticsearch.action.search.SearchResponse;
-import org.elasticsearch.client.Client;
-import org.elasticsearch.index.query.QueryBuilder;
 
 import at.molindo.esi4j.action.BulkResponseWrapper;
-import at.molindo.esi4j.action.CountResponseWrapper;
 import at.molindo.esi4j.action.DeleteResponseWrapper;
 import at.molindo.esi4j.action.GetResponseWrapper;
 import at.molindo.esi4j.action.IndexResponseWrapper;
-import at.molindo.esi4j.action.SearchResponseWrapper;
-import at.molindo.esi4j.mapping.TypeMapping;
 
 /**
  * Interface exposed to users
  */
-public interface Esi4JIndex {
+public interface Esi4JIndex extends Esi4JManagedIndex {
 
 	/**
 	 * 
 	 * @return
 	 */
+	@Override
 	String getName();
-
-	Esi4JIndexManager getIndexManager();
-
-	<T> T execute(IndexOperation<T> operation);
 
 	ListenableActionFuture<IndexResponseWrapper> index(Object o);
 
 	ListenableActionFuture<IndexResponseWrapper> executeIndex(
-			IndexOperation<ListenableActionFuture<IndexResponse>> indexOperation);
+			Esi4JOperation<ListenableActionFuture<IndexResponse>> indexOperation);
 
 	ListenableActionFuture<GetResponseWrapper> get(Class<?> type, Object id);
 
 	ListenableActionFuture<GetResponseWrapper> executeGet(
-			IndexOperation<ListenableActionFuture<GetResponse>> getOperation);
+			Esi4JOperation<ListenableActionFuture<GetResponse>> getOperation);
 
 	ListenableActionFuture<DeleteResponseWrapper> delete(Object object);
 
 	ListenableActionFuture<DeleteResponseWrapper> delete(Class<?> type, Object id);
 
 	ListenableActionFuture<DeleteResponseWrapper> executeDelete(
-			IndexOperation<ListenableActionFuture<DeleteResponse>> deleteOperation);
-
-	ListenableActionFuture<SearchResponseWrapper> search(QueryBuilder query, Class<?> type);
-
-	ListenableActionFuture<SearchResponseWrapper> search(QueryBuilder query, Class<?> type, int from, int size);
-
-	ListenableActionFuture<SearchResponseWrapper> executeSearch(
-			IndexOperation<ListenableActionFuture<SearchResponse>> searchOperation);
-
-	ListenableActionFuture<CountResponseWrapper> count(QueryBuilder query, Class<?> type);
-
-	ListenableActionFuture<CountResponseWrapper> executeCount(
-			IndexOperation<ListenableActionFuture<CountResponse>> countOperation);
+			Esi4JOperation<ListenableActionFuture<DeleteResponse>> deleteOperation);
 
 	ListenableActionFuture<BulkResponseWrapper> bulkIndex(Iterable<?> iterable);
 
 	ListenableActionFuture<BulkResponseWrapper> executeBulk(
-			IndexOperation<ListenableActionFuture<BulkResponse>> bulkOperation);
+			Esi4JOperation<ListenableActionFuture<BulkResponse>> bulkOperation);
 
 	/**
 	 * refresh elasticsearch index, see <a href=
@@ -91,17 +69,4 @@ public interface Esi4JIndex {
 
 	void close();
 
-	public interface IndexOperation<T> {
-
-		T execute(Client client, String indexName, OperationHelper helper);
-	}
-
-	// TODO name
-	public interface OperationHelper {
-
-		TypeMapping findTypeMapping(Object o);
-
-		TypeMapping findTypeMapping(Class<?> type);
-
-	}
 }

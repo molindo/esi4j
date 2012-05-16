@@ -63,7 +63,6 @@ public class DefaultStore implements Esi4JStore {
 		return _indexName;
 	}
 
-	@Override
 	public Esi4JIndex getIndex() {
 		return _index;
 	}

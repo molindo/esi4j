@@ -21,35 +21,36 @@ import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.search.SearchHit;
 
 import at.molindo.esi4j.action.SearchHitWrapper;
+import at.molindo.esi4j.action.SearchHitWrapper.SearchHitReader;
 import at.molindo.esi4j.action.SearchResponseWrapper;
-import at.molindo.esi4j.core.internal.InternalIndex;
 
 import com.google.common.collect.Lists;
 
 public class DefaultSearchResponseWrapper implements SearchResponseWrapper {
 
 	private final SearchResponse _response;
-	private final InternalIndex _index;
+	private final SearchHitReader _reader;
 
 	private List<SearchHitWrapper> _objects;
 
-	public DefaultSearchResponseWrapper(SearchResponse response, InternalIndex index) {
+	public DefaultSearchResponseWrapper(SearchResponse response, SearchHitReader reader) {
 		if (response == null) {
 			throw new NullPointerException("response");
 		}
-		if (index == null) {
-			throw new NullPointerException("index");
+		if (reader == null) {
+			throw new NullPointerException("reader");
 		}
 		_response = response;
-		_index = index;
+		_reader = reader;
 	}
 
+	@Override
 	public synchronized List<SearchHitWrapper> getObjects() {
 		if (_objects == null) {
 			SearchHit[] hits = _response.hits().hits();
 			_objects = Lists.newArrayListWithCapacity(hits.length);
 			for (int i = 0; i < hits.length; i++) {
-				_objects.add(new DefaultSearchHitWrapper(hits[i], _index));
+				_objects.add(new DefaultSearchHitWrapper(hits[i], _reader));
 			}
 		}
 		return _objects;

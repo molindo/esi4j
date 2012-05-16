@@ -13,24 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package at.molindo.esi4j.action;
+package at.molindo.esi4j.multi;
 
-import org.elasticsearch.search.SearchHit;
+import at.molindo.esi4j.core.Esi4JIndexManager;
 
-/**
- * wraps a {@link SearchHit}, allows to get returned hit as an object
- */
-public interface SearchHitWrapper {
+public interface Esi4JMultiIndexManager extends Esi4JIndexManager {
 
-	SearchHit getHit();
+	@Override
+	Esi4JManagedMultiIndex getIndex();
 
-	<T> T getObject();
-
-	<T> T getObject(Class<T> type);
-
-	public interface SearchHitReader {
-
-		Object read(SearchHit hit);
-
-	}
 }

@@ -18,31 +18,30 @@ package at.molindo.esi4j.action.impl;
 import org.elasticsearch.search.SearchHit;
 
 import at.molindo.esi4j.action.SearchHitWrapper;
-import at.molindo.esi4j.core.internal.InternalIndex;
 
 public final class DefaultSearchHitWrapper implements SearchHitWrapper {
 
 	private final SearchHit _hit;
-	private final InternalIndex _index;
+	private final SearchHitReader _reader;
 
 	private Object _object;
 
-	public DefaultSearchHitWrapper(SearchHit hit, InternalIndex index) {
+	public DefaultSearchHitWrapper(SearchHit hit, SearchHitReader reader) {
 		if (hit == null) {
 			throw new NullPointerException("hit");
 		}
-		if (index == null) {
-			throw new NullPointerException("index");
+		if (reader == null) {
+			throw new NullPointerException("reader");
 		}
 		_hit = hit;
-		_index = index;
+		_reader = reader;
 	}
 
 	@Override
 	@SuppressWarnings("unchecked")
 	public synchronized <T> T getObject() {
 		if (_object == null) {
-			_object = _index.read(_hit);
+			_object = _reader.read(_hit);
 		}
 
 		return (T) _object;
@@ -53,6 +52,7 @@ public final class DefaultSearchHitWrapper implements SearchHitWrapper {
 		return type.cast(getObject());
 	}
 
+	@Override
 	public SearchHit getHit() {
 		return _hit;
 	}

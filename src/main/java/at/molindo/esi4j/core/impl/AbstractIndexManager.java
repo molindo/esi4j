@@ -36,7 +36,7 @@ public class AbstractIndexManager implements Esi4JIndexManager {
 
 	private final Esi4JProcessingChain _processingChain;
 
-	public AbstractIndexManager(Esi4JModule module, Esi4JIndex index, Esi4JProcessingChain processingChain) {
+	public AbstractIndexManager(Esi4JModule module, InternalIndex index, Esi4JProcessingChain processingChain) {
 		if (index == null) {
 			throw new NullPointerException("index");
 		}
@@ -46,7 +46,7 @@ public class AbstractIndexManager implements Esi4JIndexManager {
 		if (processingChain == null) {
 			throw new NullPointerException("processingChain");
 		}
-		_index = (InternalIndex) index;
+		_index = index;
 		_module = module;
 		_processingChain = processingChain;
 
@@ -93,6 +93,7 @@ public class AbstractIndexManager implements Esi4JIndexManager {
 	protected void onAfterClose() {
 	}
 
+	@Override
 	public Class<?>[] getTypes() {
 		Class<?>[] types = new Class<?>[_types.length];
 		System.arraycopy(_types, 0, types, 0, _types.length);

@@ -17,8 +17,8 @@ package at.molindo.esi4j.chain.impl;
 
 import java.util.Map;
 
-import at.molindo.esi4j.chain.Esi4JEventProcessor;
 import at.molindo.esi4j.chain.Esi4JEntityTask;
+import at.molindo.esi4j.chain.Esi4JEventProcessor;
 import at.molindo.esi4j.chain.Esi4JTaskProcessor;
 import at.molindo.esi4j.chain.Esi4JTaskSource;
 import at.molindo.utils.collections.ArrayUtils;

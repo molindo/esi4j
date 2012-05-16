@@ -21,7 +21,7 @@ import org.elasticsearch.action.delete.DeleteRequest;
 import at.molindo.esi4j.chain.Esi4JEntityResolver;
 import at.molindo.esi4j.chain.Esi4JEntityResolver.ObjectKey;
 import at.molindo.esi4j.chain.Esi4JEntityTask;
-import at.molindo.esi4j.core.Esi4JIndex.OperationHelper;
+import at.molindo.esi4j.core.Esi4JOperation.OperationContext;
 import at.molindo.esi4j.mapping.TypeMapping;
 
 public final class DeleteEntityTask extends AbstractEntityTask {
@@ -48,7 +48,7 @@ public final class DeleteEntityTask extends AbstractEntityTask {
 	}
 
 	@Override
-	public void addToBulk(BulkRequestBuilder bulk, String indexName, OperationHelper helper) {
+	public void addToBulk(BulkRequestBuilder bulk, String indexName, OperationContext context) {
 		Object entity = getEntity();
 
 		TypeMapping mapping;
@@ -56,10 +56,10 @@ public final class DeleteEntityTask extends AbstractEntityTask {
 		String id;
 		if (entity instanceof ObjectKey) {
 			ObjectKey key = (ObjectKey) entity;
-			mapping = helper.findTypeMapping(key.getType());
+			mapping = context.findTypeMapping(key.getType());
 			id = mapping.toIdString(key.getId());
 		} else {
-			mapping = helper.findTypeMapping(entity);
+			mapping = context.findTypeMapping(entity);
 			id = mapping.getIdString(entity);
 		}
 

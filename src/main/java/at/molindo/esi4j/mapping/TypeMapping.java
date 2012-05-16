@@ -81,7 +81,7 @@ public abstract class TypeMapping {
 	 * 
 	 * @return <code>true</code> if entity must not be persisted to index
 	 */
-	public boolean isFiltered(@Nonnull Object entity) {
+	public boolean isFiltered(@Nonnull Object o) {
 		return false;
 	}
 
@@ -89,7 +89,7 @@ public abstract class TypeMapping {
 	 * @return the object's id
 	 * @see #setId(Object, Object)
 	 */
-	public abstract Object getId(Object o);
+	public abstract Object getId(@Nonnull Object o);
 
 	/**
 	 * sets id on object
@@ -103,8 +103,9 @@ public abstract class TypeMapping {
 	 * @see #getId(Object)
 	 * @see #toIdString(Object)
 	 */
-	public final String getIdString(Object o) {
-		return toIdString(getId(o));
+	public final String getIdString(@Nonnull Object o) {
+		Object id = getId(o);
+		return id == null ? null : toIdString(id);
 	}
 
 	/**
@@ -113,7 +114,7 @@ public abstract class TypeMapping {
 	 * @see #toId(String)
 	 * @see #setId(Object, Object)
 	 */
-	public final Object setIdString(Object o, String idString) {
+	public final Object setIdString(@Nonnull Object o, @Nonnull String idString) {
 		Object id = toId(idString);
 		setId(o, id);
 		return id;
@@ -123,13 +124,13 @@ public abstract class TypeMapping {
 	 * @return convert id to a string representation suitable for elasticsearch
 	 * @see #toId(String)
 	 */
-	public abstract String toIdString(Object id);
+	public abstract String toIdString(@Nonnull Object id);
 
 	/**
 	 * @return convert string representation suitable for elasticsearch to id
 	 * @see #toIdString(Object)
 	 */
-	public abstract Object toId(String id);
+	public abstract Object toId(@Nonnull String id);
 
 	/**
 	 * gets version from object or null if not versioned

@@ -73,7 +73,7 @@ public abstract class AbstractTypeMapping<Type, Id> extends TypeMapping {
 
 	@Override
 	public final String toIdString(Object id) {
-		return toString(castId(id));
+		return id == null ? null : toString(castId(id));
 	}
 
 	@Override

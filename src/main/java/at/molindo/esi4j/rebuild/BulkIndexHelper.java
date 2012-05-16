@@ -25,6 +25,7 @@ import org.elasticsearch.action.bulk.BulkItemResponse;
 
 import at.molindo.esi4j.action.BulkResponseWrapper;
 import at.molindo.esi4j.core.Esi4JIndex;
+import at.molindo.esi4j.core.internal.InternalIndex;
 
 /**
  * helper class that helps awaiting completion of submitted bulk index tasks
@@ -35,7 +36,7 @@ public class BulkIndexHelper {
 
 	private static final int DEFAULT_MAX_RUNNING = 10;
 
-	private final Esi4JIndex _index;
+	private final InternalIndex _index;
 
 	private final ReentrantLock _lock = new ReentrantLock();
 	private final Condition _allCompleted = _lock.newCondition();
@@ -47,7 +48,7 @@ public class BulkIndexHelper {
 	private int _indexed = 0;
 	private int _failed = 0;
 
-	public BulkIndexHelper(Esi4JIndex index) {
+	public BulkIndexHelper(InternalIndex index) {
 		if (index == null) {
 			throw new NullPointerException("index");
 		}

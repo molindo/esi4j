@@ -13,24 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package at.molindo.esi4j.action;
+package at.molindo.esi4j.multi;
 
-import org.elasticsearch.search.SearchHit;
+import java.util.Map;
 
-/**
- * wraps a {@link SearchHit}, allows to get returned hit as an object
- */
-public interface SearchHitWrapper {
+import at.molindo.esi4j.core.Esi4JManagedIndex;
+import at.molindo.esi4j.core.internal.InternalIndex;
 
-	SearchHit getHit();
+public interface Esi4JManagedMultiIndex extends Esi4JManagedIndex {
 
-	<T> T getObject();
+	/**
+	 * @return unmodifiable map (must not change)
+	 */
+	Map<String, InternalIndex> getIndices();
 
-	<T> T getObject(Class<T> type);
-
-	public interface SearchHitReader {
-
-		Object read(SearchHit hit);
-
-	}
 }
