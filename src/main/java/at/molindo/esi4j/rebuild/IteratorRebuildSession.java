@@ -41,7 +41,7 @@ public class IteratorRebuildSession<T> implements RebuildSession<T> {
 		}
 
 		List<T> list = Lists.newArrayListWithCapacity(batchSize);
-		while (_iterator.hasNext()) {
+		while (list.size() < batchSize && _iterator.hasNext()) {
 			list.add(_iterator.next());
 		}
 
