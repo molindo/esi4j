@@ -101,7 +101,10 @@ public abstract class AbstractTypeMapping<Type, Id> extends TypeMapping {
 		return read(getSource(hit));
 	}
 
-	private Object read(Map<String, Object> source) {
+	/**
+	 * meant for testing.
+	 */
+	public final Object read(Map<String, Object> source) {
 		Type object = readObject(source);
 		setIdString(object, (String) source.get(FIELD_ID));
 		setVersion(object, (Long) source.get(FIELD_VERSION));
@@ -132,25 +135,33 @@ public abstract class AbstractTypeMapping<Type, Id> extends TypeMapping {
 	}
 
 	@Override
-	public final ObjectSource getObjectSource(Object o) {
+	public ObjectSource getObjectSource(Object o) {
 		try {
-			XContentBuilder contentBuilder = JsonXContent.contentBuilder();
-
-			contentBuilder.startObject();
-
-			String id = getIdString(o);
-			if (id != null) {
-				// skip empty id for id generation
-				contentBuilder.field(FIELD_ID).value(id);
-			}
-
-			writeObject(contentBuilder, cast(o));
-			contentBuilder.endObject();
-
-			return ObjectSource.Builder.builder(contentBuilder);
+			return ObjectSource.Builder.builder(getContentBuilder(o));
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}
+	}
+
+	/**
+	 * meant for testing.
+	 * 
+	 * @return a JsonXContent builder
+	 */
+	public final XContentBuilder getContentBuilder(Object o) throws IOException {
+		XContentBuilder contentBuilder = JsonXContent.contentBuilder();
+
+		contentBuilder.startObject();
+
+		String id = getIdString(o);
+		if (id != null) {
+			// skip empty id for id generation
+			contentBuilder.field(FIELD_ID).value(id);
+		}
+
+		writeObject(contentBuilder, cast(o));
+		contentBuilder.endObject();
+		return contentBuilder;
 	}
 
 	protected boolean filter(Type o) {
