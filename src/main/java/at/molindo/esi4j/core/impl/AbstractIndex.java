@@ -108,7 +108,7 @@ public abstract class AbstractIndex implements Esi4JSearchIndex, Esi4JManagedInd
 		private final int _size;
 
 		private Search(QueryBuilder query, Class<?> type) {
-			this(query, type, 0, Integer.MAX_VALUE);
+			this(query, type, 0, 10);
 		}
 
 		private Search(QueryBuilder query, Class<?> type, int from, int size) {
