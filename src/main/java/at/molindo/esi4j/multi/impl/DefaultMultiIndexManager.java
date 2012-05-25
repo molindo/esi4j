@@ -25,6 +25,9 @@ import at.molindo.esi4j.multi.Esi4JMultiIndexManager;
 
 import com.google.common.collect.Sets;
 
+/**
+ * default implementation of {@link Esi4JMultiIndexManager}
+ */
 public class DefaultMultiIndexManager implements Esi4JMultiIndexManager {
 
 	private final Esi4JManagedMultiIndex _index;
@@ -41,7 +44,6 @@ public class DefaultMultiIndexManager implements Esi4JMultiIndexManager {
 	 */
 	@Override
 	public void rebuild(Class<?>... types) {
-
 		for (InternalIndex index : getIndex().getIndices().values()) {
 
 			LinkedHashSet<Class<?>> typeSet = Sets.newLinkedHashSet(Arrays.asList(types));
