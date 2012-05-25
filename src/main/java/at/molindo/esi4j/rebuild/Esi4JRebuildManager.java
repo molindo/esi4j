@@ -18,18 +18,10 @@ package at.molindo.esi4j.rebuild;
 import at.molindo.esi4j.core.internal.InternalIndex;
 import at.molindo.esi4j.module.Esi4JModule;
 
-/**
- * A strategy to rebuild the index from the given module. Different strategies
- * might include concurrency, might choose to clear and rebuild the index,
- * replace an existing index after rebuilding, etc.
- */
-public interface Esi4JRebuildProcessor {
+public interface Esi4JRebuildManager {
 
-	public static String DEFAULT = "default";
+	void rebuild(Esi4JModule module, InternalIndex index, Class<?>... types);
 
-	/**
-	 * rebuild all types in index using data from module
-	 */
-	void rebuild(Esi4JModule module, InternalIndex index, Class<?> type);
+	void close();
 
 }
