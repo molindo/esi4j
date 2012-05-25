@@ -18,7 +18,6 @@ package at.molindo.esi4j.chain.impl;
 import org.elasticsearch.action.bulk.BulkRequestBuilder;
 import org.elasticsearch.action.delete.DeleteRequest;
 import org.elasticsearch.action.index.IndexRequest;
-import org.elasticsearch.index.VersionType;
 
 import at.molindo.esi4j.chain.Esi4JEntityResolver;
 import at.molindo.esi4j.chain.Esi4JEntityTask;
@@ -52,24 +51,15 @@ public final class IndexEntityTask extends AbstractEntityTask {
 		Object entity = getEntity();
 		if (entity != null) {
 			TypeMapping mapping = context.findTypeMapping(entity);
+			IndexRequest index = mapping.indexRequest(indexName, entity);
 
-			String id = mapping.getIdString(entity);
-			if (!mapping.isFiltered(entity)) {
-				String type = mapping.getTypeAlias();
-
-				Long version = mapping.getVersion(entity);
-
-				IndexRequest request = new IndexRequest(indexName, type, id);
-
-				if (version != null) {
-					request.version(version).versionType(VersionType.EXTERNAL);
+			if (index != null) {
+				bulk.add(index);
+			} else {
+				DeleteRequest delete = mapping.deleteRequest(indexName, entity);
+				if (delete != null) {
+					bulk.add(delete);
 				}
-
-				mapping.getObjectSource(entity).setSource(request);
-
-				bulk.add(request);
-			} else if (id != null) {
-				bulk.add(new DeleteRequest(indexName, mapping.getTypeAlias(), id));
 			}
 		}
 	}

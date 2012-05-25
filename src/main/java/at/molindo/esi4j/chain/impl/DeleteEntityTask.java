@@ -16,7 +16,6 @@
 package at.molindo.esi4j.chain.impl;
 
 import org.elasticsearch.action.bulk.BulkRequestBuilder;
-import org.elasticsearch.action.delete.DeleteRequest;
 
 import at.molindo.esi4j.chain.Esi4JEntityResolver;
 import at.molindo.esi4j.chain.Esi4JEntityResolver.ObjectKey;
@@ -63,7 +62,7 @@ public final class DeleteEntityTask extends AbstractEntityTask {
 			id = mapping.getIdString(entity);
 		}
 
-		bulk.add(new DeleteRequest(indexName, mapping.getTypeAlias(), id));
+		bulk.add(mapping.deleteRequest(indexName, id, null));
 	}
 
 }
