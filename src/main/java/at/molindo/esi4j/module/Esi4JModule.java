@@ -16,7 +16,7 @@
 package at.molindo.esi4j.module;
 
 import at.molindo.esi4j.rebuild.Esi4JRebuildProcessor;
-import at.molindo.esi4j.rebuild.RebuildSession;
+import at.molindo.esi4j.rebuild.Esi4JRebuildSession;
 
 /**
  * A module allows rebuilding indexes from external data sources.
@@ -26,13 +26,13 @@ public interface Esi4JModule {
 	/**
 	 * must be called by {@link Esi4JRebuildProcessor} implementation before any
 	 * modifications to underlying index occur. This way, a module might decide
-	 * to queue or discard write operations until {@link RebuildSession#close()
+	 * to queue or discard write operations until {@link Esi4JRebuildSession#close()
 	 * is called}
 	 * 
 	 * @param type
 	 * @return an iterator over this module's data for the given type.
 	 */
-	<T> RebuildSession<T> startRebuildSession(Class<T> type);
+	<T> Esi4JRebuildSession<T> startRebuildSession(Class<T> type);
 
 	/**
 	 * @return the types this module supports.
