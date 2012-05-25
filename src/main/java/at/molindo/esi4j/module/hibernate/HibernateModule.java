@@ -24,7 +24,7 @@ import org.hibernate.SessionFactory;
 import org.hibernate.metadata.ClassMetadata;
 
 import at.molindo.esi4j.module.Esi4JModule;
-import at.molindo.esi4j.rebuild.RebuildSession;
+import at.molindo.esi4j.rebuild.Esi4JRebuildSession;
 import at.molindo.thirdparty.org.compass.core.util.concurrent.ConcurrentHashSet;
 
 import com.google.common.collect.Lists;
@@ -38,7 +38,7 @@ public class HibernateModule implements Esi4JModule {
 
 	private final ConcurrentHashSet<Class<?>> _rebuilding = new ConcurrentHashSet<Class<?>>();
 
-	private List<Class<?>> _types;
+	private final List<Class<?>> _types;
 
 	private final ConcurrentMap<Class<?>, HibernateQueryProvider> _queryProviders = Maps.newConcurrentMap();
 
@@ -60,13 +60,22 @@ public class HibernateModule implements Esi4JModule {
 	}
 
 	@Override
-	public <T> RebuildSession<T> startRebuildSession(final Class<T> type) {
+	public <T> Esi4JRebuildSession<T> startRebuildSession(final Class<T> type) {
 		if (type == null) {
 			throw new NullPointerException("type");
 		} else if (!_rebuilding.add(type)) {
 			throw new IllegalStateException("already indexing " + type.getName());
 		} else {
-			return new HibernateRebuildSession<T>(type, _sessionFactory, this, _queryProviders.get(type));
+			HibernateScrolling<T> scrolling;
+
+			HibernateQueryProvider provider = _queryProviders.get(type);
+			if (provider != null) {
+				scrolling = new CustomQueryScrolling<T>(type, provider);
+			} else {
+				scrolling = new DefaultQueryScrolling<T>(type);
+			}
+
+			return new HibernateRebuildSession<T>(type, _sessionFactory, this, scrolling);
 		}
 	}
 

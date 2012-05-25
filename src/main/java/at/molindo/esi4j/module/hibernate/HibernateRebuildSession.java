@@ -18,27 +18,23 @@ package at.molindo.esi4j.module.hibernate;
 import java.util.List;
 
 import org.hibernate.CacheMode;
-import org.hibernate.Criteria;
 import org.hibernate.FlushMode;
-import org.hibernate.Query;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
 import org.hibernate.classic.Session;
 
-import at.molindo.esi4j.rebuild.RebuildSession;
+import at.molindo.esi4j.rebuild.Esi4JRebuildSession;
 
-public final class HibernateRebuildSession<T> implements RebuildSession<T> {
+public final class HibernateRebuildSession<T> implements Esi4JRebuildSession<T> {
 
 	private final Transaction _tx;
 	private final Session _session;
 	private final Class<T> _type;
 	private final HibernateModule _module;
-	private final HibernateQueryProvider _queryProvider;
-
-	int _next = 0;
+	private final HibernateScrolling<T> _scrolling;
 
 	public HibernateRebuildSession(Class<T> type, SessionFactory sessionFactory, HibernateModule module,
-			HibernateQueryProvider queryProvider) {
+			HibernateScrolling<T> scrolling) {
 		if (type == null) {
 			throw new NullPointerException("type");
 		}
@@ -51,7 +47,7 @@ public final class HibernateRebuildSession<T> implements RebuildSession<T> {
 
 		_type = type;
 		_module = module;
-		_queryProvider = queryProvider;
+		_scrolling = scrolling;
 
 		_session = sessionFactory.openSession();
 		_session.setCacheMode(CacheMode.GET);
@@ -62,49 +58,14 @@ public final class HibernateRebuildSession<T> implements RebuildSession<T> {
 
 	@Override
 	public List<T> getNext(int batchSize) {
-		if (_next < 0) {
-			throw new IllegalStateException("session already closed");
-		}
-
 		// clear previous batch
 		_session.clear();
-
-		List<T> list;
-
-		if (_queryProvider != null) {
-			Criteria criteria = _queryProvider.createCriteria(_type, _session);
-			if (criteria != null) {
-				list = fetch(criteria, _next, batchSize);
-			} else {
-				Query query = _queryProvider.createQuery(_type, _session);
-				list = fetch(query, _next, batchSize);
-			}
-		} else {
-			// default query
-			list = fetch(_session.createCriteria(_type), _next, batchSize);
-		}
-
-		_next += list.size();
-
-		return list;
-	}
-
-	@SuppressWarnings("unchecked")
-	private List<T> fetch(Criteria criteria, int first, int max) {
-		// TODO there are better ways to scroll than setFirstResult(..)
-		return criteria.setFirstResult(first).setMaxResults(max).setCacheable(false).list();
-	}
-
-	@SuppressWarnings("unchecked")
-	private List<T> fetch(Query query, int first, int max) {
-		// TODO there are better ways to scroll than setFirstResult(..)
-		return query.setFirstResult(first).setMaxResults(max).setCacheable(false).list();
+		return _scrolling.fetch(_session, batchSize);
 	}
 
 	@Override
 	public void close() {
 		_session.clear();
-		_next = -1;
 		_module.unsetRebuilding(_type);
 		_tx.commit();
 		_session.close();
