@@ -22,13 +22,10 @@ import at.molindo.esi4j.chain.Esi4JBatchedProcessingChain;
 import at.molindo.esi4j.chain.Esi4JTaskProcessor;
 import at.molindo.esi4j.chain.Esi4JTaskSource;
 import at.molindo.esi4j.core.Esi4JIndex;
-import at.molindo.esi4j.rebuild.Esi4JRebuildProcessor;
-import at.molindo.esi4j.rebuild.SimpleRebuildProcessor;
 
 public class DefaultBatchedProcessingChain implements Esi4JBatchedProcessingChain {
 
 	private final DefaultTaskProcessor _taksProcessor;
-	private final SimpleRebuildProcessor _rebuildStrategy;
 	private final DefaultBatchedEventProcessor _batchedEventProcessor;
 
 	public DefaultBatchedProcessingChain(Esi4JIndex index) {
@@ -38,7 +35,6 @@ public class DefaultBatchedProcessingChain implements Esi4JBatchedProcessingChai
 	public DefaultBatchedProcessingChain(Esi4JIndex index, Map<Class<?>, Esi4JTaskSource> taskSources) {
 		_taksProcessor = new DefaultTaskProcessor(index);
 		_batchedEventProcessor = new DefaultBatchedEventProcessor(_taksProcessor, taskSources);
-		_rebuildStrategy = new SimpleRebuildProcessor();
 	}
 
 	@Override
@@ -49,11 +45,6 @@ public class DefaultBatchedProcessingChain implements Esi4JBatchedProcessingChai
 	@Override
 	public Esi4JTaskProcessor getTaksProcessor() {
 		return _taksProcessor;
-	}
-
-	@Override
-	public Esi4JRebuildProcessor getRebuildProcessor() {
-		return _rebuildStrategy;
 	}
 
 }

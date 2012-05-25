@@ -32,8 +32,4 @@ public interface Esi4JProcessingChain {
 
 	Esi4JTaskProcessor getTaksProcessor();
 
-	/**
-	 * TODO allow different rebuild processors?
-	 */
-	Esi4JRebuildProcessor getRebuildProcessor();
 }

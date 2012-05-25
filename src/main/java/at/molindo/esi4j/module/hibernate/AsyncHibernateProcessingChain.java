@@ -24,13 +24,10 @@ import at.molindo.esi4j.chain.Esi4JTaskSource;
 import at.molindo.esi4j.chain.impl.DefaultBatchedEventProcessor;
 import at.molindo.esi4j.chain.impl.QueuedTaskProcessor;
 import at.molindo.esi4j.core.Esi4JIndex;
-import at.molindo.esi4j.rebuild.Esi4JRebuildProcessor;
-import at.molindo.esi4j.rebuild.SimpleRebuildProcessor;
 
 public class AsyncHibernateProcessingChain implements Esi4JBatchedProcessingChain {
 
 	private final QueuedTaskProcessor _taksProcessor;
-	private final SimpleRebuildProcessor _rebuildStrategy;
 	private final DefaultBatchedEventProcessor _batchedEventProcessor;
 
 	public AsyncHibernateProcessingChain(Esi4JIndex index, HibernateEntityResolver entityResolver) {
@@ -54,7 +51,6 @@ public class AsyncHibernateProcessingChain implements Esi4JBatchedProcessingChai
 		};
 
 		_batchedEventProcessor = new DefaultBatchedEventProcessor(_taksProcessor, taskSources);
-		_rebuildStrategy = new SimpleRebuildProcessor();
 	}
 
 	@Override
@@ -65,11 +61,6 @@ public class AsyncHibernateProcessingChain implements Esi4JBatchedProcessingChai
 	@Override
 	public Esi4JTaskProcessor getTaksProcessor() {
 		return _taksProcessor;
-	}
-
-	@Override
-	public Esi4JRebuildProcessor getRebuildProcessor() {
-		return _rebuildStrategy;
 	}
 
 }
