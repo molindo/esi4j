@@ -253,15 +253,8 @@ public class DefaultIndex extends AbstractIndex implements InternalIndex {
 
 				for (Object o : iterable) {
 					TypeMapping mapping = helper.findTypeMapping(o);
-					if (!mapping.isFiltered(o)) {
-						String id = mapping.getIdString(o);
-
-						IndexRequestBuilder index = client.prepareIndex(indexName, mapping.getTypeAlias());
-						if (id != null) {
-							index.setId(id);
-						}
-						mapping.getObjectSource(o).setSource(index);
-
+					IndexRequestBuilder index = mapping.indexRequest(client, indexName, o);
+					if (index != null) {
 						request.add(index);
 					}
 				}
@@ -328,16 +321,12 @@ public class DefaultIndex extends AbstractIndex implements InternalIndex {
 		public ListenableActionFuture<IndexResponse> execute(Client client, String indexName, OperationContext helper) {
 			final TypeMapping typeMapping = helper.findTypeMapping(_object);
 
-			if (typeMapping.isFiltered(_object)) {
+			IndexRequestBuilder request = typeMapping.indexRequest(client, indexName, _object);
+			if (request == null) {
 				throw new Esi4JObjectFilteredException(typeMapping, _object);
+			} else {
+				return request.execute();
 			}
-
-			final String type = typeMapping.getTypeAlias();
-			final String id = typeMapping.getIdString(_object);
-
-			IndexRequestBuilder request = client.prepareIndex(indexName, type, id);
-			typeMapping.getObjectSource(_object).setSource(request);
-			return request.execute();
 		}
 	}
 
@@ -387,12 +376,7 @@ public class DefaultIndex extends AbstractIndex implements InternalIndex {
 		@Override
 		public ListenableActionFuture<DeleteResponse> execute(Client client, String indexName, OperationContext helper) {
 			final TypeMapping typeMapping = helper.findTypeMapping(_type);
-
-			final String type = typeMapping.getTypeAlias();
-			final String id = typeMapping.toIdString(_id);
-
-			return client.prepareDelete(indexName, type, id).execute();
-
+			return typeMapping.deleteRequest(client, indexName, typeMapping.toIdString(_id), null).execute();
 		}
 	}
 
