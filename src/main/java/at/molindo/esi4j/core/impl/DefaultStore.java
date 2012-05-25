@@ -21,6 +21,9 @@ import org.elasticsearch.action.admin.cluster.state.ClusterStateResponse;
 import org.elasticsearch.action.admin.indices.create.CreateIndexRequestBuilder;
 import org.elasticsearch.action.admin.indices.create.CreateIndexResponse;
 import org.elasticsearch.action.admin.indices.exists.IndicesExistsResponse;
+import org.elasticsearch.cluster.metadata.IndexMetaData;
+import org.elasticsearch.common.settings.ImmutableSettings;
+import org.elasticsearch.common.settings.ImmutableSettings.Builder;
 import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.common.unit.TimeValue;
 
@@ -101,7 +104,7 @@ public class DefaultStore implements Esi4JStore {
 			// create index
 			CreateIndexRequestBuilder request = _client.getClient().admin().indices().prepareCreate(_indexName);
 
-			Settings settings = ((InternalIndex) index).getSettings();
+			Settings settings = getStoreSettings(index);
 			if (settings != null) {
 				request.setSettings(settings);
 			}
@@ -115,10 +118,19 @@ public class DefaultStore implements Esi4JStore {
 
 		} else {
 			// update settings
-			Settings settings = ((InternalIndex) index).getSettings();
+			Settings settings = getStoreSettings(index);
 			if (settings != null && settings.getAsMap().size() > 0) {
-				_client.getClient().admin().indices().prepareUpdateSettings(_indexName).setSettings(settings).execute()
-						.actionGet();
+
+				Settings storeSettings = settings;
+				if (settings.get(IndexMetaData.SETTING_NUMBER_OF_SHARDS) != null) {
+					// es won't allow including number_of_shards
+					Builder builder = ImmutableSettings.settingsBuilder().put(settings);
+					builder.remove(IndexMetaData.SETTING_NUMBER_OF_SHARDS);
+					storeSettings = builder.build();
+				}
+
+				_client.getClient().admin().indices().prepareUpdateSettings(_indexName).setSettings(storeSettings)
+						.execute().actionGet();
 
 				ClusterStateResponse state = _client.getClient().admin().cluster().prepareState()
 						.setFilterIndices(_indexName).setFilterAll().setFilterMetaData(false).execute().actionGet();
@@ -140,6 +152,20 @@ public class DefaultStore implements Esi4JStore {
 
 			}
 		}
+	}
+
+	private Settings getStoreSettings(Esi4JIndex index) {
+		Settings indexSettings = ((InternalIndex) index).getSettings();
+		if (indexSettings == null) {
+			return null;
+		}
+		ImmutableSettings.Builder builder = ImmutableSettings.settingsBuilder();
+		for (Entry<String, String> e : indexSettings.getAsMap().entrySet()) {
+			if (e.getKey().startsWith("index.")) {
+				builder.put(e.getKey(), e.getValue());
+			}
+		}
+		return builder.build();
 	}
 
 	@Override

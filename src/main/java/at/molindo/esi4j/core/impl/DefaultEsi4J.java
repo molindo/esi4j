@@ -94,6 +94,7 @@ public class DefaultEsi4J implements Esi4J {
 		String[] indexNames = _settings.getAsArray("esi4j.indexes", new String[] { Esi4J.DEFAULT_INDEX });
 		for (String indexName : indexNames) {
 			Settings indexSettings = settingsBuilder().put(_settings)
+					.put(Esi4JUtils.getSettings(_settings, "index." + indexName + ".", "index."))
 					.put(Esi4JUtils.getSettings(_settings, "esi4j.index." + indexName + ".", "esi4j.index.")).build();
 
 			String clientName = indexSettings.get("esi4j.index.client", DEFAULT_CLIENT);
@@ -104,8 +105,7 @@ public class DefaultEsi4J implements Esi4J {
 				throw new NullPointerException("client");
 			}
 
-			_indexes.put(indexName, new DefaultIndex(indexName, indexSettings.getByPrefix("esi4j.index."),
-					new DefaultStore(client, indexName)));
+			_indexes.put(indexName, new DefaultIndex(indexName, indexSettings, new DefaultStore(client, indexName)));
 		}
 	}
 
