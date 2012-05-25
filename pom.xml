@@ -18,7 +18,7 @@
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<elasticsearch.version>0.19.3</elasticsearch.version>
+		<elasticsearch.version>0.19.4</elasticsearch.version>
 		<hibernate.version>3.6.1.Final</hibernate.version>
 		<spring.version>3.0.5.RELEASE</spring.version>
 		<findbugs.version>2.0.0</findbugs.version>
@@ -29,6 +29,11 @@
 			<groupId>org.elasticsearch</groupId>
 			<artifactId>elasticsearch</artifactId>
 			<version>${elasticsearch.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>com.aconex.scrutineer</groupId>
+			<artifactId>scrutineer</artifactId>
+			<version>1.0.1</version>
 		</dependency>
 		<dependency>
 			<groupId>at.molindo</groupId>
