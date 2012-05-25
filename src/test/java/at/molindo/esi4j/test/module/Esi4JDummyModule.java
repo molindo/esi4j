@@ -15,12 +15,13 @@
  */
 package at.molindo.esi4j.test.module;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
 
 import at.molindo.esi4j.module.Esi4JModule;
-import at.molindo.esi4j.rebuild.IteratorRebuildSession;
-import at.molindo.esi4j.rebuild.RebuildSession;
+import at.molindo.esi4j.rebuild.Esi4JRebuildSession;
+import at.molindo.esi4j.rebuild.util.IteratorRebuildSession;
 
 public class Esi4JDummyModule implements Esi4JModule {
 
@@ -35,6 +36,10 @@ public class Esi4JDummyModule implements Esi4JModule {
 		return new Class<?>[] { _type };
 	}
 
+	public <T> Esi4JDummyModule setData(Class<T> type, T... data) {
+		return setData(type, Arrays.asList(data));
+	}
+
 	public <T> Esi4JDummyModule setData(Class<T> type, Collection<? extends T> data) {
 		_type = type;
 		_data = data;
@@ -43,7 +48,7 @@ public class Esi4JDummyModule implements Esi4JModule {
 
 	@Override
 	@SuppressWarnings("unchecked")
-	public <T> RebuildSession<T> startRebuildSession(Class<T> type) {
+	public <T> Esi4JRebuildSession<T> startRebuildSession(Class<T> type) {
 		if (_type != type) {
 			throw new IllegalArgumentException("unexpected type " + type.getName());
 		}

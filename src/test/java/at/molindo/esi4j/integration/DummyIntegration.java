@@ -24,8 +24,9 @@ import at.molindo.esi4j.core.Esi4JIndex;
 import at.molindo.esi4j.core.impl.DefaultEsi4J;
 import at.molindo.esi4j.core.internal.InternalIndex;
 import at.molindo.esi4j.mapping.impl.ElasticSearchOsemTypeMapping;
-import at.molindo.esi4j.rebuild.SimpleRebuildProcessor;
+import at.molindo.esi4j.rebuild.simple.SimpleRebuildProcessor;
 import at.molindo.esi4j.test.module.Esi4JDummyModule;
+import at.molindo.esi4j.test.util.Tweet;
 
 import com.google.common.collect.Lists;
 

@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package at.molindo.esi4j.integration;
+package at.molindo.esi4j.test.util;
 
 import org.elasticsearch.osem.annotations.Indexable;
 import org.elasticsearch.osem.annotations.Searchable;
@@ -23,6 +23,7 @@ import com.google.common.base.Objects;
 @Searchable
 public final class Tweet {
 	private String _id;
+	private Long _version;
 	private String _user;
 	private String _message;
 
@@ -35,6 +36,16 @@ public final class Tweet {
 		setMessage(message);
 	}
 
+	public Tweet(String id, Integer version, String user, String message) {
+		this(id, user, message);
+		setVersion(version == null ? null : version.longValue());
+	}
+
+	public Tweet(String id, Long version, String user, String message) {
+		this(id, user, message);
+		setVersion(version);
+	}
+
 	public String getId() {
 		return _id;
 	}
@@ -42,6 +53,15 @@ public final class Tweet {
 	@Indexable(indexName = "_id")
 	public void setId(String id) {
 		_id = id;
+	}
+
+	public Long getVersion() {
+		return _version;
+	}
+
+	@Indexable(indexName = "_version")
+	public void setVersion(Long version) {
+		_version = version;
 	}
 
 	public String getUser() {
