@@ -51,20 +51,26 @@ public class ElasticSearchOsemTypeMapping extends TypeMapping {
 
 	@Override
 	public void setId(Object o, Object id) {
-		// TODO
+		// TODO only supports string ids
 		_context.setId(o, toIdString(id));
 	}
 
 	@Override
 	public String toIdString(Object id) {
-		// TODO
+		// TODO only supports string ids
 		return (String) id;
 	}
 
 	@Override
 	public Object toId(String id) {
-		// TODO
+		// TODO only supports string ids
 		return id;
+	}
+
+	@Override
+	public boolean isVersioned() {
+		// TODO not supported
+		return false;
 	}
 
 	@Override

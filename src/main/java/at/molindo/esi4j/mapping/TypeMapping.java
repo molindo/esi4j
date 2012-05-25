@@ -19,9 +19,16 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
 
+import org.elasticsearch.action.delete.DeleteRequest;
+import org.elasticsearch.action.delete.DeleteRequestBuilder;
 import org.elasticsearch.action.get.GetResponse;
+import org.elasticsearch.action.index.IndexRequest;
+import org.elasticsearch.action.index.IndexRequestBuilder;
+import org.elasticsearch.client.Client;
+import org.elasticsearch.index.VersionType;
 import org.elasticsearch.index.get.GetField;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHitField;
@@ -84,6 +91,13 @@ public abstract class TypeMapping {
 	public boolean isFiltered(@Nonnull Object o) {
 		return false;
 	}
+
+	/**
+	 * @return <code>true</code> if all object's of mapped type are supposed to
+	 *         be versioned. Note that it isn't required to call this method
+	 *         before {@link #getVersion(Object)}
+	 */
+	public abstract boolean isVersioned();
 
 	/**
 	 * @return the object's id
@@ -208,4 +222,81 @@ public abstract class TypeMapping {
 		return map;
 	}
 
+	/**
+	 * @return null if object is filtered
+	 */
+	@CheckForNull
+	public final IndexRequestBuilder indexRequest(Client client, String indexName, Object o) {
+		return populate(client.prepareIndex(), indexName, o);
+	}
+
+	/**
+	 * @return null if object is filtered
+	 */
+	@CheckForNull
+	public final IndexRequest indexRequest(String indexName, Object o) {
+		IndexRequestBuilder builder = populate(new IndexRequestBuilder(null), indexName, o);
+		return builder == null ? null : builder.request();
+	}
+
+	private IndexRequestBuilder populate(IndexRequestBuilder builder, String indexName, Object o) {
+		if (!isFiltered(o)) {
+			builder.setIndex(indexName).setType(getTypeAlias()).setId(getIdString(o));
+
+			Long version = getVersion(o);
+			if (version != null) {
+				builder.setVersion(version).setVersionType(VersionType.EXTERNAL);
+			}
+
+			getObjectSource(o).setSource(builder);
+
+			return builder;
+		} else {
+			return null;
+		}
+	}
+
+	/**
+	 * @return null if object doesn't have an id
+	 */
+	@CheckForNull
+	public final DeleteRequest deleteRequest(String indexName, Object o) {
+		return deleteRequest(indexName, getIdString(o), getVersion(o));
+	}
+
+	/**
+	 * @return null if object doesn't have an id
+	 */
+	@CheckForNull
+	public final DeleteRequest deleteRequest(String indexName, String id, Long version) {
+		DeleteRequestBuilder builder = populate(new DeleteRequestBuilder(null), indexName, id, version);
+		return builder == null ? null : builder.request();
+	}
+
+	/**
+	 * @return null if object doesn't have an id
+	 */
+	@CheckForNull
+	public final DeleteRequestBuilder deleteRequest(Client client, String indexName, Object o) {
+		return deleteRequest(client, indexName, getIdString(o), getVersion(o));
+	}
+
+	/**
+	 * @return null if object doesn't have an id
+	 */
+	@CheckForNull
+	public final DeleteRequestBuilder deleteRequest(Client client, String indexName, String id, Long version) {
+		return populate(client.prepareDelete(), indexName, id, version);
+	}
+
+	private final DeleteRequestBuilder populate(DeleteRequestBuilder builder, String indexName, String id, Long version) {
+		if (id == null) {
+			return null;
+		}
+		builder.setIndex(indexName).setType(getTypeAlias()).setId(id);
+		if (version != null) {
+			builder.setVersion(version).setVersionType(VersionType.EXTERNAL);
+		}
+		return builder;
+	}
 }
