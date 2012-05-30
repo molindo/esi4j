@@ -142,14 +142,14 @@ public class DefaultStore implements Esi4JStore {
 					String localValue = e.getValue();
 					String indexValue = indexSettings.get(key.startsWith("index.") ? key : "index." + key);
 					if (!StringUtils.equals(localValue, indexValue)) {
-						throw new IllegalStateException("could not update value for settings key '" + key
-								+ "' - delete and rebuild index " + _indexName);
+						// TODO make behavior configurable: fail or warn
+						log.warn("could not update value for settings key '" + key + "' from ('" + indexValue
+								+ "' to '" + localValue + "') - delete and rebuild index " + _indexName);
 					}
 				}
 
 				// TODO reset previously set settings to their defaults
 				// TODO try closing index to update settings
-
 			}
 		}
 	}
