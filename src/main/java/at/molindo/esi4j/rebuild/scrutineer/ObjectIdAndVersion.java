@@ -15,19 +15,68 @@
  */
 package at.molindo.esi4j.rebuild.scrutineer;
 
+import java.io.IOException;
+import java.io.ObjectOutputStream;
+
+import javax.annotation.CheckForNull;
+
+import org.apache.commons.lang.builder.CompareToBuilder;
+import org.apache.commons.lang.builder.HashCodeBuilder;
+
+import com.aconex.scrutineer.AbstractIdAndVersion;
 import com.aconex.scrutineer.IdAndVersion;
 
-public class ObjectIdAndVersion extends IdAndVersion {
+public class ObjectIdAndVersion extends AbstractIdAndVersion {
 
 	private final Object _object;
+	private final Object _id;
 
-	public ObjectIdAndVersion(Object object, String id, long version) {
-		super(id, version);
-		_object = object;
+	public ObjectIdAndVersion(Object id, long version) {
+		this(id, version, null);
 	}
 
+	public ObjectIdAndVersion(Object id, long version, Object object) {
+		super(version);
+		if (id instanceof Number) {
+			id = ((Number) id).longValue();
+		}
+		if (id instanceof Long || id instanceof String) {
+			_object = object;
+			_id = id;
+		} else {
+			throw new IllegalArgumentException("unexpected id: " + id);
+		}
+	}
+
+	@CheckForNull
 	public Object getObject() {
 		return _object;
+	}
+
+	@Override
+	public String getId() {
+		return _id.toString();
+	}
+
+	@Override
+	protected HashCodeBuilder appendId(HashCodeBuilder appender) {
+		return appender.append(_id);
+	}
+
+	@Override
+	protected CompareToBuilder appendId(CompareToBuilder appender, IdAndVersion other) {
+		return appender.append(_id, ((ObjectIdAndVersion) other)._id);
+	}
+
+	@Override
+	protected void writeId(ObjectOutputStream objectOutputStream) throws IOException {
+		if (_id instanceof String) {
+			objectOutputStream.writeBoolean(true);
+			objectOutputStream.writeUTF((String) _id);
+		} else {
+			objectOutputStream.writeBoolean(false);
+			objectOutputStream.writeLong(((Number) _id).longValue());
+		}
 	}
 
 }

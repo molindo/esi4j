@@ -50,20 +50,25 @@ public abstract class TypeMapping {
 
 	private final String _typeAlias;
 	private final Class<?> _typeClass;
+	private final Class<?> _idClass;
 
 	/**
 	 * creates a {@link TypeMapping} for given alias and class. Both, alias and
 	 * class must be unique per index.
 	 */
-	public TypeMapping(String typeAlias, Class<?> typeClass) {
+	public TypeMapping(String typeAlias, Class<?> typeClass, Class<?> idClass) {
 		if (typeClass == null) {
 			throw new NullPointerException("typeClass");
+		}
+		if (idClass == null) {
+			throw new NullPointerException("idClass");
 		}
 		if (StringUtils.empty(typeAlias)) {
 			throw new IllegalArgumentException("typeAlias must not be empty");
 		}
 		_typeAlias = typeAlias;
 		_typeClass = typeClass;
+		_idClass = idClass;
 	}
 
 	/**
@@ -79,6 +84,10 @@ public abstract class TypeMapping {
 	 */
 	public Class<?> getTypeClass() {
 		return _typeClass;
+	}
+
+	public Class<?> getIdClass() {
+		return _idClass;
 	}
 
 	/**

@@ -36,15 +36,10 @@ import at.molindo.esi4j.mapping.TypeMapping;
  */
 public abstract class AbstractTypeMapping<Type, Id> extends TypeMapping {
 
-	private final Class<Id> _idClass;
 	private String _mapping;
 
 	public AbstractTypeMapping(String typeAlias, Class<Type> typeClass, Class<Id> idClass) {
-		super(typeAlias, typeClass);
-		if (idClass == null) {
-			throw new NullPointerException("idClass");
-		}
-		_idClass = idClass;
+		super(typeAlias, typeClass, idClass);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -52,8 +47,9 @@ public abstract class AbstractTypeMapping<Type, Id> extends TypeMapping {
 		return (Type) getTypeClass().cast(o);
 	}
 
+	@SuppressWarnings("unchecked")
 	protected Id castId(Object o) {
-		return _idClass.cast(o);
+		return (Id) getIdClass().cast(o);
 	}
 
 	@Override
