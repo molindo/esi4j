@@ -13,28 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package at.molindo.esi4j.core;
+package at.molindo.esi4j.operation;
 
-/**
- *
- *
- */
-public interface Esi4JIndexManager {
+import org.elasticsearch.client.Client;
 
-	/**
-	 * @return managed index (never null, never changes)
-	 */
-	Esi4JManagedIndex getIndex();
+import at.molindo.esi4j.chain.impl.SerializableEsi4JOperation;
 
-	public Class<?>[] getTypes();
+public final class RefreshOperation implements SerializableEsi4JOperation<Void> {
+	private static final long serialVersionUID = 1L;
 
-	void rebuild(Class<?>... types);
-
-	/**
-	 * submits a refresh operation to the underlying processing chain and waits
-	 * for it to complete
-	 */
-	void refresh();
-
-	void close();
+	@Override
+	public Void execute(Client client, String indexName, OperationContext helper) {
+		client.admin().indices().prepareRefresh(indexName).execute().actionGet();
+		return null;
+	}
 }

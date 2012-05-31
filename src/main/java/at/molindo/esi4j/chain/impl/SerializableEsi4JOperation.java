@@ -13,28 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package at.molindo.esi4j.core;
+package at.molindo.esi4j.chain.impl;
 
-/**
- *
- *
- */
-public interface Esi4JIndexManager {
+import java.io.Serializable;
 
-	/**
-	 * @return managed index (never null, never changes)
-	 */
-	Esi4JManagedIndex getIndex();
+import at.molindo.esi4j.core.Esi4JOperation;
 
-	public Class<?>[] getTypes();
+public interface SerializableEsi4JOperation<T> extends Serializable, Esi4JOperation<T> {
 
-	void rebuild(Class<?>... types);
-
-	/**
-	 * submits a refresh operation to the underlying processing chain and waits
-	 * for it to complete
-	 */
-	void refresh();
-
-	void close();
 }

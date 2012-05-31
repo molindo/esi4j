@@ -19,12 +19,14 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
+
 import at.molindo.esi4j.chain.Esi4JProcessingChain;
 import at.molindo.esi4j.chain.impl.DefaultTaskSource;
 import at.molindo.esi4j.core.Esi4JIndex;
 import at.molindo.esi4j.core.Esi4JIndexManager;
 import at.molindo.esi4j.core.internal.InternalIndex;
 import at.molindo.esi4j.module.Esi4JModule;
+import at.molindo.esi4j.operation.RefreshOperation;
 import at.molindo.esi4j.rebuild.Esi4JRebuildManager;
 import at.molindo.esi4j.rebuild.impl.DefaultRebuildManager;
 import at.molindo.utils.collections.ArrayUtils;
@@ -84,6 +86,11 @@ public class AbstractIndexManager implements Esi4JIndexManager {
 		}
 
 		_rebuildManager.rebuild(_module, _index, types);
+	}
+
+	@Override
+	public void refresh() {
+		_processingChain.getTaksProcessor().execute(new RefreshOperation());
 	}
 
 	@Override

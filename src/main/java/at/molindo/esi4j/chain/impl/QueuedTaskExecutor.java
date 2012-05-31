@@ -16,6 +16,8 @@
 package at.molindo.esi4j.chain.impl;
 
 import java.io.Serializable;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.RejectedExecutionHandler;
@@ -23,12 +25,14 @@ import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import org.elasticsearch.action.ListenableActionFuture;
 import org.elasticsearch.action.bulk.BulkRequestBuilder;
 import org.elasticsearch.action.bulk.BulkResponse;
 import org.elasticsearch.client.Client;
 
+import at.molindo.esi4j.action.BulkResponseWrapper;
 import at.molindo.esi4j.chain.Esi4JEntityResolver;
 import at.molindo.esi4j.chain.Esi4JEntityTask;
 import at.molindo.esi4j.core.Esi4JOperation;
@@ -45,8 +49,11 @@ public class QueuedTaskExecutor implements ThreadFactory, RejectedExecutionHandl
 
 	private final QueuedTaskProcessor _queuedTaskProcessor;
 	private final Esi4JEntityResolver _entityResolver;
-	private final LinkedBlockingQueue<Runnable> _queue;
 	private final ExecutorService _executorService;
+
+	private final ReentrantReadWriteLock _lock = new ReentrantReadWriteLock();
+
+	private final int _poolSize;
 
 	public QueuedTaskExecutor(QueuedTaskProcessor queuedTaskProcessor, Esi4JEntityResolver entityResolver) {
 		if (queuedTaskProcessor == null) {
@@ -56,9 +63,14 @@ public class QueuedTaskExecutor implements ThreadFactory, RejectedExecutionHandl
 		_entityResolver = entityResolver;
 
 		// TODO make configurable
-		int poolSize = Runtime.getRuntime().availableProcessors();
-		_queue = new LinkedBlockingQueue<Runnable>();
-		_executorService = new ThreadPoolExecutor(poolSize, poolSize, 0L, TimeUnit.MILLISECONDS, _queue, this, this);
+		_poolSize = (Runtime.getRuntime().availableProcessors() + 1) / 2;
+		_executorService = newExecutorService();
+	}
+
+	private ThreadPoolExecutor newExecutorService() {
+		log.info("creating new QueuedTaskExecutor with " + _poolSize + " threads");
+		return new ThreadPoolExecutor(_poolSize, _poolSize, 0L, TimeUnit.MILLISECONDS,
+				new LinkedBlockingQueue<Runnable>(), this, this);
 	}
 
 	public void execute(Esi4JEntityTask[] tasks) {
@@ -69,6 +81,24 @@ public class QueuedTaskExecutor implements ThreadFactory, RejectedExecutionHandl
 				}
 			}
 			_executorService.execute(new BulkIndexRunnable(tasks));
+		}
+	}
+
+	public <T> T submit(final SerializableEsi4JOperation<T> operation) {
+		try {
+			T value = _executorService.submit(new OperationCallable<T>(operation)).get();
+
+			if (log.isDebugEnabled()) {
+				log.debug("finished submitted operation");
+			}
+
+			return value;
+		} catch (InterruptedException e) {
+			// TODO handle
+			throw new RuntimeException(e);
+		} catch (ExecutionException e) {
+			// TODO handle
+			throw new RuntimeException(e);
 		}
 	}
 
@@ -87,7 +117,7 @@ public class QueuedTaskExecutor implements ThreadFactory, RejectedExecutionHandl
 
 	@Override
 	public Thread newThread(Runnable r) {
-		return new BulkIndexThread(r);
+		return new ExecutorThread(r);
 	}
 
 	public void close() {
@@ -99,9 +129,41 @@ public class QueuedTaskExecutor implements ThreadFactory, RejectedExecutionHandl
 		}
 	}
 
-	private final class BulkIndexThread extends Thread {
+	private static final class OperationCallable<T> implements Callable<T>, Serializable {
 
-		public BulkIndexThread(Runnable r) {
+		private static final long serialVersionUID = 1L;
+
+		// discard during serialization
+		private final SerializableEsi4JOperation<T> _operation;
+
+		private OperationCallable(SerializableEsi4JOperation<T> operation) {
+			if (operation == null) {
+				throw new NullPointerException("operation");
+			}
+			_operation = operation;
+		}
+
+		@Override
+		public T call() throws Exception {
+			if (_operation == null) {
+				return null;
+			}
+
+			final QueuedTaskExecutor executor = ((ExecutorThread) Thread.currentThread()).getQueuedTaskExecutor();
+
+			// wait for current tasks to complete
+			executor._lock.writeLock().lock();
+			try {
+				return executor.getTaskProcessor().getIndex().execute(_operation);
+			} finally {
+				executor._lock.writeLock().unlock();
+			}
+		}
+	}
+
+	private final class ExecutorThread extends Thread {
+
+		public ExecutorThread(Runnable r) {
 			super(r, QueuedTaskProcessor.class.getSimpleName() + "-" + _executorNumber + "-"
 					+ _threadNumber.getAndIncrement());
 			setDaemon(true);
@@ -125,40 +187,49 @@ public class QueuedTaskExecutor implements ThreadFactory, RejectedExecutionHandl
 
 		@Override
 		public void run() {
-			final QueuedTaskExecutor executor = ((BulkIndexThread) Thread.currentThread()).getQueuedTaskExecutor();
+			final QueuedTaskExecutor executor = ((ExecutorThread) Thread.currentThread()).getQueuedTaskExecutor();
 
-			executor.getTaskProcessor().onBeforeBulkIndex();
+			executor._lock.readLock().lock();
+			try {
 
-			Esi4JEntityResolver entityResolver = executor.getEntityResolver();
+				executor.getTaskProcessor().onBeforeBulkIndex();
 
-			if (entityResolver != null) {
-				for (int i = 0; i < _tasks.length; i++) {
-					_tasks[i].resolveEntity(entityResolver);
+				Esi4JEntityResolver entityResolver = executor.getEntityResolver();
+
+				if (entityResolver != null) {
+					for (int i = 0; i < _tasks.length; i++) {
+						_tasks[i].resolveEntity(entityResolver);
+					}
 				}
-			}
 
-			// TODO handle response
-			executor.getTaskProcessor().getIndex()
-					.executeBulk(new Esi4JOperation<ListenableActionFuture<BulkResponse>>() {
+				// TODO handle response
+				BulkResponseWrapper response = executor.getTaskProcessor().getIndex()
+						.executeBulk(new Esi4JOperation<ListenableActionFuture<BulkResponse>>() {
 
-						@Override
-						public ListenableActionFuture<BulkResponse> execute(Client client, String indexName,
-								OperationContext helper) {
-							BulkRequestBuilder bulk = client.prepareBulk();
+							@Override
+							public ListenableActionFuture<BulkResponse> execute(Client client, String indexName,
+									OperationContext helper) {
+								BulkRequestBuilder bulk = client.prepareBulk();
 
-							for (int i = 0; i < _tasks.length; i++) {
-								_tasks[i].addToBulk(bulk, indexName, helper);
+								for (int i = 0; i < _tasks.length; i++) {
+									_tasks[i].addToBulk(bulk, indexName, helper);
+								}
+
+								ListenableActionFuture<BulkResponse> response = bulk.execute();
+
+								executor.getTaskProcessor().onAfterBulkIndex();
+
+								return response;
 							}
+						}).actionGet();
 
-							ListenableActionFuture<BulkResponse> response = bulk.execute();
-
-							executor.getTaskProcessor().onAfterBulkIndex();
-
-							return response;
-						}
-					});
+				if (log.isDebugEnabled()) {
+					log.debug("finished bulk indexing " + response.getBulkResponse().items().length + " items");
+				}
+			} finally {
+				executor._lock.readLock().unlock();
+			}
 		}
-
 	}
 
 }

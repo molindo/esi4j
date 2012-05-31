@@ -15,6 +15,7 @@
  */
 package at.molindo.esi4j.chain;
 
+import at.molindo.esi4j.chain.impl.SerializableEsi4JOperation;
 import at.molindo.esi4j.core.Esi4JIndex;
 
 /**
@@ -35,6 +36,12 @@ public interface Esi4JTaskProcessor {
 	 * but might have better performance
 	 */
 	void processTasks(Iterable<Esi4JEntityTask[]> tasks);
+
+	/**
+	 * executes operation after currently submitted tasks and before newly
+	 * submitted tasks
+	 */
+	<T> T execute(SerializableEsi4JOperation<T> operation);
 
 	void close();
 

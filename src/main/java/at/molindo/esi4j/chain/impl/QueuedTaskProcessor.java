@@ -44,6 +44,11 @@ public class QueuedTaskProcessor extends AbstractTaskProcessor implements Esi4JT
 
 	}
 
+	@Override
+	public <T> T execute(SerializableEsi4JOperation<T> operation) {
+		return _executor.submit(operation);
+	}
+
 	protected void onBeforeBulkIndex() {
 	}
 

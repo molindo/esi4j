@@ -17,6 +17,7 @@ package at.molindo.esi4j.multi.impl;
 
 import java.util.Arrays;
 import java.util.LinkedHashSet;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import at.molindo.esi4j.core.internal.InternalIndex;
@@ -54,6 +55,13 @@ public class DefaultMultiIndexManager implements Esi4JMultiIndexManager {
 			index.getIndexManager().rebuild(managedTypes);
 		}
 
+	}
+
+	@Override
+	public void refresh() {
+		for (Entry<String, InternalIndex> e : _index.getIndices().entrySet()) {
+			e.getValue().getIndexManager().refresh();
+		}
 	}
 
 	@Override
