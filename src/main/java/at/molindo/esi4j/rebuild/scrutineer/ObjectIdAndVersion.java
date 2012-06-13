@@ -19,6 +19,7 @@ import java.io.IOException;
 import java.io.ObjectOutputStream;
 
 import javax.annotation.CheckForNull;
+import javax.annotation.Nullable;
 
 import org.apache.commons.lang.builder.CompareToBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
@@ -35,7 +36,7 @@ public class ObjectIdAndVersion extends AbstractIdAndVersion {
 		this(id, version, null);
 	}
 
-	public ObjectIdAndVersion(Object id, long version, Object object) {
+	public ObjectIdAndVersion(Object id, long version, @Nullable Object object) {
 		super(version);
 		if (id instanceof Number) {
 			id = ((Number) id).longValue();

@@ -21,6 +21,7 @@ import java.util.Map.Entry;
 
 import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 import org.elasticsearch.action.delete.DeleteRequest;
 import org.elasticsearch.action.delete.DeleteRequestBuilder;
@@ -144,7 +145,8 @@ public abstract class TypeMapping {
 	}
 
 	/**
-	 * @return convert id to a string representation suitable for elasticsearch
+	 * @return convert id to a string representation suitable for elasticsearch.
+	 *         never null if id is not null
 	 * @see #toId(String)
 	 */
 	public abstract String toIdString(@Nonnull Object id);
@@ -248,8 +250,8 @@ public abstract class TypeMapping {
 		return builder == null ? null : builder.request();
 	}
 
-	private IndexRequestBuilder populate(IndexRequestBuilder builder, String indexName, Object o) {
-		if (!isFiltered(o)) {
+	private IndexRequestBuilder populate(IndexRequestBuilder builder, String indexName, @Nullable Object o) {
+		if (o != null && !isFiltered(o)) {
 			builder.setIndex(indexName).setType(getTypeAlias()).setId(getIdString(o));
 
 			Long version = getVersion(o);

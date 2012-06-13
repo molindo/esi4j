@@ -48,6 +48,7 @@ import at.molindo.esi4j.mapping.TypeMapping;
 import at.molindo.esi4j.mapping.TypeMappings;
 import at.molindo.esi4j.util.ListenableActionFutureWrapper;
 import at.molindo.utils.data.Function;
+import edu.umd.cs.findbugs.annotations.SuppressWarnings;
 
 public class DefaultIndex extends AbstractIndex implements InternalIndex {
 
@@ -374,6 +375,7 @@ public class DefaultIndex extends AbstractIndex implements InternalIndex {
 		}
 
 		@Override
+		@SuppressWarnings(value = "NP_NULL_ON_SOME_PATH_FROM_RETURN_VALUE", justification = "_id not null at this point")
 		public ListenableActionFuture<DeleteResponse> execute(Client client, String indexName, OperationContext helper) {
 			final TypeMapping typeMapping = helper.findTypeMapping(_type);
 			return typeMapping.deleteRequest(client, indexName, typeMapping.toIdString(_id), null).execute();
