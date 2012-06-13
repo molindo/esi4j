@@ -15,8 +15,6 @@
  */
 package at.molindo.esi4j.rebuild.scrutineer;
 
-import java.util.Comparator;
-
 import org.apache.commons.lang.SystemUtils;
 import org.elasticsearch.client.Client;
 
@@ -27,6 +25,7 @@ import at.molindo.esi4j.module.Esi4JModule;
 import at.molindo.esi4j.rebuild.Esi4JRebuildProcessor;
 
 import com.aconex.scrutineer.IdAndVersion;
+import com.aconex.scrutineer.IdAndVersionFactory;
 import com.aconex.scrutineer.IdAndVersionStream;
 import com.aconex.scrutineer.IdAndVersionStreamVerifierListener;
 import com.aconex.scrutineer.elasticsearch.ElasticSearchDownloader;
@@ -39,6 +38,7 @@ import com.fasterxml.sort.DataReaderFactory;
 import com.fasterxml.sort.DataWriterFactory;
 import com.fasterxml.sort.SortConfig;
 import com.fasterxml.sort.Sorter;
+import com.fasterxml.sort.util.NaturalComparator;
 
 public class ScrutineerRebuildProcessor implements Esi4JRebuildProcessor {
 
@@ -61,19 +61,19 @@ public class ScrutineerRebuildProcessor implements Esi4JRebuildProcessor {
 				ModuleIdAndVersionStream moduleStream = new ModuleIdAndVersionStream(module, DEFAULT_BATCH_SIZE,
 						mapping);
 
-				Comparator<IdAndVersion> comparator = new MappedIdAndVersionComparator(mapping);
+				IdAndVersionFactory factory = new MappedObjectIdAndVersionFactory(mapping);
 
-				ElasticSearchSorter elasticSearchSorter = new ElasticSearchSorter(createSorter(comparator));
-				IteratorFactory iteratorFactory = new IteratorFactory();
+				ElasticSearchSorter elasticSearchSorter = new ElasticSearchSorter(createSorter(factory));
+				IteratorFactory iteratorFactory = new IteratorFactory(factory);
 				String workingDirectory = SystemUtils.getJavaIoTmpDir().getAbsolutePath();
 
 				ElasticSearchIdAndVersionStream esStream = new ElasticSearchIdAndVersionStream(
-						new ElasticSearchDownloader(client, indexName, "_type:" + mapping.getTypeAlias()),
+						new ElasticSearchDownloader(client, indexName, "_type:" + mapping.getTypeAlias(), factory),
 						elasticSearchSorter, iteratorFactory, workingDirectory);
 
 				VerifierListener listener = new VerifierListener(client, indexName, mapping, DEFAULT_BATCH_SIZE);
 				try {
-					verify(moduleStream, esStream, comparator, listener);
+					verify(moduleStream, esStream, listener);
 				} finally {
 					/*
 					 * TODO let IdAndVersionStreamVerifier do that as it does
@@ -87,15 +87,16 @@ public class ScrutineerRebuildProcessor implements Esi4JRebuildProcessor {
 		});
 	}
 
-	private Sorter<IdAndVersion> createSorter(Comparator<IdAndVersion> comparator) {
+	private Sorter<IdAndVersion> createSorter(IdAndVersionFactory factory) {
 		SortConfig sortConfig = new SortConfig().withMaxMemoryUsage(DEFAULT_SORT_MEM);
-		DataReaderFactory<IdAndVersion> dataReaderFactory = new IdAndVersionDataReaderFactory();
+		DataReaderFactory<IdAndVersion> dataReaderFactory = new IdAndVersionDataReaderFactory(factory);
 		DataWriterFactory<IdAndVersion> dataWriterFactory = new IdAndVersionDataWriterFactory();
-		return new Sorter<IdAndVersion>(sortConfig, dataReaderFactory, dataWriterFactory, comparator);
+		return new Sorter<IdAndVersion>(sortConfig, dataReaderFactory, dataWriterFactory,
+				new NaturalComparator<IdAndVersion>());
 	}
 
 	private void verify(IdAndVersionStream primaryStream, IdAndVersionStream secondaryStream,
-			Comparator<IdAndVersion> comparator, IdAndVersionStreamVerifierListener listener) {
-		new IdAndVersionStreamVerifier().verify(primaryStream, secondaryStream, comparator, listener);
+			IdAndVersionStreamVerifierListener listener) {
+		new IdAndVersionStreamVerifier().verify(primaryStream, secondaryStream, listener);
 	}
 }

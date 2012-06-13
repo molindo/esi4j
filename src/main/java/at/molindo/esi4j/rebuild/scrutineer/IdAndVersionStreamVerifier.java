@@ -15,7 +15,6 @@
  */
 package at.molindo.esi4j.rebuild.scrutineer;
 
-import java.util.Comparator;
 import java.util.Iterator;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -29,9 +28,8 @@ public class IdAndVersionStreamVerifier {
 
 	private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(IdAndVersionStreamVerifier.class);
 
-	public void verify(final IdAndVersionStream primaryStream, final IdAndVersionStream secondayStream,
-			Comparator<IdAndVersion> comparator,
-			final IdAndVersionStreamVerifierListener idAndVersionStreamVerifierListener) {
+	public void verify(IdAndVersionStream primaryStream, IdAndVersionStream secondayStream,
+			IdAndVersionStreamVerifierListener idAndVersionStreamVerifierListener) {
 
 		long numItems = 0;
 		// long begin = System.currentTimeMillis();
@@ -48,15 +46,15 @@ public class IdAndVersionStreamVerifier {
 
 			while (primaryItem != null && secondaryItem != null) {
 				if (primaryItem.equals(secondaryItem)) {
-					primaryItem = verifiedNext(primaryIterator, primaryItem, comparator);
+					primaryItem = verifiedNext(primaryIterator, primaryItem);
 					secondaryItem = next(secondaryIterator);
 				} else if (primaryItem.getId().equals(secondaryItem.getId())) {
 					idAndVersionStreamVerifierListener.onVersionMisMatch(primaryItem, secondaryItem);
-					primaryItem = verifiedNext(primaryIterator, primaryItem, comparator);
+					primaryItem = verifiedNext(primaryIterator, primaryItem);
 					secondaryItem = next(secondaryIterator);
-				} else if (comparator.compare(primaryItem, secondaryItem) < 0) {
+				} else if (primaryItem.compareTo(secondaryItem) < 0) {
 					idAndVersionStreamVerifierListener.onMissingInSecondaryStream(primaryItem);
-					primaryItem = verifiedNext(primaryIterator, primaryItem, comparator);
+					primaryItem = verifiedNext(primaryIterator, primaryItem);
 				} else {
 					idAndVersionStreamVerifierListener.onMissingInPrimaryStream(secondaryItem);
 					secondaryItem = next(secondaryIterator);
@@ -66,7 +64,7 @@ public class IdAndVersionStreamVerifier {
 
 			while (primaryItem != null) {
 				idAndVersionStreamVerifierListener.onMissingInSecondaryStream(primaryItem);
-				primaryItem = verifiedNext(primaryIterator, primaryItem, comparator);
+				primaryItem = verifiedNext(primaryIterator, primaryItem);
 				numItems++;
 			}
 
@@ -100,13 +98,12 @@ public class IdAndVersionStreamVerifier {
 		}
 	}
 
-	private IdAndVersion verifiedNext(Iterator<IdAndVersion> iterator, IdAndVersion previous,
-			Comparator<IdAndVersion> comparator) {
+	private IdAndVersion verifiedNext(Iterator<IdAndVersion> iterator, IdAndVersion previous) {
 		if (iterator.hasNext()) {
 			IdAndVersion next = iterator.next();
 			if (next == null) {
 				throw new IllegalStateException("stream must not return null");
-			} else if (comparator.compare(previous, next) >= 0) {
+			} else if (previous.compareTo(next) > 0) {
 				throw new IllegalStateException("stream not ordered as expected");
 			} else {
 				return next;

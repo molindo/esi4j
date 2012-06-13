@@ -126,13 +126,13 @@ public final class ModuleIdAndVersionStream implements IdAndVersionStream {
 			Object next = _next;
 			_next = null;
 
-			String id = _mapping.getIdString(next);
+			Object id = _mapping.getId(next);
 			Long version = _mapping.getVersion(next);
 
 			if (version == null) {
 				throw new IllegalArgumentException("version required for scrutineer");
 			}
-			return new ObjectIdAndVersion(next, id, version);
+			return new ObjectIdAndVersion(id, version, next);
 		}
 
 		@Override

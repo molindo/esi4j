@@ -37,7 +37,7 @@ public class ElasticSearchOsemTypeMapping extends TypeMapping {
 	}
 
 	private ElasticSearchOsemTypeMapping(String typeAlias, Class<?> typeClass, ObjectContext context) {
-		super(typeAlias, typeClass);
+		super(typeAlias, typeClass, String.class);
 		if (context == null) {
 			throw new NullPointerException("context");
 		}
