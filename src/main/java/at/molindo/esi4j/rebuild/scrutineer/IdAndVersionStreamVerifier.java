@@ -20,19 +20,21 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
+import org.slf4j.Logger;
+
 import com.aconex.scrutineer.IdAndVersion;
 import com.aconex.scrutineer.IdAndVersionStream;
 import com.aconex.scrutineer.IdAndVersionStreamVerifierListener;
+import com.aconex.scrutineer.LogUtils;
 
 public class IdAndVersionStreamVerifier {
 
-	private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(IdAndVersionStreamVerifier.class);
+	private static final Logger LOG = LogUtils.loggerForThisClass();
 
 	public void verify(IdAndVersionStream primaryStream, IdAndVersionStream secondayStream,
 			IdAndVersionStreamVerifierListener idAndVersionStreamVerifierListener) {
-
 		long numItems = 0;
-		// long begin = System.currentTimeMillis();
+		long begin = System.currentTimeMillis();
 
 		try {
 
@@ -77,9 +79,7 @@ public class IdAndVersionStreamVerifier {
 			closeWithoutThrowingException(primaryStream);
 			closeWithoutThrowingException(secondayStream);
 		}
-		log.info("Completed verification");
-		// LogUtils.infoTimeTaken(LOG, begin, numItems,
-		// "Completed verification");
+		LogUtils.infoTimeTaken(LOG, begin, numItems, "Completed verification");
 	}
 
 	// CHECKSTYLE:ON
@@ -125,8 +125,7 @@ public class IdAndVersionStreamVerifier {
 		try {
 			idAndVersionStream.close();
 		} catch (Exception e) {
-			log.warn("Unable to close IdAndVersionStream", e);
-			// LogUtils.warn(LOG, "Unable to close IdAndVersionStream", e);
+			LogUtils.warn(LOG, "Unable to close IdAndVersionStream", e);
 		}
 	}
 
