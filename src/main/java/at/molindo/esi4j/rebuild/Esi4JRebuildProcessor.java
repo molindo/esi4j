@@ -30,6 +30,7 @@ public interface Esi4JRebuildProcessor {
 	/**
 	 * rebuild all types in index using data from module
 	 */
+	// FIXME replace InternalIndex with Esi4JStore
 	void rebuild(Esi4JModule module, InternalIndex index, Class<?> type);
 
 }

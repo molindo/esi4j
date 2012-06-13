@@ -116,6 +116,8 @@ public class DefaultStore implements Esi4JStore {
 				log.warn("index creation not acknowledged within " + INDEX_CREATION_TIMEOUT_SECONDS + " seconds");
 			}
 
+			// TODO newly created. auto rebuild?
+
 		} else {
 			// update settings
 			Settings settings = getStoreSettings(index);

@@ -55,6 +55,12 @@ public class DefaultRebuildManager implements Esi4JRebuildManager {
 			index.findTypeMapping(type);
 		}
 
+		// TODO assert index - but if failed? restart? clone?
+
+		// TODO clone store?
+
+		// TODO how to handle events while rebuilding clone?
+
 		for (Class<?> type : types) {
 			waitForGreenStatus(index);
 
