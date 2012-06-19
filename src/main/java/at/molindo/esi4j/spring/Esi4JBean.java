@@ -94,8 +94,10 @@ public class Esi4JBean implements FactoryBean<Esi4J>, DisposableBean {
 
 	@Override
 	public void destroy() throws Exception {
+		if (_esi4j != null) {
+			_esi4j.close();
+		}
 		close();
-		_esi4j.close();
 	}
 
 	protected void close() {
