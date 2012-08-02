@@ -89,7 +89,7 @@ public abstract class AbstractTypeMapping<Type, Id> extends TypeMapping {
 
 	@Override
 	public final Object read(GetResponse response) {
-		return read(getSource(response));
+		return response.exists() ? read(getSource(response)) : null;
 	}
 
 	@Override

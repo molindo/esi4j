@@ -96,7 +96,7 @@ public class ElasticSearchOsemTypeMapping extends TypeMapping {
 
 	@Override
 	public Object read(GetResponse response) {
-		return _context.read(response);
+		return response.exists() ? _context.read(response) : null;
 	}
 
 	@Override
