@@ -27,6 +27,12 @@ public interface SearchResponseWrapper {
 
 	SearchResponse getSearchResponse();
 
-	List<SearchHitWrapper> getObjects();
+	List<SearchHitWrapper> getHits();
+
+	List<?> getObjects();
+
+	<T> List<T> getObjects(Class<T> type);
+
+	long getTotalHits();
 
 }

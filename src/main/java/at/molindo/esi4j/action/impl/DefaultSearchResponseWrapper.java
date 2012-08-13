@@ -45,7 +45,7 @@ public class DefaultSearchResponseWrapper implements SearchResponseWrapper {
 	}
 
 	@Override
-	public synchronized List<SearchHitWrapper> getObjects() {
+	public synchronized List<SearchHitWrapper> getHits() {
 		if (_objects == null) {
 			SearchHit[] hits = _response.hits().hits();
 			_objects = Lists.newArrayListWithCapacity(hits.length);
@@ -59,6 +59,28 @@ public class DefaultSearchResponseWrapper implements SearchResponseWrapper {
 	@Override
 	public SearchResponse getSearchResponse() {
 		return _response;
+	}
+
+	@Override
+	public List<?> getObjects() {
+		return getObjects(Object.class);
+	}
+
+	@Override
+	public <T> List<T> getObjects(Class<T> type) {
+		List<SearchHitWrapper> hits = getHits();
+		List<T> objects = Lists.newArrayListWithCapacity(hits.size());
+
+		for (SearchHitWrapper hit : hits) {
+			objects.add(hit.getObject(type));
+		}
+
+		return objects;
+	}
+
+	@Override
+	public long getTotalHits() {
+		return getSearchResponse().getHits().getTotalHits();
 	}
 
 }
