@@ -42,21 +42,22 @@ public final class ModuleIdAndVersionStream implements IdAndVersionStream {
 
 	@Override
 	public void open() {
+		verifyNotOpen();
 		_session = _module.startRebuildSession(_mapping.getTypeClass());
 	}
 
 	@Override
 	public Iterator<IdAndVersion> iterator() {
-		if (_session == null) {
-			throw new IllegalStateException("stream not open");
-		}
+		verifyOpen();
 		return new ModuleIdAndVersionStreamIterator();
 	}
 
 	@Override
 	public void close() {
-		_session.close();
-		_session = null;
+		if (_session != null) {
+			_session.close();
+			_session = null;
+		}
 	}
 
 	final class ModuleIdAndVersionStreamIterator implements Iterator<IdAndVersion> {
@@ -99,6 +100,7 @@ public final class ModuleIdAndVersionStream implements IdAndVersionStream {
 		 * fetch next batch from session if necessary
 		 */
 		private void fetchBatch() {
+			verifyOpen();
 			if (_iter == null || !_lastBatchFetched && !_iter.hasNext()) {
 				// defer calling as long as possible
 				List<?> list = _session.getNext(_batchSize);
@@ -140,4 +142,17 @@ public final class ModuleIdAndVersionStream implements IdAndVersionStream {
 			throw new UnsupportedOperationException();
 		}
 	}
+
+	private void verifyOpen() {
+		if (_session == null) {
+			throw new IllegalStateException("stream not open");
+		}
+	}
+
+	private void verifyNotOpen() {
+		if (_session != null) {
+			throw new IllegalStateException("stream already open");
+		}
+	}
+
 }
