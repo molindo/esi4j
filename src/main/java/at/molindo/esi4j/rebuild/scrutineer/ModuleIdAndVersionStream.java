@@ -134,6 +134,11 @@ public final class ModuleIdAndVersionStream implements IdAndVersionStream {
 			if (version == null) {
 				throw new IllegalArgumentException("version required for scrutineer");
 			}
+
+			if (!ObjectIdAndVersion.isIdSupported(id)) {
+				id = _mapping.toIdString(id);
+			}
+
 			return new ObjectIdAndVersion(id, version, next);
 		}
 

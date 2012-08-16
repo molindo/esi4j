@@ -32,6 +32,10 @@ public class ObjectIdAndVersion extends AbstractIdAndVersion {
 	private final Object _object;
 	private final Object _id;
 
+	public static boolean isIdSupported(Object id) {
+		return id instanceof Number || id instanceof String;
+	}
+
 	public ObjectIdAndVersion(Object id, long version) {
 		this(id, version, null);
 	}
