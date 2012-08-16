@@ -30,7 +30,11 @@ import com.aconex.scrutineer.IdAndVersion;
 public class ObjectIdAndVersion extends AbstractIdAndVersion {
 
 	private final Object _object;
-	private final Object _id;
+	private final Comparable<?> _id;
+
+	public static boolean isIdSupported(Class<?> idClass) {
+		return String.class.equals(idClass) || Number.class.isAssignableFrom(idClass);
+	}
 
 	public static boolean isIdSupported(Object id) {
 		return id instanceof Number || id instanceof String;
@@ -47,7 +51,7 @@ public class ObjectIdAndVersion extends AbstractIdAndVersion {
 		}
 		if (id instanceof Long || id instanceof String) {
 			_object = object;
-			_id = id;
+			_id = (Comparable<?>) id;
 		} else {
 			throw new IllegalArgumentException("unexpected id: " + id);
 		}

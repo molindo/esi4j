@@ -33,7 +33,7 @@ public class MappedObjectIdAndVersionFactory implements IdAndVersionFactory {
 			throw new NullPointerException("mapping");
 		}
 		_mapping = mapping;
-		_convertIds = !String.class.equals(mapping.getIdClass());
+		_convertIds = ObjectIdAndVersion.isIdSupported(mapping.getIdClass());
 	}
 
 	@Override
