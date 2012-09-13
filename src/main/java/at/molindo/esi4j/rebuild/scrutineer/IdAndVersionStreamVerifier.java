@@ -102,9 +102,10 @@ public class IdAndVersionStreamVerifier {
 		if (iterator.hasNext()) {
 			IdAndVersion next = iterator.next();
 			if (next == null) {
-				throw new IllegalStateException("stream must not return null");
+				throw new IllegalStateException("primary stream must not return null");
 			} else if (previous.compareTo(next) > 0) {
-				throw new IllegalStateException("stream not ordered as expected");
+				throw new IllegalStateException("primary stream not ordered as expected: " + next + " followed "
+						+ previous);
 			} else {
 				return next;
 			}
