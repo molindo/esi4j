@@ -35,17 +35,15 @@ public class HibernateEntityResolver implements Esi4JEntityResolver {
 	private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(HibernateEntityResolver.class);
 
 	private final SessionFactory _sessionFactory;
-	private final ThreadLocal<Session> _localSession = new ThreadLocal<Session>();
-
 	private final ClassMap<String> _entityNames = ClassMap.create();
+	private final ThreadLocal<Session> _localSession = new ThreadLocal<Session>();
 
 	public HibernateEntityResolver(SessionFactory sessionFactory) {
 		if (sessionFactory == null) {
 			throw new NullPointerException("sessionFactory");
 		}
-		_sessionFactory = sessionFactory;
 
-		for (Entry<String, ClassMetadata> e : _sessionFactory.getAllClassMetadata().entrySet()) {
+		for (Entry<String, ClassMetadata> e : sessionFactory.getAllClassMetadata().entrySet()) {
 
 			Class<?> mappedClass = e.getValue().getMappedClass(EntityMode.POJO);
 
@@ -53,6 +51,8 @@ public class HibernateEntityResolver implements Esi4JEntityResolver {
 				_entityNames.put(mappedClass, e.getKey());
 			}
 		}
+
+		_sessionFactory = sessionFactory;
 	}
 
 	/**
@@ -60,11 +60,13 @@ public class HibernateEntityResolver implements Esi4JEntityResolver {
 	 */
 	@Override
 	public ObjectKey toObjectKey(Object entity) {
-		Session session = _sessionFactory.getCurrentSession();
+		SessionFactory factory = getSessionFactory();
+
+		Session session = getCurrentSession(factory);
 
 		String entityName = _entityNames.find(entity.getClass());
 
-		ClassMetadata meta = _sessionFactory.getClassMetadata(entityName);
+		ClassMetadata meta = factory.getClassMetadata(entityName);
 
 		EntityMode entityMode = session.getEntityMode();
 		Class<?> type = meta.getMappedClass(entityMode);
@@ -111,7 +113,7 @@ public class HibernateEntityResolver implements Esi4JEntityResolver {
 
 			Session session = _localSession.get();
 			if (session == null) {
-				session = _sessionFactory.openSession();
+				session = getNewSession(getSessionFactory());
 				session.setDefaultReadOnly(true);
 				session.setCacheMode(CacheMode.GET);
 				session.setFlushMode(FlushMode.MANUAL);
@@ -135,7 +137,15 @@ public class HibernateEntityResolver implements Esi4JEntityResolver {
 
 	}
 
-	public SessionFactory getSessionFactory() {
+	protected Session getCurrentSession(SessionFactory factory) {
+		return factory.getCurrentSession();
+	}
+
+	protected Session getNewSession(SessionFactory factory) {
+		return factory.openSession();
+	}
+
+	public final SessionFactory getSessionFactory() {
 		return _sessionFactory;
 	}
 
