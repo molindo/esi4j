@@ -165,7 +165,7 @@ public abstract class TypeMapping {
 	/**
 	 * set version on object
 	 */
-	public abstract void setVersion(Object o, Long version);
+	public abstract void setVersion(@Nonnull Object o, @Nonnull Long version);
 
 	/**
 	 * @return a new {@link MappingSource} for this type
@@ -208,7 +208,9 @@ public abstract class TypeMapping {
 		map.put(FIELD_INDEX, response.getIndex());
 		map.put(FIELD_TYPE, response.getType());
 		map.put(FIELD_ID, response.getId());
-		map.put(FIELD_VERSION, response.getVersion());
+		if (response.getVersion() != -1) {
+			map.put(FIELD_VERSION, response.getVersion());
+		}
 		return map;
 	}
 
@@ -230,7 +232,9 @@ public abstract class TypeMapping {
 		map.put(FIELD_INDEX, hit.getIndex());
 		map.put(FIELD_TYPE, hit.getType());
 		map.put(FIELD_ID, hit.getId());
-		map.put(FIELD_VERSION, hit.getVersion());
+		if (hit.getVersion() != -1) {
+			map.put(FIELD_VERSION, hit.getVersion());
+		}
 		return map;
 	}
 

@@ -98,12 +98,24 @@ public abstract class AbstractTypeMapping<Type, Id> extends TypeMapping {
 	}
 
 	/**
-	 * meant for testing.
+	 * only public for testing.
 	 */
 	public final Object read(Map<String, Object> source) {
 		Type object = readObject(source);
-		setIdString(object, (String) source.get(FIELD_ID));
-		setVersion(object, (Long) source.get(FIELD_VERSION));
+
+		if (object != null) {
+
+			String id = (String) source.get(FIELD_ID);
+			if (id != null) {
+				setIdString(object, id);
+			}
+
+			Long version = (Long) source.get(FIELD_VERSION);
+			if (version != null && version != -1) {
+				setVersion(object, version);
+			}
+		}
+
 		return object;
 	}
 
