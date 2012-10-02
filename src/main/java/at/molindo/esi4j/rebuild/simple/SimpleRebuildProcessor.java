@@ -82,8 +82,17 @@ public class SimpleRebuildProcessor implements Esi4JRebuildProcessor {
 
 			long seconds = (System.currentTimeMillis() - start) / 1000;
 
-			log.info("finished indexing of " + h.getSucceeded() + " objects of type " + type.getName() + " in "
-					+ seconds + " seconds (" + h.getFailed() + " failed)");
+			// logging
+			StringBuilder logMsg = new StringBuilder("finished indexing of ").append(h.getSucceeded())
+					.append(" objects of type ").append(type.getName()).append(" in ").append(seconds)
+					.append(" seconds");
+
+			if (h.getFailed() > 0) {
+				logMsg.append(" (").append(h.getFailed()).append(" failed)");
+				log.warn(logMsg.toString());
+			} else {
+				log.info(logMsg.toString());
+			}
 
 		} catch (InterruptedException e) {
 			log.error("awaiting completion of indexing has been interrupted", e);
