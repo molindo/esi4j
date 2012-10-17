@@ -21,6 +21,10 @@ import at.molindo.esi4j.chain.Esi4JTaskProcessor;
 import at.molindo.esi4j.core.Esi4JIndex;
 import at.molindo.utils.collections.ArrayUtils;
 
+/**
+ * {@link Esi4JTaskProcessor} that uses a {@link QueuedTaskExecutor} to process
+ * tasks asynchronously
+ */
 public class QueuedTaskProcessor extends AbstractTaskProcessor implements Esi4JTaskProcessor {
 
 	private final QueuedTaskExecutor _executor;
@@ -49,6 +53,9 @@ public class QueuedTaskProcessor extends AbstractTaskProcessor implements Esi4JT
 		return _executor.submit(operation);
 	}
 
+	/**
+	 * make sure to always call {@link #onAfterBulkIndex()} afterwards
+	 */
 	protected void onBeforeBulkIndex() {
 	}
 

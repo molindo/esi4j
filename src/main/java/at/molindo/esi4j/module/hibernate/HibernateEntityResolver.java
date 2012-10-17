@@ -96,6 +96,23 @@ public class HibernateEntityResolver implements Esi4JEntityResolver {
 		return toObjectKey(entity);
 	}
 
+	public void openResolveSession() {
+		Session session = _localSession.get();
+
+		if (session != null) {
+			log.warn("session already open, now closing first");
+			closeResolveSession();
+			session = null;
+		}
+
+		session = getNewSession(getSessionFactory());
+		session.setDefaultReadOnly(true);
+		session.setCacheMode(CacheMode.GET);
+		session.setFlushMode(FlushMode.MANUAL);
+		session.beginTransaction();
+		_localSession.set(session);
+	}
+
 	public void closeResolveSession() {
 		Session session = _localSession.get();
 		if (session != null) {
@@ -103,6 +120,8 @@ public class HibernateEntityResolver implements Esi4JEntityResolver {
 			session.clear();
 			session.close();
 			_localSession.set(null);
+		} else {
+			log.warn("session not open");
 		}
 	}
 
@@ -113,12 +132,7 @@ public class HibernateEntityResolver implements Esi4JEntityResolver {
 
 			Session session = _localSession.get();
 			if (session == null) {
-				session = getNewSession(getSessionFactory());
-				session.setDefaultReadOnly(true);
-				session.setCacheMode(CacheMode.GET);
-				session.setFlushMode(FlushMode.MANUAL);
-				session.beginTransaction();
-				_localSession.set(session);
+				throw new IllegalStateException("no session available");
 			}
 
 			// ignore version, use latest, use load for batch fetching

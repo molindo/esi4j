@@ -44,6 +44,11 @@ public class AsyncHibernateProcessingChain implements Esi4JBatchedProcessingChai
 		_taksProcessor = new QueuedTaskProcessor(index, entityResolver) {
 
 			@Override
+			protected void onBeforeBulkIndex() {
+				((HibernateEntityResolver) getEntityResolver()).openResolveSession();
+			}
+
+			@Override
 			protected void onAfterBulkIndex() {
 				((HibernateEntityResolver) getEntityResolver()).closeResolveSession();
 			}
