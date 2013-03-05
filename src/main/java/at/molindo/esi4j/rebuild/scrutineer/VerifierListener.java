@@ -15,10 +15,10 @@
  */
 package at.molindo.esi4j.rebuild.scrutineer;
 
+import org.elasticsearch.action.ActionRequestBuilder;
 import org.elasticsearch.action.bulk.BulkRequestBuilder;
 import org.elasticsearch.action.delete.DeleteRequestBuilder;
 import org.elasticsearch.action.index.IndexRequestBuilder;
-import org.elasticsearch.action.support.BaseRequestBuilder;
 import org.elasticsearch.client.Client;
 
 import at.molindo.esi4j.mapping.TypeMapping;
@@ -79,7 +79,7 @@ public class VerifierListener implements IdAndVersionStreamVerifierListener {
 		add(_mapping.deleteRequest(_client, _indexName, idAndVersion.getId(), idAndVersion.getVersion()));
 	}
 
-	private void add(BaseRequestBuilder<?, ?> request) {
+	private void add(ActionRequestBuilder<?, ?, ?> request) {
 		if (request == null) {
 			throw new IllegalArgumentException("stream contained object without id or filtered object");
 		}
