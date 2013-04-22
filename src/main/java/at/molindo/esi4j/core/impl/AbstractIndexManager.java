@@ -19,7 +19,6 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
-
 import at.molindo.esi4j.chain.Esi4JProcessingChain;
 import at.molindo.esi4j.chain.impl.DefaultTaskSource;
 import at.molindo.esi4j.core.Esi4JIndex;
@@ -40,9 +39,14 @@ public class AbstractIndexManager implements Esi4JIndexManager {
 	private final Class<?>[] _types;
 
 	private final Esi4JProcessingChain _processingChain;
-	private final Esi4JRebuildManager _rebuildManager = new DefaultRebuildManager();
+	private final Esi4JRebuildManager _rebuildManager;
 
 	public AbstractIndexManager(Esi4JModule module, InternalIndex index, Esi4JProcessingChain processingChain) {
+		this(module, index, processingChain, new DefaultRebuildManager());
+	}
+
+	public AbstractIndexManager(Esi4JModule module, InternalIndex index, Esi4JProcessingChain processingChain,
+			Esi4JRebuildManager rebuildManager) {
 		if (index == null) {
 			throw new NullPointerException("index");
 		}
@@ -52,9 +56,13 @@ public class AbstractIndexManager implements Esi4JIndexManager {
 		if (processingChain == null) {
 			throw new NullPointerException("processingChain");
 		}
+		if (rebuildManager == null) {
+			throw new NullPointerException("rebuildManager");
+		}
 		_index = index;
 		_module = module;
 		_processingChain = processingChain;
+		_rebuildManager = rebuildManager;
 
 		Set<Class<?>> types = Sets.newHashSet(_module.getTypes());
 		types.retainAll(Arrays.asList(_index.getMappedTypes()));

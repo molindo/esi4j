@@ -46,6 +46,11 @@ public class ScrutineerRebuildProcessor implements Esi4JRebuildProcessor {
 	private static final int DEFAULT_BATCH_SIZE = 1000;
 
 	@Override
+	public boolean isSupported(TypeMapping mapping) {
+		return mapping.isVersioned();
+	}
+
+	@Override
 	public void rebuild(final Esi4JModule module, InternalIndex index, final Class<?> type) {
 		index.execute(new Esi4JOperation<Void>() {
 
@@ -99,4 +104,5 @@ public class ScrutineerRebuildProcessor implements Esi4JRebuildProcessor {
 			IdAndVersionStreamVerifierListener listener) {
 		new IdAndVersionStreamVerifier().verify(primaryStream, secondaryStream, listener);
 	}
+
 }

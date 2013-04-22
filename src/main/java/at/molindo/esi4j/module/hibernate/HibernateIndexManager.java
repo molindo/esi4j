@@ -22,6 +22,8 @@ import at.molindo.esi4j.chain.Esi4JBatchedProcessingChain;
 import at.molindo.esi4j.core.Esi4JIndex;
 import at.molindo.esi4j.core.impl.AbstractIndexManager;
 import at.molindo.esi4j.core.internal.InternalIndex;
+import at.molindo.esi4j.rebuild.Esi4JRebuildManager;
+import at.molindo.esi4j.rebuild.impl.DefaultRebuildManager;
 
 public class HibernateIndexManager extends AbstractIndexManager {
 
@@ -29,7 +31,12 @@ public class HibernateIndexManager extends AbstractIndexManager {
 
 	public HibernateIndexManager(SessionFactory sessionFactory, Esi4JIndex index,
 			Esi4JBatchedProcessingChain processingChain) {
-		super(new HibernateModule(sessionFactory), (InternalIndex) index, processingChain);
+		this(sessionFactory, index, processingChain, new DefaultRebuildManager());
+	}
+
+	public HibernateIndexManager(SessionFactory sessionFactory, Esi4JIndex index,
+			Esi4JBatchedProcessingChain processingChain, Esi4JRebuildManager rebuildManager) {
+		super(new HibernateModule(sessionFactory), (InternalIndex) index, processingChain, rebuildManager);
 
 		// inject listener into session factory and start processing
 		_lifecycleInjector = new DefaultHibernateLifecycleInjector(false);

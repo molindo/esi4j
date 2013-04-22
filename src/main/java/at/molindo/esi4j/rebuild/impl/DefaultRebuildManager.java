@@ -15,7 +15,7 @@
  */
 package at.molindo.esi4j.rebuild.impl;
 
-import java.util.HashMap;
+import java.util.List;
 
 import org.elasticsearch.action.admin.cluster.health.ClusterHealthRequestBuilder;
 import org.elasticsearch.action.admin.cluster.health.ClusterHealthResponse;
@@ -31,21 +31,25 @@ import at.molindo.esi4j.rebuild.Esi4JRebuildManager;
 import at.molindo.esi4j.rebuild.Esi4JRebuildProcessor;
 import at.molindo.esi4j.rebuild.scrutineer.ScrutineerRebuildProcessor;
 import at.molindo.esi4j.rebuild.simple.SimpleRebuildProcessor;
+import at.molindo.utils.collections.ArrayUtils;
 
-import com.google.common.collect.Maps;
+import com.google.common.collect.Lists;
 
 public class DefaultRebuildManager implements Esi4JRebuildManager {
 
-	private static final String SIMPLE = Esi4JRebuildProcessor.DEFAULT;
-	private static final String SCRUTINEER = "scrutineer";
-
-	private final HashMap<String, Esi4JRebuildProcessor> _processors = Maps.newHashMap();
+	private final List<Esi4JRebuildProcessor> _processors;
 
 	private TimeValue _healthTimeout = TimeValue.timeValueSeconds(60);
 
 	public DefaultRebuildManager() {
-		_processors.put(SIMPLE, new SimpleRebuildProcessor());
-		_processors.put(SCRUTINEER, new ScrutineerRebuildProcessor());
+		this(new SimpleRebuildProcessor(), new ScrutineerRebuildProcessor());
+	}
+
+	public DefaultRebuildManager(Esi4JRebuildProcessor... processors) {
+		if (ArrayUtils.empty(processors)) {
+			throw new IllegalArgumentException("processors must not be empty");
+		}
+		_processors = Lists.newArrayList(processors);
 	}
 
 	@Override
@@ -63,13 +67,7 @@ public class DefaultRebuildManager implements Esi4JRebuildManager {
 
 		for (Class<?> type : types) {
 			waitForGreenStatus(index);
-
-			TypeMapping mapping = index.findTypeMapping(type);
-			if (mapping.isVersioned()) {
-				findRebuildProcessor(SCRUTINEER).rebuild(module, index, type);
-			} else {
-				findRebuildProcessor(SIMPLE).rebuild(module, index, type);
-			}
+			findRebuildProcessor(index.findTypeMapping(type)).rebuild(module, index, type);
 		}
 
 		// optimize index after rebuild
@@ -107,12 +105,17 @@ public class DefaultRebuildManager implements Esi4JRebuildManager {
 		}
 	}
 
-	private Esi4JRebuildProcessor findRebuildProcessor(String name) {
-		Esi4JRebuildProcessor processor = _processors.get(name);
-		if (processor == null) {
-			throw new IllegalArgumentException("unknown processor: " + name);
+	/**
+	 * @return first {@link Esi4JRebuildProcessor} that supports this
+	 *         {@link TypeMapping}
+	 */
+	private Esi4JRebuildProcessor findRebuildProcessor(TypeMapping mapping) {
+		for (Esi4JRebuildProcessor processor : _processors) {
+			if (processor.isSupported(mapping)) {
+				return processor;
+			}
 		}
-		return processor;
+		throw new IllegalArgumentException("mapping not supported by any processor: " + mapping.getTypeAlias());
 	}
 
 	@Override

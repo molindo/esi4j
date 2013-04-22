@@ -16,6 +16,7 @@
 package at.molindo.esi4j.rebuild;
 
 import at.molindo.esi4j.core.internal.InternalIndex;
+import at.molindo.esi4j.mapping.TypeMapping;
 import at.molindo.esi4j.module.Esi4JModule;
 
 /**
@@ -25,7 +26,10 @@ import at.molindo.esi4j.module.Esi4JModule;
  */
 public interface Esi4JRebuildProcessor {
 
-	public static String DEFAULT = "default";
+	/**
+	 * @return true if {@link TypeMapping} is supported
+	 */
+	boolean isSupported(TypeMapping mapping);
 
 	/**
 	 * rebuild all types in index using data from module

@@ -48,6 +48,11 @@ public class SimpleRebuildProcessor implements Esi4JRebuildProcessor {
 	}
 
 	@Override
+	public boolean isSupported(TypeMapping mapping) {
+		return true;
+	}
+
+	@Override
 	public void rebuild(final Esi4JModule module, InternalIndex index, final Class<?> type) {
 
 		log.info("rebuilding index for object of type " + type.getName());
