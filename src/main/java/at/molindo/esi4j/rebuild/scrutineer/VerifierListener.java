@@ -38,18 +38,19 @@ public class VerifierListener implements IdAndVersionStreamVerifierListener {
 	private final String _indexName;
 	private final TypeMapping _mapping;
 	private final int _batchSize;
+	private final BulkIndexHelper _helper;
 
-	private final BulkIndexHelper _helper = new BulkIndexHelper().setMaxRunning(2);
 	private BulkRequestBuilder _bulkRequest;
 
 	private int _index;
 	private int _update;
 	private int _delete;
 
-	public VerifierListener(Client client, String indexName, TypeMapping mapping, int batchSize) {
+	public VerifierListener(Client client, String indexName, TypeMapping mapping, BulkIndexHelper helper, int batchSize) {
 		_client = client;
 		_indexName = indexName;
 		_mapping = mapping;
+		_helper = helper;
 		_batchSize = batchSize;
 	}
 

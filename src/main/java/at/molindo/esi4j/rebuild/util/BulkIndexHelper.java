@@ -49,6 +49,8 @@ public class BulkIndexHelper {
 	private int _succeeded = 0;
 	private int _failed = 0;
 
+	private IResponseHandler _responseHandler;
+
 	public BulkIndexHelper() {
 	}
 
@@ -103,10 +105,17 @@ public class BulkIndexHelper {
 
 				BulkItemResponse[] items = response.items();
 				for (int i = 0; i < items.length; i++) {
-					if (items[i].failed()) {
+
+					BulkItemResponse item = items[i];
+
+					if (item.failed()) {
 						failed++;
 					} else {
 						succeeded++;
+
+						if (_responseHandler != null) {
+							_responseHandler.handle(item.id(), item.type());
+						}
 					}
 				}
 
@@ -184,6 +193,15 @@ public class BulkIndexHelper {
 
 		_maxRunning = maxRunning;
 		return this;
+	}
+
+	public BulkIndexHelper setResponseHandler(IResponseHandler responseHandler) {
+		_responseHandler = responseHandler;
+		return this;
+	}
+
+	public interface IResponseHandler {
+		void handle(String id, String type);
 	}
 
 }

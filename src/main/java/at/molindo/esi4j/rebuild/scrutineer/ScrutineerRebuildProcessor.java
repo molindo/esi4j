@@ -23,6 +23,7 @@ import at.molindo.esi4j.core.internal.InternalIndex;
 import at.molindo.esi4j.mapping.TypeMapping;
 import at.molindo.esi4j.module.Esi4JModule;
 import at.molindo.esi4j.rebuild.Esi4JRebuildProcessor;
+import at.molindo.esi4j.rebuild.util.BulkIndexHelper;
 
 import com.aconex.scrutineer.IdAndVersion;
 import com.aconex.scrutineer.IdAndVersionFactory;
@@ -57,7 +58,7 @@ public class ScrutineerRebuildProcessor implements Esi4JRebuildProcessor {
 			@Override
 			public Void execute(Client client, String indexName, Esi4JOperation.OperationContext context) {
 
-				TypeMapping mapping = context.findTypeMapping(type);
+				final TypeMapping mapping = context.findTypeMapping(type);
 
 				if (!mapping.isVersioned()) {
 					throw new IllegalArgumentException("type must be versioned: " + type);
@@ -76,7 +77,23 @@ public class ScrutineerRebuildProcessor implements Esi4JRebuildProcessor {
 						new ElasticSearchDownloader(client, indexName, "_type:" + mapping.getTypeAlias(), factory),
 						elasticSearchSorter, iteratorFactory, workingDirectory);
 
-				VerifierListener listener = new VerifierListener(client, indexName, mapping, DEFAULT_BATCH_SIZE);
+				BulkIndexHelper bulkHelper = new BulkIndexHelper().setMaxRunning(2);
+				bulkHelper.setResponseHandler(new BulkIndexHelper.IResponseHandler() {
+
+					@Override
+					public void handle(String id, String type) {
+						if ("delete".equals(type)) {
+							onDelete(mapping.getTypeClass(), mapping.toId(id));
+						} else {
+							onIndex(mapping.getTypeClass(), mapping.toId(id));
+						}
+					}
+
+				});
+
+				VerifierListener listener = new VerifierListener(client, indexName, mapping, bulkHelper,
+						DEFAULT_BATCH_SIZE);
+
 				try {
 					verify(moduleStream, esStream, listener);
 				} finally {
@@ -103,6 +120,12 @@ public class ScrutineerRebuildProcessor implements Esi4JRebuildProcessor {
 	private void verify(IdAndVersionStream primaryStream, IdAndVersionStream secondaryStream,
 			IdAndVersionStreamVerifierListener listener) {
 		new IdAndVersionStreamVerifier().verify(primaryStream, secondaryStream, listener);
+	}
+
+	protected void onIndex(Class<?> type, Object id) {
+	}
+
+	protected void onDelete(Class<?> type, Object id) {
 	}
 
 }
