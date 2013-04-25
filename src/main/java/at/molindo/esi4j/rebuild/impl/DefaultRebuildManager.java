@@ -42,7 +42,7 @@ public class DefaultRebuildManager implements Esi4JRebuildManager {
 	private TimeValue _healthTimeout = TimeValue.timeValueSeconds(60);
 
 	public DefaultRebuildManager() {
-		this(new SimpleRebuildProcessor(), new ScrutineerRebuildProcessor());
+		this(new ScrutineerRebuildProcessor(), new SimpleRebuildProcessor());
 	}
 
 	public DefaultRebuildManager(Esi4JRebuildProcessor... processors) {

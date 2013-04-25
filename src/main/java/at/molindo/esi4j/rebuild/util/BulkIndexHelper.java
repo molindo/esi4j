@@ -114,7 +114,7 @@ public class BulkIndexHelper {
 						succeeded++;
 
 						if (_responseHandler != null) {
-							_responseHandler.handle(item.id(), item.type());
+							_responseHandler.handle(item.id(), item.opType());
 						}
 					}
 				}
