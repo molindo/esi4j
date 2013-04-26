@@ -15,15 +15,23 @@
  */
 package at.molindo.esi4j.test.util;
 
+import static org.elasticsearch.index.mapper.MapperBuilders.all;
+import static org.elasticsearch.index.mapper.MapperBuilders.source;
+
 import java.io.IOException;
 import java.util.Map;
 
 import org.elasticsearch.common.xcontent.XContentBuilder;
+import org.elasticsearch.index.mapper.MapperBuilders;
+import org.elasticsearch.index.mapper.object.ObjectMapper.Dynamic;
 import org.elasticsearch.index.mapper.object.RootObjectMapper.Builder;
 
 import at.molindo.esi4j.mapping.impl.AbstractStringTypeMapping;
 
 public class TweetTypeMapping extends AbstractStringTypeMapping<Tweet> {
+
+	private static final String FIELD_MESSAGE = "message";
+	private static final String FIELD_USER = "user";
 
 	public TweetTypeMapping(String typeAlias) {
 		super(typeAlias, Tweet.class);
@@ -56,18 +64,23 @@ public class TweetTypeMapping extends AbstractStringTypeMapping<Tweet> {
 
 	@Override
 	protected void buildMapping(Builder mapperBuilder) throws IOException {
-		// TODO Auto-generated method stub
+		mapperBuilder.dynamic(Dynamic.STRICT).add(source().enabled(true)).add(all().enabled(true))
+
+		.add(MapperBuilders.stringField(FIELD_MESSAGE)).add(MapperBuilders.stringField(FIELD_USER));
+
 	}
 
 	@Override
 	protected void writeObject(XContentBuilder contentBuilder, Tweet o) throws IOException {
-		// TODO Auto-generated method stub
+		contentBuilder.field(FIELD_MESSAGE, o.getMessage()).field(FIELD_USER, o.getUser());
 	}
 
 	@Override
 	protected Tweet readObject(Map<String, Object> source) {
-		// TODO Auto-generated method stub
-		return null;
+		Tweet tweet = new Tweet();
+		tweet.setMessage((String) source.get(FIELD_MESSAGE));
+		tweet.setUser((String) source.get(FIELD_USER));
+		return tweet;
 	}
 
 }

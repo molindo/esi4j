@@ -15,12 +15,8 @@
  */
 package at.molindo.esi4j.test.util;
 
-import org.elasticsearch.osem.annotations.Indexable;
-import org.elasticsearch.osem.annotations.Searchable;
-
 import com.google.common.base.Objects;
 
-@Searchable
 public final class Tweet {
 	private String _id;
 	private Long _version;
@@ -50,7 +46,6 @@ public final class Tweet {
 		return _id;
 	}
 
-	@Indexable(indexName = "_id")
 	public void setId(String id) {
 		_id = id;
 	}
@@ -59,7 +54,6 @@ public final class Tweet {
 		return _version;
 	}
 
-	@Indexable(indexName = "_version")
 	public void setVersion(Long version) {
 		_version = version;
 	}

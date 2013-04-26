@@ -16,17 +16,15 @@
 package at.molindo.esi4j.integration;
 
 import org.elasticsearch.common.settings.ImmutableSettings;
-import org.elasticsearch.osem.core.ObjectContext;
-import org.elasticsearch.osem.core.ObjectContextFactory;
 
 import at.molindo.esi4j.core.Esi4J;
 import at.molindo.esi4j.core.Esi4JIndex;
 import at.molindo.esi4j.core.impl.DefaultEsi4J;
 import at.molindo.esi4j.core.internal.InternalIndex;
-import at.molindo.esi4j.mapping.impl.ElasticSearchOsemTypeMapping;
 import at.molindo.esi4j.rebuild.simple.SimpleRebuildProcessor;
 import at.molindo.esi4j.test.module.Esi4JDummyModule;
 import at.molindo.esi4j.test.util.Tweet;
+import at.molindo.esi4j.test.util.TweetTypeMapping;
 
 import com.google.common.collect.Lists;
 
@@ -34,15 +32,13 @@ public class DummyIntegration {
 
 	public static void main(String[] args) {
 
-		ObjectContext context = ObjectContextFactory.create();
-
 		Esi4J esi4j = new DefaultEsi4J(ImmutableSettings.settingsBuilder().put("esi4j.client.type", "node")
 				.put("index.store.type", "ram").put("index.refresh_interval", "-1").put("node.data", true)
 				.put("node.local", true).put("gateway.type", "none").build());
 
 		Esi4JIndex index = esi4j.getIndex();
 
-		((InternalIndex) index).addTypeMapping(ElasticSearchOsemTypeMapping.create(Tweet.class, context));
+		((InternalIndex) index).addTypeMapping(new TweetTypeMapping("tweet"));
 
 		Tweet t1 = new Tweet("1", "sfussenegger", "esi4j rocks #elasticsearch");
 
@@ -53,6 +49,9 @@ public class DummyIntegration {
 
 		Tweet t2 = (Tweet) index.get(Tweet.class, id).actionGet().getObject();
 		System.out.println(t1.equals(t2));
+
+		Tweet none = (Tweet) index.get(Tweet.class, "4711").actionGet().getObject();
+		System.out.println(none == null);
 
 		t1.setUser("dummy");
 
