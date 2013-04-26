@@ -91,7 +91,7 @@ public class ScrutineerRebuildProcessor implements Esi4JRebuildProcessor {
 
 				});
 
-				VerifierListener listener = new VerifierListener(client, indexName, mapping, bulkHelper,
+				VerifierListener listener = new VerifierListener(client, indexName, context, mapping, bulkHelper,
 						DEFAULT_BATCH_SIZE);
 
 				try {

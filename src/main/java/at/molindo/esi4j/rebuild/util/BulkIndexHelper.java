@@ -23,12 +23,16 @@ import org.elasticsearch.action.ActionListener;
 import org.elasticsearch.action.bulk.BulkItemResponse;
 import org.elasticsearch.action.bulk.BulkRequestBuilder;
 import org.elasticsearch.action.bulk.BulkResponse;
+import org.elasticsearch.action.delete.DeleteRequestBuilder;
 import org.elasticsearch.action.index.IndexRequestBuilder;
 import org.elasticsearch.client.Client;
 
 import at.molindo.esi4j.core.Esi4JIndex;
 import at.molindo.esi4j.core.Esi4JOperation;
+import at.molindo.esi4j.core.Esi4JOperation.OperationContext;
 import at.molindo.esi4j.mapping.TypeMapping;
+
+import com.google.common.collect.Lists;
 
 /**
  * helper class that helps awaiting completion of submitted bulk index tasks
@@ -54,25 +58,28 @@ public class BulkIndexHelper {
 	public BulkIndexHelper() {
 	}
 
-	public void bulkIndex(Esi4JIndex index, final List<?> list) {
-		bulkIndex(index.execute(new Esi4JOperation<BulkRequestBuilder>() {
+	public Session newSession(Esi4JIndex index, final int batchSize) {
+		return index.execute(new Esi4JOperation<Session>() {
 
 			@Override
-			public BulkRequestBuilder execute(Client client, String indexName, Esi4JOperation.OperationContext helper) {
-				BulkRequestBuilder request = client.prepareBulk();
-				for (Object o : list) {
-					TypeMapping mapping = helper.findTypeMapping(o);
-					if (!mapping.isFiltered(o)) {
-						IndexRequestBuilder index = mapping.indexRequest(client, indexName, o);
-						if (index != null) {
-							request.add(index);
-						}
-					}
-				}
-				return request;
+			public Session execute(Client client, String indexName, OperationContext helper) {
+
+				return newSession(client, indexName, helper, batchSize);
 			}
 
-		}));
+		});
+	}
+
+	public Session newSession(Client client, String indexName, OperationContext context, int batchSize) {
+		return new Session(client, indexName, context, batchSize);
+	}
+
+	public void bulkIndex(Esi4JIndex index, final List<?> list) {
+		Session session = newSession(index, list.size());
+		for (Object o : list) {
+			session.index(o);
+		}
+		session.submit();
 	}
 
 	public void bulkIndex(BulkRequestBuilder request) {
@@ -202,6 +209,135 @@ public class BulkIndexHelper {
 
 	public interface IResponseHandler {
 		void handle(String id, String type);
+	}
+
+	public class Session {
+
+		private final Client _client;
+		private final String _indexName;
+		private final OperationContext _context;
+		private final int _batchSize;
+
+		private final List<Operation> _operations;
+
+		public Session(Client client, String indexName, OperationContext context, int batchSize) {
+			_client = client;
+			_indexName = indexName;
+			_context = context;
+			_batchSize = batchSize;
+			_operations = Lists.newArrayListWithCapacity(_batchSize);
+		}
+
+		public Session index(Object o) {
+			add(new Index(o));
+			return this;
+		}
+
+		public Session delete(Object o) {
+			TypeMapping mapping = _context.findTypeMapping(o);
+			delete(mapping.getTypeClass(), mapping.getId(o), mapping.getVersion(o));
+			return this;
+		}
+
+		public Session delete(Class<?> type, Object id, Long version) {
+			add(new Delete(type, id, version));
+			return this;
+		}
+
+		private void add(Operation op) {
+			_operations.add(op);
+			if (_operations.size() == _batchSize) {
+				submit();
+			}
+		}
+
+		public BulkIndexHelper submit() {
+			try {
+				// build BulkRequestBuilder and clear operations
+				bulkIndex(new Esi4JOperation<BulkRequestBuilder>() {
+
+					@Override
+					public BulkRequestBuilder execute(Client client, String indexName,
+							Esi4JOperation.OperationContext helper) {
+						BulkRequestBuilder bulk = client.prepareBulk();
+						for (Operation op : _operations) {
+
+							Object request = op.toRequest(client, indexName, helper);
+							if (request instanceof IndexRequestBuilder) {
+								bulk.add((IndexRequestBuilder) request);
+							} else if (request instanceof DeleteRequestBuilder) {
+								bulk.add((DeleteRequestBuilder) request);
+							} else if (request != null) {
+								throw new IllegalArgumentException("unexpected request type "
+										+ request.getClass().getName());
+							}
+
+						}
+						return bulk;
+					}
+
+				}.execute(_client, _indexName, _context));
+			} finally {
+				_operations.clear();
+			}
+			return BulkIndexHelper.this;
+		}
+
+	}
+
+	private interface Operation {
+
+		Object toRequest(Client client, String indexName, OperationContext helper);
+
+	}
+
+	private class Delete implements Operation {
+
+		private final Class<?> _type;
+		private final Object _id;
+		private final Long _version;
+
+		public Delete(Class<?> type, Object id, Long version) {
+			if (type == null) {
+				throw new NullPointerException("type");
+			}
+			if (id == null) {
+				throw new NullPointerException("id");
+			}
+			_type = type;
+			_id = id;
+			_version = version;
+		}
+
+		@Override
+		public DeleteRequestBuilder toRequest(Client client, String indexName, OperationContext helper) {
+			TypeMapping mapping = helper.findTypeMapping(_type);
+
+			// FIXME workaround for #2938
+			Long version = _version == null ? null : _version + 1;
+
+			return mapping.deleteRequest(client, indexName, mapping.toIdString(_id), version);
+		}
+
+	}
+
+	private class Index implements Operation {
+
+		private final Object _object;
+
+		public Index(Object object) {
+			if (object == null) {
+				throw new NullPointerException("object");
+			}
+			_object = object;
+		}
+
+		@Override
+		public IndexRequestBuilder toRequest(Client client, String indexName, OperationContext helper) {
+			TypeMapping mapping = helper.findTypeMapping(_object);
+			return mapping.indexRequest(client, indexName, _object);
+		}
+
 	}
 
 }

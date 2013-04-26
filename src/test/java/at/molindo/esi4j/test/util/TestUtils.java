@@ -20,17 +20,22 @@ import java.util.UUID;
 
 import org.elasticsearch.cluster.ClusterName;
 import org.elasticsearch.common.settings.ImmutableSettings;
+import org.elasticsearch.common.settings.ImmutableSettings.Builder;
 import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.node.Node;
 import org.elasticsearch.node.NodeBuilder;
 
+import at.molindo.esi4j.core.Esi4J;
 import at.molindo.esi4j.core.Esi4JClient;
+import at.molindo.esi4j.core.impl.DefaultEsi4J;
 import at.molindo.esi4j.core.impl.NodeClient;
 import at.molindo.utils.data.StringUtils;
 import at.molindo.utils.io.FileUtils;
 import at.molindo.utils.properties.SystemProperty;
 
 public class TestUtils {
+
+	private static final boolean HTTP = Boolean.getBoolean(TestUtils.class.getName() + ".http");
 
 	private TestUtils() {
 	}
@@ -45,15 +50,8 @@ public class TestUtils {
 			clusterName = ClusterName.DEFAULT.value();
 		}
 
-		final File tmp = new File(SystemProperty.JAVA_IO_TMPDIR.getFile(), "esi4jtest-" + UUID.randomUUID().toString());
-		if (!tmp.mkdirs()) {
-			throw new RuntimeException("failed to create temp dir: " + tmp);
-		}
-
-		Settings settings = ImmutableSettings.settingsBuilder().put("cluster.name", clusterName)
-				.put("path.data", new File(tmp, "data").toString()).put("path.logs", new File(tmp, "logs").toString())
-				.put("index.store.type", "ram").put("index.refresh_interval", "-1").put("node.data", true)
-				.put("node.local", true).put("gateway.type", "none").build();
+		final File tmp = newTmpDir();
+		Settings settings = nodeSettings(tmp).put("cluster.name", clusterName).build();
 
 		Node node = NodeBuilder.nodeBuilder().settings(settings).build();
 
@@ -64,6 +62,37 @@ public class TestUtils {
 				FileUtils.delete(tmp);
 			}
 
+		};
+	}
+
+	private static File newTmpDir() {
+		final File tmp = new File(SystemProperty.JAVA_IO_TMPDIR.getFile(), "esi4jtest-" + UUID.randomUUID().toString());
+		if (!tmp.mkdirs()) {
+			throw new RuntimeException("failed to create temp dir: " + tmp);
+		}
+		return tmp;
+	}
+
+	private static Builder nodeSettings(File tmp) {
+		return ImmutableSettings.settingsBuilder().put("path.data", new File(tmp, "data").toString())
+				.put("path.logs", new File(tmp, "logs").toString()).put("index.store.type", "ram")
+				.put("index.refresh_interval", "-1").put("node.data", true).put("node.local", true)
+				.put("gateway.type", "none").put("http.enabled", HTTP).put("index.number_of_replicas", 0)
+				.put("index.number_of_shards", 1);
+	}
+
+	public static Esi4J newEsi4j() {
+		final File tmp = newTmpDir();
+
+		return new DefaultEsi4J(nodeSettings(tmp).put("esi4j.client.type", "node").put("index.store.type", "ram")
+				.put("index.refresh_interval", "-1").put("node.data", true).put("node.local", true)
+				.put("gateway.type", "none").build()) {
+
+			@Override
+			public void close() {
+				super.close();
+				FileUtils.delete(tmp);
+			}
 		};
 	}
 }

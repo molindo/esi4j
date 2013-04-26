@@ -15,14 +15,12 @@
  */
 package at.molindo.esi4j.rebuild.scrutineer;
 
-import org.elasticsearch.action.ActionRequestBuilder;
-import org.elasticsearch.action.bulk.BulkRequestBuilder;
-import org.elasticsearch.action.delete.DeleteRequestBuilder;
-import org.elasticsearch.action.index.IndexRequestBuilder;
 import org.elasticsearch.client.Client;
 
+import at.molindo.esi4j.core.Esi4JOperation.OperationContext;
 import at.molindo.esi4j.mapping.TypeMapping;
 import at.molindo.esi4j.rebuild.util.BulkIndexHelper;
+import at.molindo.esi4j.rebuild.util.BulkIndexHelper.Session;
 
 import com.aconex.scrutineer.IdAndVersion;
 import com.aconex.scrutineer.IdAndVersionStreamVerifierListener;
@@ -34,24 +32,18 @@ public class VerifierListener implements IdAndVersionStreamVerifierListener {
 
 	private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(VerifierListener.class);
 
-	private final Client _client;
-	private final String _indexName;
 	private final TypeMapping _mapping;
-	private final int _batchSize;
-	private final BulkIndexHelper _helper;
-
-	private BulkRequestBuilder _bulkRequest;
+	private final Session _bulkSession;
 
 	private int _index;
 	private int _update;
 	private int _delete;
 
-	public VerifierListener(Client client, String indexName, TypeMapping mapping, BulkIndexHelper helper, int batchSize) {
-		_client = client;
-		_indexName = indexName;
+	public VerifierListener(Client client, String indexName, OperationContext context, TypeMapping mapping,
+			BulkIndexHelper bulkHelper, int batchSize) {
+
 		_mapping = mapping;
-		_helper = helper;
-		_batchSize = batchSize;
+		_bulkSession = bulkHelper.newSession(client, indexName, context, batchSize);
 	}
 
 	@Override
@@ -73,44 +65,16 @@ public class VerifierListener implements IdAndVersionStreamVerifierListener {
 	}
 
 	private void index(ObjectIdAndVersion objectIdAndVersion) {
-		add(_mapping.indexRequest(_client, _indexName, objectIdAndVersion.getObject()));
+		_bulkSession.index(objectIdAndVersion.getObject());
 	}
 
 	private void delete(IdAndVersion idAndVersion) {
-		add(_mapping.deleteRequest(_client, _indexName, idAndVersion.getId(), idAndVersion.getVersion()));
-	}
-
-	private void add(ActionRequestBuilder<?, ?, ?> request) {
-		if (request == null) {
-			throw new IllegalArgumentException("stream contained object without id or filtered object");
-		}
-
-		if (_bulkRequest == null) {
-			_bulkRequest = _client.prepareBulk();
-		}
-
-		if (request instanceof DeleteRequestBuilder) {
-			_bulkRequest.add((DeleteRequestBuilder) request);
-		} else {
-			_bulkRequest.add((IndexRequestBuilder) request);
-		}
-
-		if (_bulkRequest.numberOfActions() >= _batchSize) {
-			submitRequest();
-		}
-	}
-
-	private void submitRequest() {
-		_helper.bulkIndex(_bulkRequest);
-		_bulkRequest = null;
+		_bulkSession.delete(_mapping.getTypeClass(), _mapping.toId(idAndVersion.getId()), idAndVersion.getVersion());
 	}
 
 	public void close() {
-		if (_bulkRequest != null) {
-			submitRequest();
-		}
+		_bulkSession.submit();
 		log.info("submitted " + (_index + _update + _delete) + " requests (" + _index + " index, " + _update
 				+ " update, " + _delete + " delete)");
 	}
-
 }
