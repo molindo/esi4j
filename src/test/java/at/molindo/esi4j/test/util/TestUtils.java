@@ -78,7 +78,11 @@ public class TestUtils {
 				.put("path.logs", new File(tmp, "logs").toString()).put("index.store.type", "ram")
 				.put("index.refresh_interval", "-1").put("node.data", true).put("node.local", true)
 				.put("gateway.type", "none").put("http.enabled", HTTP).put("index.number_of_replicas", 0)
-				.put("index.number_of_shards", 1);
+				.put("index.number_of_shards", 1)
+
+				.put("index.search.slowlog.threshold.query.debug", "0ms")
+				.put("index.search.slowlog.threshold.fetch.debug", "0ms")
+				.put("index.indexing.slowlog.threshold.index.debug", "0ms");
 	}
 
 	public static Esi4J newEsi4j() {
