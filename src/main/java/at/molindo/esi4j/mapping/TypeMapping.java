@@ -311,7 +311,8 @@ public abstract class TypeMapping {
 		}
 		builder.setIndex(indexName).setType(getTypeAlias()).setId(id);
 		if (version != null) {
-			builder.setVersion(version).setVersionType(VersionType.EXTERNAL);
+			// FIXME `version + 1` see elasticsearch#2946
+			builder.setVersion(version + 1).setVersionType(VersionType.EXTERNAL);
 		}
 		return builder;
 	}

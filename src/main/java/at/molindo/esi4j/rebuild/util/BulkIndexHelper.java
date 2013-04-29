@@ -312,11 +312,7 @@ public class BulkIndexHelper {
 		@Override
 		public DeleteRequestBuilder toRequest(Client client, String indexName, OperationContext helper) {
 			TypeMapping mapping = helper.findTypeMapping(_type);
-
-			// FIXME workaround for #2938
-			Long version = _version == null ? null : _version + 1;
-
-			return mapping.deleteRequest(client, indexName, mapping.toIdString(_id), version);
+			return mapping.deleteRequest(client, indexName, mapping.toIdString(_id), _version);
 		}
 
 	}
