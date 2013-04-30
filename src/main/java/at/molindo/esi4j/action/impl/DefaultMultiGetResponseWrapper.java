@@ -30,6 +30,7 @@ public class DefaultMultiGetResponseWrapper implements MultiGetResponseWrapper {
 
 	private final MultiGetResponse _response;
 	private final MultiGetItemReader _reader;
+
 	private List<MultiGetItemResponseWrapper> _objects;
 
 	public DefaultMultiGetResponseWrapper(MultiGetResponse response, MultiGetItemReader reader) {
@@ -41,11 +42,6 @@ public class DefaultMultiGetResponseWrapper implements MultiGetResponseWrapper {
 		}
 		_response = response;
 		_reader = reader;
-	}
-
-	@Override
-	public MultiGetResponse getMultiGetResponse() {
-		return _response;
 	}
 
 	@Override
@@ -61,6 +57,11 @@ public class DefaultMultiGetResponseWrapper implements MultiGetResponseWrapper {
 	}
 
 	@Override
+	public MultiGetResponse getMultiGetResponse() {
+		return _response;
+	}
+
+	@Override
 	public List<?> getObjects() {
 		return getObjects(Object.class);
 	}
@@ -71,10 +72,7 @@ public class DefaultMultiGetResponseWrapper implements MultiGetResponseWrapper {
 		List<T> objects = Lists.newArrayListWithCapacity(resps.size());
 
 		for (MultiGetItemResponseWrapper hit : resps) {
-			T obj = hit.getObject(type);
-			if (obj != null) {
-				objects.add(obj);
-			}
+			objects.add(hit.getObject(type));
 		}
 
 		return objects;

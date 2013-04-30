@@ -50,7 +50,7 @@ public interface Esi4JIndex extends Esi4JManagedIndex {
 	ListenableActionFuture<GetResponseWrapper> executeGet(
 			Esi4JOperation<ListenableActionFuture<GetResponse>> getOperation);
 
-	ListenableActionFuture<MultiGetResponseWrapper> multiGet(Class<?> type, Iterable<? extends Object> ids);
+	ListenableActionFuture<MultiGetResponseWrapper> multiGet(Class<?> type, Iterable<?> ids);
 
 	ListenableActionFuture<MultiGetResponseWrapper> executeMultiGet(
 			Esi4JOperation<ListenableActionFuture<MultiGetResponse>> multiGetOperation);

@@ -15,21 +15,39 @@
  */
 package at.molindo.esi4j.action;
 
+import javax.annotation.CheckForNull;
+
+import org.elasticsearch.action.get.GetResponse;
 import org.elasticsearch.action.get.MultiGetItemResponse;
+
+import at.molindo.esi4j.mapping.TypeMapping;
 
 /**
  * wraps a {@link MultiGetItemResponse}, allows to get returned hit as an object
+ * (similar to {@link SearchHitWrapper})
  */
 public interface MultiGetItemResponseWrapper {
 
-	MultiGetItemResponse getResponse();
+	MultiGetItemResponse getMultiGetItemResponse();
 
-	<T> T getObject();
+	/**
+	 * @return may be <code>null</code> if id not found or
+	 *         {@link TypeMapping#read(GetResponse)} returns null
+	 */
+	@CheckForNull
+	Object getObject();
 
+	/**
+	 * @return object of given type
+	 * @throws ClassCastException
+	 *             if returned object is not of given type
+	 */
+	@CheckForNull
 	<T> T getObject(Class<T> type);
 
 	public interface MultiGetItemReader {
 
+		@CheckForNull
 		Object read(MultiGetItemResponse response);
 
 	}

@@ -15,21 +15,37 @@
  */
 package at.molindo.esi4j.action;
 
+import javax.annotation.CheckForNull;
+
 import org.elasticsearch.search.SearchHit;
+
+import at.molindo.esi4j.mapping.TypeMapping;
 
 /**
  * wraps a {@link SearchHit}, allows to get returned hit as an object
  */
 public interface SearchHitWrapper {
 
-	SearchHit getHit();
+	SearchHit getSearchHit();
 
-	<T> T getObject();
+	/**
+	 * @return may be <code>null</code> if {@link TypeMapping#read(SearchHit)}
+	 *         returns null
+	 */
+	@CheckForNull
+	Object getObject();
 
+	/**
+	 * @return object of given type
+	 * @throws ClassCastException
+	 *             if returned object is not of given type
+	 */
+	@CheckForNull
 	<T> T getObject(Class<T> type);
 
 	public interface SearchHitReader {
 
+		@CheckForNull
 		Object read(SearchHit hit);
 
 	}

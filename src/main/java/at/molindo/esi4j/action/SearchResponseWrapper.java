@@ -18,6 +18,9 @@ package at.molindo.esi4j.action;
 import java.util.List;
 
 import org.elasticsearch.action.search.SearchResponse;
+import org.elasticsearch.search.SearchHit;
+
+import at.molindo.esi4j.mapping.TypeMapping;
 
 /**
  * wraps a {@link SearchResponse}, allows to get returned results as a
@@ -27,10 +30,17 @@ public interface SearchResponseWrapper {
 
 	SearchResponse getSearchResponse();
 
-	List<SearchHitWrapper> getHits();
+	List<SearchHitWrapper> getSearchHits();
 
+	/**
+	 * @see #getObjects(Class)
+	 */
 	List<?> getObjects();
 
+	/**
+	 * @return may contain <code>null</code> if
+	 *         {@link TypeMapping#read(SearchHit)} returns <code>null</code>
+	 */
 	<T> List<T> getObjects(Class<T> type);
 
 	long getTotalHits();

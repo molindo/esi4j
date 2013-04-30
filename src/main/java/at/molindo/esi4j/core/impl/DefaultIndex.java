@@ -25,7 +25,6 @@ import org.elasticsearch.action.bulk.BulkRequestBuilder;
 import org.elasticsearch.action.bulk.BulkResponse;
 import org.elasticsearch.action.delete.DeleteResponse;
 import org.elasticsearch.action.get.GetResponse;
-import org.elasticsearch.action.get.MultiGetItemResponse;
 import org.elasticsearch.action.get.MultiGetRequestBuilder;
 import org.elasticsearch.action.get.MultiGetResponse;
 import org.elasticsearch.action.index.IndexRequestBuilder;
@@ -37,7 +36,6 @@ import at.molindo.esi4j.action.BulkResponseWrapper;
 import at.molindo.esi4j.action.DeleteResponseWrapper;
 import at.molindo.esi4j.action.GetResponseWrapper;
 import at.molindo.esi4j.action.IndexResponseWrapper;
-import at.molindo.esi4j.action.MultiGetItemResponseWrapper.MultiGetItemReader;
 import at.molindo.esi4j.action.MultiGetResponseWrapper;
 import at.molindo.esi4j.action.impl.DefaultBulkResponseWrapper;
 import at.molindo.esi4j.action.impl.DefaultDeleteResponseWrapper;
@@ -56,7 +54,7 @@ import at.molindo.esi4j.util.ListenableActionFutureWrapper;
 import at.molindo.utils.data.Function;
 import edu.umd.cs.findbugs.annotations.SuppressWarnings;
 
-public class DefaultIndex extends AbstractIndex implements InternalIndex, MultiGetItemReader {
+public class DefaultIndex extends AbstractIndex implements InternalIndex {
 
 	private final String _name;
 	private final Settings _settings;
@@ -227,7 +225,7 @@ public class DefaultIndex extends AbstractIndex implements InternalIndex, MultiG
 	}
 
 	@Override
-	public ListenableActionFuture<MultiGetResponseWrapper> multiGet(Class<?> type, Iterable<? extends Object> ids) {
+	public ListenableActionFuture<MultiGetResponseWrapper> multiGet(Class<?> type, Iterable<?> ids) {
 		return executeMultiGet(new MultiGet(type, ids));
 	}
 
@@ -386,9 +384,9 @@ public class DefaultIndex extends AbstractIndex implements InternalIndex, MultiG
 	private static final class MultiGet implements Esi4JOperation<ListenableActionFuture<MultiGetResponse>> {
 
 		private final Class<?> _type;
-		private final Iterable<? extends Object> _ids;
+		private final Iterable<?> _ids;
 
-		private MultiGet(Class<?> type, Iterable<? extends Object> ids) {
+		private MultiGet(Class<?> type, Iterable<?> ids) {
 			if (type == null) {
 				throw new NullPointerException("type");
 			}
@@ -405,8 +403,8 @@ public class DefaultIndex extends AbstractIndex implements InternalIndex, MultiG
 			final String type = typeMapping.getTypeAlias();
 
 			MultiGetRequestBuilder builder = client.prepareMultiGet();
-			for (Object obj : _ids) {
-				builder.add(indexName, type, obj.toString());
+			for (Object id : _ids) {
+				builder.add(indexName, type, typeMapping.toIdString(id));
 			}
 
 			return builder.execute();
@@ -436,12 +434,6 @@ public class DefaultIndex extends AbstractIndex implements InternalIndex, MultiG
 			final TypeMapping typeMapping = helper.findTypeMapping(_type);
 			return typeMapping.deleteRequest(client, indexName, typeMapping.toIdString(_id), null).execute();
 		}
-	}
-
-	@Override
-	public Object read(MultiGetItemResponse response) {
-		final TypeMapping typeMapping = _mappings.getTypeMapping(response.getType());
-		return typeMapping.read(response.getResponse());
 	}
 
 }

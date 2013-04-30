@@ -38,22 +38,20 @@ public class DefaultMultiGetItemResponseWrapper implements MultiGetItemResponseW
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
-	public synchronized <T> T getObject() {
+	public Object getObject() {
+		return getObject(Object.class);
+	}
+
+	@Override
+	public synchronized <T> T getObject(Class<T> type) {
 		if (_object == null) {
 			_object = _reader.read(_response);
 		}
-
-		return (T) _object;
+		return type.cast(_object);
 	}
 
 	@Override
-	public <T> T getObject(Class<T> type) {
-		return type.cast(getObject());
-	}
-
-	@Override
-	public MultiGetItemResponse getResponse() {
+	public MultiGetItemResponse getMultiGetItemResponse() {
 		return _response;
 	}
 
