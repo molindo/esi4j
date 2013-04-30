@@ -291,7 +291,7 @@ public class BulkIndexHelper {
 
 	}
 
-	private class Delete implements Operation {
+	private static class Delete implements Operation {
 
 		private final Class<?> _type;
 		private final Object _id;
@@ -321,7 +321,7 @@ public class BulkIndexHelper {
 
 	}
 
-	private class Index implements Operation {
+	private static class Index implements Operation {
 
 		private final Object _object;
 

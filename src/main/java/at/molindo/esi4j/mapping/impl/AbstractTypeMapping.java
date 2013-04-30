@@ -18,6 +18,8 @@ package at.molindo.esi4j.mapping.impl;
 import java.io.IOException;
 import java.util.Map;
 
+import javax.annotation.CheckForNull;
+
 import org.elasticsearch.action.get.GetResponse;
 import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.elasticsearch.common.xcontent.json.JsonXContent;
@@ -100,6 +102,7 @@ public abstract class AbstractTypeMapping<Type, Id> extends TypeMapping {
 	/**
 	 * only public for testing.
 	 */
+	@CheckForNull
 	public final Object read(Map<String, Object> source) {
 		Type object = readObject(source);
 
@@ -192,5 +195,6 @@ public abstract class AbstractTypeMapping<Type, Id> extends TypeMapping {
 
 	protected abstract void writeObject(XContentBuilder contentBuilder, Type o) throws IOException;
 
+	@CheckForNull
 	protected abstract Type readObject(Map<String, Object> source);
 }
