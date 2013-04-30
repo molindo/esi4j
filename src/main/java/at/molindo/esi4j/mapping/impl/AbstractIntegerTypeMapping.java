@@ -26,12 +26,12 @@ public abstract class AbstractIntegerTypeMapping<T> extends AbstractTypeMapping<
 	}
 
 	@Override
-	protected final String toString(Integer id) {
+	public final String toString(Integer id) {
 		return id.toString();
 	}
 
 	@Override
-	protected final Integer fromString(String id) {
+	public final Integer toId(String id) {
 		// TODO parse errors
 		return Integer.parseInt(id);
 	}

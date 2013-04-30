@@ -26,12 +26,12 @@ public abstract class AbstractLongTypeMapping<T> extends AbstractTypeMapping<T, 
 	}
 
 	@Override
-	protected final String toString(Long id) {
+	public final String toString(Long id) {
 		return id.toString();
 	}
 
 	@Override
-	protected final Long fromString(String id) {
+	public final Long toId(String id) {
 		// TODO parse errors
 		return Long.parseLong(id);
 	}

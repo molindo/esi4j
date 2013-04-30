@@ -15,10 +15,6 @@
  */
 package at.molindo.esi4j.mapping;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-
 import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -30,14 +26,9 @@ import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.action.index.IndexRequestBuilder;
 import org.elasticsearch.client.Client;
 import org.elasticsearch.index.VersionType;
-import org.elasticsearch.index.get.GetField;
 import org.elasticsearch.search.SearchHit;
-import org.elasticsearch.search.SearchHitField;
 
-import at.molindo.utils.collections.CollectionUtils;
 import at.molindo.utils.data.StringUtils;
-
-import com.google.common.collect.Maps;
 
 /**
  * base class for mappings from type to elasticsearch representation
@@ -50,26 +41,16 @@ public abstract class TypeMapping {
 	public static final String FIELD_VERSION = "_version";
 
 	private final String _typeAlias;
-	private final Class<?> _typeClass;
-	private final Class<?> _idClass;
 
 	/**
 	 * creates a {@link TypeMapping} for given alias and class. Both, alias and
 	 * class must be unique per index.
 	 */
-	public TypeMapping(String typeAlias, Class<?> typeClass, Class<?> idClass) {
-		if (typeClass == null) {
-			throw new NullPointerException("typeClass");
-		}
-		if (idClass == null) {
-			throw new NullPointerException("idClass");
-		}
+	public TypeMapping(String typeAlias) {
 		if (StringUtils.empty(typeAlias)) {
 			throw new IllegalArgumentException("typeAlias must not be empty");
 		}
 		_typeAlias = typeAlias;
-		_typeClass = typeClass;
-		_idClass = idClass;
 	}
 
 	/**
@@ -80,16 +61,9 @@ public abstract class TypeMapping {
 		return _typeAlias;
 	}
 
-	/**
-	 * TODO might this be a common base class?
-	 */
-	public Class<?> getTypeClass() {
-		return _typeClass;
-	}
+	public abstract Class<?> getTypeClass();
 
-	public Class<?> getIdClass() {
-		return _idClass;
-	}
+	public abstract Class<?> getIdClass();
 
 	/**
 	 * Simple filtering of entities. esi4j core library will always respect this
@@ -116,13 +90,6 @@ public abstract class TypeMapping {
 	public abstract Object getId(@Nonnull Object o);
 
 	/**
-	 * sets id on object
-	 * 
-	 * @see #getId(Object)
-	 */
-	public abstract void setId(Object o, Object id);
-
-	/**
 	 * @return the object's id as a string suitable for elasticsearch
 	 * @see #getId(Object)
 	 * @see #toIdString(Object)
@@ -130,18 +97,6 @@ public abstract class TypeMapping {
 	public final String getIdString(@Nonnull Object o) {
 		Object id = getId(o);
 		return id == null ? null : toIdString(id);
-	}
-
-	/**
-	 * sets id on object after converting elasticsearch id to suitable type
-	 * 
-	 * @see #toId(String)
-	 * @see #setId(Object, Object)
-	 */
-	public final Object setIdString(@Nonnull Object o, @Nonnull String idString) {
-		Object id = toId(idString);
-		setId(o, id);
-		return id;
 	}
 
 	/**
@@ -163,11 +118,6 @@ public abstract class TypeMapping {
 	public abstract Long getVersion(Object o);
 
 	/**
-	 * set version on object
-	 */
-	public abstract void setVersion(@Nonnull Object o, @Nonnull Long version);
-
-	/**
 	 * @return a new {@link MappingSource} for this type
 	 */
 	public abstract MappingSource getMappingSource();
@@ -187,56 +137,6 @@ public abstract class TypeMapping {
 	 * @return the object returned by a {@link SearchHit}
 	 */
 	public abstract Object read(SearchHit hit);
-
-	// some utilities
-
-	/**
-	 * @return map containing all properties of a {@link GetResponse}
-	 * @see #getSource(SearchHit)
-	 */
-	protected Map<String, Object> getSource(GetResponse response) {
-		Map<String, Object> map = response.getSource();
-		if (map == null) {
-			map = Maps.newHashMap();
-			for (Entry<String, GetField> e : response.getFields().entrySet()) {
-				List<?> values = e.getValue().getValues();
-				if (!CollectionUtils.empty(values)) {
-					map.put(e.getKey(), values.size() == 1 ? values.get(0) : values);
-				}
-			}
-		}
-		map.put(FIELD_INDEX, response.getIndex());
-		map.put(FIELD_TYPE, response.getType());
-		map.put(FIELD_ID, response.getId());
-		if (response.getVersion() != -1) {
-			map.put(FIELD_VERSION, response.getVersion());
-		}
-		return map;
-	}
-
-	/**
-	 * @return map containing all properties of a {@link SearchHit}
-	 * @see #getSource(GetResponse)
-	 */
-	protected Map<String, Object> getSource(SearchHit hit) {
-		Map<String, Object> map = hit.sourceAsMap();
-		if (map == null) {
-			map = Maps.newHashMap();
-			for (Entry<String, SearchHitField> e : hit.getFields().entrySet()) {
-				List<?> values = e.getValue().getValues();
-				if (!CollectionUtils.empty(values)) {
-					map.put(e.getKey(), values.size() == 1 ? values.get(0) : values);
-				}
-			}
-		}
-		map.put(FIELD_INDEX, hit.getIndex());
-		map.put(FIELD_TYPE, hit.getType());
-		map.put(FIELD_ID, hit.getId());
-		if (hit.getVersion() != -1) {
-			map.put(FIELD_VERSION, hit.getVersion());
-		}
-		return map;
-	}
 
 	/**
 	 * @return null if object is filtered

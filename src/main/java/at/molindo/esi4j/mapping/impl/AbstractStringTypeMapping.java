@@ -26,12 +26,12 @@ public abstract class AbstractStringTypeMapping<T> extends AbstractTypeMapping<T
 	}
 
 	@Override
-	protected final String toString(String id) {
+	public final String toString(String id) {
 		return id;
 	}
 
 	@Override
-	protected final String fromString(String id) {
+	public final String toId(String id) {
 		return id;
 	}
 

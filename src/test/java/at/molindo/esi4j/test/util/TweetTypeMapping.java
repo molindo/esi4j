@@ -43,7 +43,7 @@ public class TweetTypeMapping extends AbstractStringTypeMapping<Tweet> {
 	}
 
 	@Override
-	protected void id(Tweet o, String id) {
+	protected void setId(Tweet o, String id) {
 		o.setId(id);
 	}
 
@@ -58,7 +58,7 @@ public class TweetTypeMapping extends AbstractStringTypeMapping<Tweet> {
 	}
 
 	@Override
-	protected void version(Tweet o, Long version) {
+	protected void setVersion(Tweet o, Long version) {
 		o.setVersion(version);
 	}
 
