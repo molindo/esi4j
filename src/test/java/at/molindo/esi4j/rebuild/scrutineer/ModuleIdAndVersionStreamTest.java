@@ -35,11 +35,11 @@ public class ModuleIdAndVersionStreamTest {
 
 		TweetTypeMapping mapping = new TweetTypeMapping("tweet");
 
-		Tweet t1 = new Tweet("1", 1, "dummy", "Tweet #1");
-		Tweet t2 = new Tweet("2", 1, "dummy", "Tweet #2");
-		Tweet t3 = new Tweet("3", 1, "dummy", "Tweet #3");
-		Tweet t4 = new Tweet("4", 1, "dummy", "Tweet #4");
-		Tweet t5 = new Tweet("5", 1, "dummy", "Tweet #5");
+		Tweet t1 = new Tweet(1, 1, "dummy", "Tweet #1");
+		Tweet t2 = new Tweet(2, 1, "dummy", "Tweet #2");
+		Tweet t3 = new Tweet(3, 1, "dummy", "Tweet #3");
+		Tweet t4 = new Tweet(4, 1, "dummy", "Tweet #4");
+		Tweet t5 = new Tweet(5, 1, "dummy", "Tweet #5");
 
 		final int[] fetched = new int[1];
 		final int[] processed = new int[1];

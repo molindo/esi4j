@@ -18,7 +18,7 @@ package at.molindo.esi4j.test.util;
 import com.google.common.base.Objects;
 
 public final class Tweet {
-	private String _id;
+	private Integer _id;
 	private Long _version;
 	private String _user;
 	private String _message;
@@ -26,27 +26,27 @@ public final class Tweet {
 	public Tweet() {
 	}
 
-	public Tweet(String id, String user, String message) {
+	public Tweet(Integer id, String user, String message) {
 		setId(id);
 		setUser(user);
 		setMessage(message);
 	}
 
-	public Tweet(String id, Integer version, String user, String message) {
+	public Tweet(Integer id, Integer version, String user, String message) {
 		this(id, user, message);
 		setVersion(version == null ? null : version.longValue());
 	}
 
-	public Tweet(String id, Long version, String user, String message) {
+	public Tweet(Integer id, Long version, String user, String message) {
 		this(id, user, message);
 		setVersion(version);
 	}
 
-	public String getId() {
+	public Integer getId() {
 		return _id;
 	}
 
-	public void setId(String id) {
+	public void setId(Integer id) {
 		_id = id;
 	}
 
