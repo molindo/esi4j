@@ -47,7 +47,7 @@ public class BulkIndexHelperTest {
 
 		replay(handler);
 
-		Tweet tweet = new Tweet("1", 4, "bob", "hello world");
+		Tweet tweet = new Tweet(1, 4, "bob", "hello world");
 
 		helper.newSession(index, 10).index(tweet).submit().await();
 		assertEquals(1, helper.getSucceeded());

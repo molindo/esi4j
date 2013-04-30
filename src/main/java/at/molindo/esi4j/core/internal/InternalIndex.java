@@ -17,6 +17,7 @@ package at.molindo.esi4j.core.internal;
 
 import org.elasticsearch.common.settings.Settings;
 
+import at.molindo.esi4j.action.MultiGetItemResponseWrapper.MultiGetItemReader;
 import at.molindo.esi4j.action.SearchHitWrapper.SearchHitReader;
 import at.molindo.esi4j.core.Esi4JIndex;
 import at.molindo.esi4j.core.Esi4JOperation.OperationContext;
@@ -26,7 +27,7 @@ import at.molindo.esi4j.mapping.TypeMapping;
 /**
  * private API, do not use unless you really know what you are doing
  */
-public interface InternalIndex extends Esi4JIndex, OperationContext, SearchHitReader {
+public interface InternalIndex extends Esi4JIndex, OperationContext, SearchHitReader, MultiGetItemReader {
 
 	InternalIndex addTypeMapping(TypeMapping typeMapping);
 

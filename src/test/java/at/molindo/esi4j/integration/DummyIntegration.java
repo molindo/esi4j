@@ -15,6 +15,9 @@
  */
 package at.molindo.esi4j.integration;
 
+import java.util.Arrays;
+import java.util.List;
+
 import org.elasticsearch.common.settings.ImmutableSettings;
 
 import at.molindo.esi4j.core.Esi4J;
@@ -40,18 +43,25 @@ public class DummyIntegration {
 
 		((InternalIndex) index).addTypeMapping(new TweetTypeMapping("tweet"));
 
-		Tweet t1 = new Tweet("1", "sfussenegger", "esi4j rocks #elasticsearch");
+		Tweet t1 = new Tweet(1, "sfussenegger", "esi4j rocks #elasticsearch");
+		Tweet t4 = new Tweet(3, "msparer", "esi4j really rocks");
 
-		String id = (String) index.index(t1).actionGet().getId();
+		Integer id = (Integer) index.index(t1).actionGet().getId();
 		System.out.println("indexed: " + id);
+		index.index(t4).actionGet().getId();
 
 		index.refresh();
 
 		Tweet t2 = (Tweet) index.get(Tweet.class, id).actionGet().getObject();
 		System.out.println(t1.equals(t2));
 
-		Tweet none = (Tweet) index.get(Tweet.class, "4711").actionGet().getObject();
+		Tweet none = (Tweet) index.get(Tweet.class, 4711).actionGet().getObject();
 		System.out.println(none == null);
+
+		List<Tweet> tweets = index.multiGet(Tweet.class, Arrays.asList(new Integer[] { 1, 2, 3 })).actionGet()
+				.getObjects(Tweet.class);
+		System.out.println("multi: " + tweets.contains(t1));
+		System.out.println("multi: " + tweets.contains(t4));
 
 		t1.setUser("dummy");
 

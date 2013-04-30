@@ -17,6 +17,7 @@ package at.molindo.esi4j.mapping.impl;
 
 import java.util.Map;
 
+import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
 
 /**
@@ -34,6 +35,7 @@ public abstract class AbstractTypeMapping<Type, Id> extends GenericTypeMapping<T
 	 * only public for testing.
 	 */
 	@Override
+	@CheckForNull
 	public final Type read(Map<String, Object> source) {
 		Type object = readObject(source);
 
@@ -69,5 +71,6 @@ public abstract class AbstractTypeMapping<Type, Id> extends GenericTypeMapping<T
 
 	protected abstract void setVersion(Type o, Long version);
 
+	@CheckForNull
 	protected abstract Type readObject(Map<String, Object> source);
 }

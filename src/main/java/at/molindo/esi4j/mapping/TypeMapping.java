@@ -128,14 +128,17 @@ public abstract class TypeMapping {
 	public abstract ObjectSource getObjectSource(Object o);
 
 	/**
-	 * @return the object returned by a {@link GetResponse} or null if doc
-	 *         doesn't exist
+	 * @return the object returned by a {@link GetResponse} or null if not
+	 *         applicable or doc doesn't exist
 	 */
+	@CheckForNull
 	public abstract Object read(GetResponse response);
 
 	/**
-	 * @return the object returned by a {@link SearchHit}
+	 * @return the object returned by a {@link SearchHit} or null if not
+	 *         applicable
 	 */
+	@CheckForNull
 	public abstract Object read(SearchHit hit);
 
 	/**

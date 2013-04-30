@@ -18,6 +18,7 @@ package at.molindo.esi4j.core.impl;
 import org.elasticsearch.action.ListenableActionFuture;
 import org.elasticsearch.action.count.CountRequestBuilder;
 import org.elasticsearch.action.count.CountResponse;
+import org.elasticsearch.action.get.MultiGetItemResponse;
 import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.client.Client;
@@ -25,6 +26,7 @@ import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.search.SearchHit;
 
 import at.molindo.esi4j.action.CountResponseWrapper;
+import at.molindo.esi4j.action.MultiGetItemResponseWrapper.MultiGetItemReader;
 import at.molindo.esi4j.action.SearchHitWrapper.SearchHitReader;
 import at.molindo.esi4j.action.SearchResponseWrapper;
 import at.molindo.esi4j.action.impl.DefaultCountResponseWrapper;
@@ -39,7 +41,8 @@ import at.molindo.esi4j.mapping.TypeMapping;
 import at.molindo.esi4j.util.ListenableActionFutureWrapper;
 import at.molindo.utils.data.Function;
 
-public abstract class AbstractIndex implements Esi4JSearchIndex, Esi4JManagedIndex, OperationContext, SearchHitReader {
+public abstract class AbstractIndex implements Esi4JSearchIndex, Esi4JManagedIndex, OperationContext, SearchHitReader,
+		MultiGetItemReader {
 
 	@Override
 	public <T> T execute(final Esi4JOperation<T> operation) {
@@ -97,6 +100,11 @@ public abstract class AbstractIndex implements Esi4JSearchIndex, Esi4JManagedInd
 	@Override
 	public final Object read(SearchHit hit) {
 		return findTypeMapping(hit.index(), hit.type()).read(hit);
+	}
+
+	@Override
+	public Object read(MultiGetItemResponse response) {
+		return findTypeMapping(response.index(), response.type()).read(response.getResponse());
 	}
 
 	protected static final class Search implements Esi4JOperation<ListenableActionFuture<SearchResponse>> {

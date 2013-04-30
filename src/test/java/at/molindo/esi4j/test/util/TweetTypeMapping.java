@@ -26,9 +26,9 @@ import org.elasticsearch.index.mapper.MapperBuilders;
 import org.elasticsearch.index.mapper.object.ObjectMapper.Dynamic;
 import org.elasticsearch.index.mapper.object.RootObjectMapper.Builder;
 
-import at.molindo.esi4j.mapping.impl.AbstractStringTypeMapping;
+import at.molindo.esi4j.mapping.impl.AbstractIntegerTypeMapping;
 
-public class TweetTypeMapping extends AbstractStringTypeMapping<Tweet> {
+public class TweetTypeMapping extends AbstractIntegerTypeMapping<Tweet> {
 
 	private static final String FIELD_MESSAGE = "message";
 	private static final String FIELD_USER = "user";
@@ -38,12 +38,12 @@ public class TweetTypeMapping extends AbstractStringTypeMapping<Tweet> {
 	}
 
 	@Override
-	protected String id(Tweet o) {
+	protected Integer id(Tweet o) {
 		return o.getId();
 	}
 
 	@Override
-	protected void setId(Tweet o, String id) {
+	protected void setId(Tweet o, Integer id) {
 		o.setId(id);
 	}
 

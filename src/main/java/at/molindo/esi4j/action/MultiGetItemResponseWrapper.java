@@ -17,20 +17,22 @@ package at.molindo.esi4j.action;
 
 import javax.annotation.CheckForNull;
 
-import org.elasticsearch.search.SearchHit;
+import org.elasticsearch.action.get.GetResponse;
+import org.elasticsearch.action.get.MultiGetItemResponse;
 
 import at.molindo.esi4j.mapping.TypeMapping;
 
 /**
- * wraps a {@link SearchHit}, allows to get returned hit as an object
+ * wraps a {@link MultiGetItemResponse}, allows to get returned hit as an object
+ * (similar to {@link SearchHitWrapper})
  */
-public interface SearchHitWrapper {
+public interface MultiGetItemResponseWrapper {
 
-	SearchHit getSearchHit();
+	MultiGetItemResponse getMultiGetItemResponse();
 
 	/**
-	 * @return may be <code>null</code> if {@link TypeMapping#read(SearchHit)}
-	 *         returns null
+	 * @return may be <code>null</code> if id not found or
+	 *         {@link TypeMapping#read(GetResponse)} returns null
 	 */
 	@CheckForNull
 	Object getObject();
@@ -43,10 +45,11 @@ public interface SearchHitWrapper {
 	@CheckForNull
 	<T> T getObject(Class<T> type);
 
-	public interface SearchHitReader {
+	public interface MultiGetItemReader {
 
 		@CheckForNull
-		Object read(SearchHit hit);
+		Object read(MultiGetItemResponse response);
 
 	}
+
 }

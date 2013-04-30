@@ -17,20 +17,18 @@ package at.molindo.esi4j.action;
 
 import java.util.List;
 
-import org.elasticsearch.action.search.SearchResponse;
-import org.elasticsearch.search.SearchHit;
-
-import at.molindo.esi4j.mapping.TypeMapping;
+import org.elasticsearch.action.get.MultiGetResponse;
 
 /**
- * wraps a {@link SearchResponse}, allows to get returned results as a
- * {@link List} of {@link SearchHitWrapper}
+ * wraps a {@link MultiGetResponsee}, allows to get returned results as a
+ * {@link List} of {@link MultiGetItemResponseWrapper} (similar to
+ * {@link SearchResponseWrapper})
  */
-public interface SearchResponseWrapper {
+public interface MultiGetResponseWrapper {
 
-	SearchResponse getSearchResponse();
+	MultiGetResponse getMultiGetResponse();
 
-	List<SearchHitWrapper> getSearchHits();
+	List<MultiGetItemResponseWrapper> getMultiGetItemResponses();
 
 	/**
 	 * @see #getObjects(Class)
@@ -38,11 +36,10 @@ public interface SearchResponseWrapper {
 	List<?> getObjects();
 
 	/**
-	 * @return may contain <code>null</code> if
-	 *         {@link TypeMapping#read(SearchHit)} returns <code>null</code>
+	 * @return {@link List} of objects of cast to given type. may contain
+	 *         <code>null</code> if ID does not exist or
+	 *         {@link TypeMapping#read(GetResponse))} returns <code>null</code>
 	 */
 	<T> List<T> getObjects(Class<T> type);
-
-	long getTotalHits();
 
 }

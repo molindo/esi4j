@@ -18,7 +18,6 @@ package at.molindo.esi4j.rebuild.scrutineer;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
 
-import javax.annotation.CheckForNull;
 import javax.annotation.Nullable;
 
 import org.apache.commons.lang.builder.CompareToBuilder;
@@ -40,10 +39,21 @@ public class ObjectIdAndVersion extends AbstractIdAndVersion {
 		return id instanceof Number || id instanceof String;
 	}
 
+	/**
+	 * used for id and version coming from current index
+	 * 
+	 * @see MappedObjectIdAndVersionFactory
+	 */
 	public ObjectIdAndVersion(Object id, long version) {
 		this(id, version, null);
 	}
 
+	/**
+	 * @param id
+	 * @param version
+	 * @param object
+	 *            may be null when coming from index
+	 */
 	public ObjectIdAndVersion(Object id, long version, @Nullable Object object) {
 		super(version);
 		if (id instanceof Number) {
@@ -57,7 +67,10 @@ public class ObjectIdAndVersion extends AbstractIdAndVersion {
 		}
 	}
 
-	@CheckForNull
+	/**
+	 * @return <code>null</code> only for currently indexed objects
+	 */
+	@Nullable
 	public Object getObject() {
 		return _object;
 	}

@@ -17,23 +17,23 @@ package at.molindo.esi4j.action.impl;
 
 import java.util.List;
 
-import org.elasticsearch.action.search.SearchResponse;
-import org.elasticsearch.search.SearchHit;
+import org.elasticsearch.action.get.MultiGetItemResponse;
+import org.elasticsearch.action.get.MultiGetResponse;
 
-import at.molindo.esi4j.action.SearchHitWrapper;
-import at.molindo.esi4j.action.SearchHitWrapper.SearchHitReader;
-import at.molindo.esi4j.action.SearchResponseWrapper;
+import at.molindo.esi4j.action.MultiGetItemResponseWrapper;
+import at.molindo.esi4j.action.MultiGetItemResponseWrapper.MultiGetItemReader;
+import at.molindo.esi4j.action.MultiGetResponseWrapper;
 
 import com.google.common.collect.Lists;
 
-public class DefaultSearchResponseWrapper implements SearchResponseWrapper {
+public class DefaultMultiGetResponseWrapper implements MultiGetResponseWrapper {
 
-	private final SearchResponse _response;
-	private final SearchHitReader _reader;
+	private final MultiGetResponse _response;
+	private final MultiGetItemReader _reader;
 
-	private List<SearchHitWrapper> _objects;
+	private List<MultiGetItemResponseWrapper> _objects;
 
-	public DefaultSearchResponseWrapper(SearchResponse response, SearchHitReader reader) {
+	public DefaultMultiGetResponseWrapper(MultiGetResponse response, MultiGetItemReader reader) {
 		if (response == null) {
 			throw new NullPointerException("response");
 		}
@@ -45,19 +45,19 @@ public class DefaultSearchResponseWrapper implements SearchResponseWrapper {
 	}
 
 	@Override
-	public synchronized List<SearchHitWrapper> getSearchHits() {
+	public synchronized List<MultiGetItemResponseWrapper> getMultiGetItemResponses() {
 		if (_objects == null) {
-			SearchHit[] hits = _response.hits().hits();
-			_objects = Lists.newArrayListWithCapacity(hits.length);
-			for (int i = 0; i < hits.length; i++) {
-				_objects.add(new DefaultSearchHitWrapper(hits[i], _reader));
+			MultiGetItemResponse[] reps = _response.responses();
+			_objects = Lists.newArrayListWithCapacity(reps.length);
+			for (int i = 0; i < reps.length; i++) {
+				_objects.add(new DefaultMultiGetItemResponseWrapper(reps[i], _reader));
 			}
 		}
 		return _objects;
 	}
 
 	@Override
-	public SearchResponse getSearchResponse() {
+	public MultiGetResponse getMultiGetResponse() {
 		return _response;
 	}
 
@@ -68,19 +68,14 @@ public class DefaultSearchResponseWrapper implements SearchResponseWrapper {
 
 	@Override
 	public <T> List<T> getObjects(Class<T> type) {
-		List<SearchHitWrapper> hits = getSearchHits();
-		List<T> objects = Lists.newArrayListWithCapacity(hits.size());
+		List<MultiGetItemResponseWrapper> resps = getMultiGetItemResponses();
+		List<T> objects = Lists.newArrayListWithCapacity(resps.size());
 
-		for (SearchHitWrapper hit : hits) {
+		for (MultiGetItemResponseWrapper hit : resps) {
 			objects.add(hit.getObject(type));
 		}
 
 		return objects;
-	}
-
-	@Override
-	public long getTotalHits() {
-		return getSearchResponse().getHits().getTotalHits();
 	}
 
 }

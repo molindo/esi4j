@@ -15,25 +15,25 @@
  */
 package at.molindo.esi4j.action.impl;
 
-import org.elasticsearch.search.SearchHit;
+import org.elasticsearch.action.get.MultiGetItemResponse;
 
-import at.molindo.esi4j.action.SearchHitWrapper;
+import at.molindo.esi4j.action.MultiGetItemResponseWrapper;
 
-public final class DefaultSearchHitWrapper implements SearchHitWrapper {
+public class DefaultMultiGetItemResponseWrapper implements MultiGetItemResponseWrapper {
 
-	private final SearchHit _hit;
-	private final SearchHitReader _reader;
+	private final MultiGetItemResponse _response;
+	private final MultiGetItemReader _reader;
 
 	private Object _object;
 
-	public DefaultSearchHitWrapper(SearchHit hit, SearchHitReader reader) {
-		if (hit == null) {
-			throw new NullPointerException("hit");
+	public DefaultMultiGetItemResponseWrapper(MultiGetItemResponse response, MultiGetItemReader reader) {
+		if (response == null) {
+			throw new NullPointerException("response");
 		}
 		if (reader == null) {
 			throw new NullPointerException("reader");
 		}
-		_hit = hit;
+		_response = response;
 		_reader = reader;
 	}
 
@@ -45,14 +45,14 @@ public final class DefaultSearchHitWrapper implements SearchHitWrapper {
 	@Override
 	public synchronized <T> T getObject(Class<T> type) {
 		if (_object == null) {
-			_object = _reader.read(_hit);
+			_object = _reader.read(_response);
 		}
 		return type.cast(_object);
 	}
 
 	@Override
-	public SearchHit getSearchHit() {
-		return _hit;
+	public MultiGetItemResponse getMultiGetItemResponse() {
+		return _response;
 	}
 
 }
