@@ -244,6 +244,9 @@ public abstract class GenericTypeMapping<Type, Id> extends TypeMapping {
 
 	protected abstract void writeObject(XContentBuilder contentBuilder, Type o) throws IOException;
 
-	protected abstract Type read(Map<String, Object> source);
+	/**
+	 * read object from source. Publicly accessible for testing
+	 */
+	public abstract Type read(Map<String, Object> source);
 
 }
