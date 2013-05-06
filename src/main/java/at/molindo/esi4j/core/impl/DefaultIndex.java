@@ -24,9 +24,6 @@ import org.elasticsearch.action.admin.indices.refresh.RefreshResponse;
 import org.elasticsearch.action.bulk.BulkRequestBuilder;
 import org.elasticsearch.action.bulk.BulkResponse;
 import org.elasticsearch.action.delete.DeleteResponse;
-import org.elasticsearch.action.get.GetResponse;
-import org.elasticsearch.action.get.MultiGetRequestBuilder;
-import org.elasticsearch.action.get.MultiGetResponse;
 import org.elasticsearch.action.index.IndexRequestBuilder;
 import org.elasticsearch.action.index.IndexResponse;
 import org.elasticsearch.client.Client;
@@ -34,14 +31,10 @@ import org.elasticsearch.common.settings.Settings;
 
 import at.molindo.esi4j.action.BulkResponseWrapper;
 import at.molindo.esi4j.action.DeleteResponseWrapper;
-import at.molindo.esi4j.action.GetResponseWrapper;
 import at.molindo.esi4j.action.IndexResponseWrapper;
-import at.molindo.esi4j.action.MultiGetResponseWrapper;
 import at.molindo.esi4j.action.impl.DefaultBulkResponseWrapper;
 import at.molindo.esi4j.action.impl.DefaultDeleteResponseWrapper;
-import at.molindo.esi4j.action.impl.DefaultGetResponseWrapper;
 import at.molindo.esi4j.action.impl.DefaultIndexResponseWrapper;
-import at.molindo.esi4j.action.impl.DefaultMultiGetResponseWrapper;
 import at.molindo.esi4j.core.Esi4JIndexManager;
 import at.molindo.esi4j.core.Esi4JOperation;
 import at.molindo.esi4j.core.Esi4JStore;
@@ -204,46 +197,6 @@ public class DefaultIndex extends AbstractIndex implements InternalIndex {
 	}
 
 	@Override
-	public ListenableActionFuture<GetResponseWrapper> get(Class<?> type, Object id) {
-		return executeGet(new Get(type, id));
-	}
-
-	@Override
-	public ListenableActionFuture<GetResponseWrapper> executeGet(
-			Esi4JOperation<ListenableActionFuture<GetResponse>> getOperation) {
-
-		return ListenableActionFutureWrapper.wrap(execute(getOperation),
-				new Function<GetResponse, GetResponseWrapper>() {
-
-					@Override
-					public GetResponseWrapper apply(GetResponse input) {
-						TypeMapping typeMapping = _mappings.getTypeMapping(input.getType());
-						Object object = typeMapping.read(input, DefaultIndex.this);
-						return new DefaultGetResponseWrapper(input, object);
-					}
-				});
-	}
-
-	@Override
-	public ListenableActionFuture<MultiGetResponseWrapper> multiGet(Class<?> type, Iterable<?> ids) {
-		return executeMultiGet(new MultiGet(type, ids));
-	}
-
-	@Override
-	public ListenableActionFuture<MultiGetResponseWrapper> executeMultiGet(
-			Esi4JOperation<ListenableActionFuture<MultiGetResponse>> multiGetOperation) {
-		return ListenableActionFutureWrapper.wrap(execute(multiGetOperation),
-				new Function<MultiGetResponse, MultiGetResponseWrapper>() {
-
-					@Override
-					public MultiGetResponseWrapper apply(MultiGetResponse input) {
-						return new DefaultMultiGetResponseWrapper(input, DefaultIndex.this);
-					}
-
-				});
-	}
-
-	@Override
 	public ListenableActionFuture<DeleteResponseWrapper> executeDelete(
 			Esi4JOperation<ListenableActionFuture<DeleteResponse>> deleteOperation) {
 		return ListenableActionFutureWrapper.wrap(execute(deleteOperation),
@@ -352,64 +305,6 @@ public class DefaultIndex extends AbstractIndex implements InternalIndex {
 				return request.execute();
 			}
 		}
-	}
-
-	private static final class Get implements Esi4JOperation<ListenableActionFuture<GetResponse>> {
-
-		private final Class<?> _type;
-		private final Object _id;
-
-		private Get(Class<?> type, Object id) {
-			if (type == null) {
-				throw new NullPointerException("type");
-			}
-			if (id == null) {
-				throw new NullPointerException("id");
-			}
-			_type = type;
-			_id = id;
-		}
-
-		@Override
-		public ListenableActionFuture<GetResponse> execute(Client client, String indexName, OperationContext helper) {
-			final TypeMapping typeMapping = helper.findTypeMapping(_type);
-
-			final String type = typeMapping.getTypeAlias();
-			final String id = typeMapping.toIdString(_id);
-
-			return client.prepareGet(indexName, type, id).execute();
-		}
-	}
-
-	private static final class MultiGet implements Esi4JOperation<ListenableActionFuture<MultiGetResponse>> {
-
-		private final Class<?> _type;
-		private final Iterable<?> _ids;
-
-		private MultiGet(Class<?> type, Iterable<?> ids) {
-			if (type == null) {
-				throw new NullPointerException("type");
-			}
-			if (ids == null) {
-				throw new NullPointerException("ids");
-			}
-			_type = type;
-			_ids = ids;
-		}
-
-		@Override
-		public ListenableActionFuture<MultiGetResponse> execute(Client client, String indexName, OperationContext helper) {
-			final TypeMapping typeMapping = helper.findTypeMapping(_type);
-			final String type = typeMapping.getTypeAlias();
-
-			MultiGetRequestBuilder builder = client.prepareMultiGet();
-			for (Object id : _ids) {
-				builder.add(indexName, type, typeMapping.toIdString(id));
-			}
-
-			return builder.execute();
-		}
-
 	}
 
 	private static final class Delete implements Esi4JOperation<ListenableActionFuture<DeleteResponse>> {

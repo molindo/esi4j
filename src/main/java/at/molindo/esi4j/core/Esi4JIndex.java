@@ -18,15 +18,11 @@ package at.molindo.esi4j.core;
 import org.elasticsearch.action.ListenableActionFuture;
 import org.elasticsearch.action.bulk.BulkResponse;
 import org.elasticsearch.action.delete.DeleteResponse;
-import org.elasticsearch.action.get.GetResponse;
-import org.elasticsearch.action.get.MultiGetResponse;
 import org.elasticsearch.action.index.IndexResponse;
 
 import at.molindo.esi4j.action.BulkResponseWrapper;
 import at.molindo.esi4j.action.DeleteResponseWrapper;
-import at.molindo.esi4j.action.GetResponseWrapper;
 import at.molindo.esi4j.action.IndexResponseWrapper;
-import at.molindo.esi4j.action.MultiGetResponseWrapper;
 
 /**
  * Interface exposed to users
@@ -44,16 +40,6 @@ public interface Esi4JIndex extends Esi4JManagedIndex {
 
 	ListenableActionFuture<IndexResponseWrapper> executeIndex(
 			Esi4JOperation<ListenableActionFuture<IndexResponse>> indexOperation);
-
-	ListenableActionFuture<GetResponseWrapper> get(Class<?> type, Object id);
-
-	ListenableActionFuture<GetResponseWrapper> executeGet(
-			Esi4JOperation<ListenableActionFuture<GetResponse>> getOperation);
-
-	ListenableActionFuture<MultiGetResponseWrapper> multiGet(Class<?> type, Iterable<?> ids);
-
-	ListenableActionFuture<MultiGetResponseWrapper> executeMultiGet(
-			Esi4JOperation<ListenableActionFuture<MultiGetResponse>> multiGetOperation);
 
 	ListenableActionFuture<DeleteResponseWrapper> delete(Object object);
 

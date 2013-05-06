@@ -18,7 +18,10 @@ package at.molindo.esi4j.core.impl;
 import org.elasticsearch.action.ListenableActionFuture;
 import org.elasticsearch.action.count.CountRequestBuilder;
 import org.elasticsearch.action.count.CountResponse;
+import org.elasticsearch.action.get.GetResponse;
 import org.elasticsearch.action.get.MultiGetItemResponse;
+import org.elasticsearch.action.get.MultiGetRequestBuilder;
+import org.elasticsearch.action.get.MultiGetResponse;
 import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.client.Client;
@@ -26,10 +29,14 @@ import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.search.SearchHit;
 
 import at.molindo.esi4j.action.CountResponseWrapper;
+import at.molindo.esi4j.action.GetResponseWrapper;
 import at.molindo.esi4j.action.MultiGetItemResponseWrapper.MultiGetItemReader;
+import at.molindo.esi4j.action.MultiGetResponseWrapper;
 import at.molindo.esi4j.action.SearchHitWrapper.SearchHitReader;
 import at.molindo.esi4j.action.SearchResponseWrapper;
 import at.molindo.esi4j.action.impl.DefaultCountResponseWrapper;
+import at.molindo.esi4j.action.impl.DefaultGetResponseWrapper;
+import at.molindo.esi4j.action.impl.DefaultMultiGetResponseWrapper;
 import at.molindo.esi4j.action.impl.DefaultSearchResponseWrapper;
 import at.molindo.esi4j.core.Esi4JManagedIndex;
 import at.molindo.esi4j.core.Esi4JOperation;
@@ -53,6 +60,46 @@ public abstract class AbstractIndex implements Esi4JSearchIndex, Esi4JManagedInd
 				return operation.execute(client, indexName, AbstractIndex.this);
 			}
 		});
+	}
+
+	@Override
+	public ListenableActionFuture<GetResponseWrapper> get(Class<?> type, Object id) {
+		return executeGet(new Get(type, id));
+	}
+
+	@Override
+	public ListenableActionFuture<GetResponseWrapper> executeGet(
+			Esi4JOperation<ListenableActionFuture<GetResponse>> getOperation) {
+
+		return ListenableActionFutureWrapper.wrap(execute(getOperation),
+				new Function<GetResponse, GetResponseWrapper>() {
+
+					@Override
+					public GetResponseWrapper apply(GetResponse input) {
+						TypeMapping typeMapping = findTypeMapping(input.getType());
+						Object object = typeMapping.read(input, AbstractIndex.this);
+						return new DefaultGetResponseWrapper(input, object);
+					}
+				});
+	}
+
+	@Override
+	public ListenableActionFuture<MultiGetResponseWrapper> multiGet(Class<?> type, Iterable<?> ids) {
+		return executeMultiGet(new MultiGet(type, ids));
+	}
+
+	@Override
+	public ListenableActionFuture<MultiGetResponseWrapper> executeMultiGet(
+			Esi4JOperation<ListenableActionFuture<MultiGetResponse>> multiGetOperation) {
+		return ListenableActionFutureWrapper.wrap(execute(multiGetOperation),
+				new Function<MultiGetResponse, MultiGetResponseWrapper>() {
+
+					@Override
+					public MultiGetResponseWrapper apply(MultiGetResponse input) {
+						return new DefaultMultiGetResponseWrapper(input, AbstractIndex.this);
+					}
+
+				});
 	}
 
 	@Override
@@ -177,4 +224,61 @@ public abstract class AbstractIndex implements Esi4JSearchIndex, Esi4JManagedInd
 
 	protected abstract Esi4JStore getStore();
 
+	private static final class Get implements Esi4JOperation<ListenableActionFuture<GetResponse>> {
+
+		private final Class<?> _type;
+		private final Object _id;
+
+		private Get(Class<?> type, Object id) {
+			if (type == null) {
+				throw new NullPointerException("type");
+			}
+			if (id == null) {
+				throw new NullPointerException("id");
+			}
+			_type = type;
+			_id = id;
+		}
+
+		@Override
+		public ListenableActionFuture<GetResponse> execute(Client client, String indexName, OperationContext helper) {
+			final TypeMapping typeMapping = helper.findTypeMapping(_type);
+
+			final String type = typeMapping.getTypeAlias();
+			final String id = typeMapping.toIdString(_id);
+
+			return client.prepareGet(indexName, type, id).execute();
+		}
+	}
+
+	private static final class MultiGet implements Esi4JOperation<ListenableActionFuture<MultiGetResponse>> {
+
+		private final Class<?> _type;
+		private final Iterable<?> _ids;
+
+		private MultiGet(Class<?> type, Iterable<?> ids) {
+			if (type == null) {
+				throw new NullPointerException("type");
+			}
+			if (ids == null) {
+				throw new NullPointerException("ids");
+			}
+			_type = type;
+			_ids = ids;
+		}
+
+		@Override
+		public ListenableActionFuture<MultiGetResponse> execute(Client client, String indexName, OperationContext helper) {
+			final TypeMapping typeMapping = helper.findTypeMapping(_type);
+			final String type = typeMapping.getTypeAlias();
+
+			MultiGetRequestBuilder builder = client.prepareMultiGet();
+			for (Object id : _ids) {
+				builder.add(indexName, type, typeMapping.toIdString(id));
+			}
+
+			return builder.execute();
+		}
+
+	}
 }

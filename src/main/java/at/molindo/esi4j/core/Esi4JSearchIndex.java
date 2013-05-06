@@ -17,10 +17,14 @@ package at.molindo.esi4j.core;
 
 import org.elasticsearch.action.ListenableActionFuture;
 import org.elasticsearch.action.count.CountResponse;
+import org.elasticsearch.action.get.GetResponse;
+import org.elasticsearch.action.get.MultiGetResponse;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.index.query.QueryBuilder;
 
 import at.molindo.esi4j.action.CountResponseWrapper;
+import at.molindo.esi4j.action.GetResponseWrapper;
+import at.molindo.esi4j.action.MultiGetResponseWrapper;
 import at.molindo.esi4j.action.SearchResponseWrapper;
 
 public interface Esi4JSearchIndex {
@@ -34,6 +38,16 @@ public interface Esi4JSearchIndex {
 	Class<?>[] getMappedTypes();
 
 	<T> T execute(Esi4JOperation<T> operation);
+
+	ListenableActionFuture<GetResponseWrapper> get(Class<?> type, Object id);
+
+	ListenableActionFuture<GetResponseWrapper> executeGet(
+			Esi4JOperation<ListenableActionFuture<GetResponse>> getOperation);
+
+	ListenableActionFuture<MultiGetResponseWrapper> multiGet(Class<?> type, Iterable<?> ids);
+
+	ListenableActionFuture<MultiGetResponseWrapper> executeMultiGet(
+			Esi4JOperation<ListenableActionFuture<MultiGetResponse>> multiGetOperation);
 
 	ListenableActionFuture<SearchResponseWrapper> search(QueryBuilder query, Class<?> type);
 
