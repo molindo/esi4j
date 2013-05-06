@@ -76,7 +76,7 @@ public abstract class AbstractIndex implements Esi4JSearchIndex, Esi4JManagedInd
 
 					@Override
 					public GetResponseWrapper apply(GetResponse input) {
-						TypeMapping typeMapping = findTypeMapping(input.getType());
+						TypeMapping typeMapping = findTypeMapping(input.getIndex(), input.getType());
 						Object object = typeMapping.read(input, AbstractIndex.this);
 						return new DefaultGetResponseWrapper(input, object);
 					}
@@ -247,6 +247,7 @@ public abstract class AbstractIndex implements Esi4JSearchIndex, Esi4JManagedInd
 			final String type = typeMapping.getTypeAlias();
 			final String id = typeMapping.toIdString(_id);
 
+			// FIXME doesn't work for multi index
 			return client.prepareGet(indexName, type, id).execute();
 		}
 	}
@@ -274,6 +275,7 @@ public abstract class AbstractIndex implements Esi4JSearchIndex, Esi4JManagedInd
 
 			MultiGetRequestBuilder builder = client.prepareMultiGet();
 			for (Object id : _ids) {
+				// FIXME doesn't work for multi index
 				builder.add(indexName, type, typeMapping.toIdString(id));
 			}
 
