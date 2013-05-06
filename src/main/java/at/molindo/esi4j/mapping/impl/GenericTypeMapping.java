@@ -101,7 +101,7 @@ public abstract class GenericTypeMapping<Type, Id> extends TypeMapping {
 	}
 
 	/**
-	 * meant for testing.
+	 * public for testing.
 	 * 
 	 * @return a JsonXContent builder
 	 */
@@ -110,6 +110,7 @@ public abstract class GenericTypeMapping<Type, Id> extends TypeMapping {
 
 		contentBuilder.startObject();
 
+		// TODO why do we add the id to the document source?
 		String id = getIdString(o);
 		if (id != null) {
 			// skip empty id for id generation
