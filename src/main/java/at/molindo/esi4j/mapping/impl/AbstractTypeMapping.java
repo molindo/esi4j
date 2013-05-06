@@ -20,6 +20,8 @@ import java.util.Map;
 import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
 
+import at.molindo.esi4j.core.Esi4JSearchIndex;
+
 /**
  * basic extension of {@link GenericTypeMapping} that adds setters for ID and
  * version and a read method implementation that takes care of ID and version
@@ -36,8 +38,8 @@ public abstract class AbstractTypeMapping<Type, Id> extends GenericTypeMapping<T
 	 */
 	@Override
 	@CheckForNull
-	public final Type read(Map<String, Object> source) {
-		Type object = readObject(source);
+	public final Type read(Map<String, Object> source, Esi4JSearchIndex index) {
+		Type object = readObject(source, index);
 
 		if (object != null) {
 
@@ -72,5 +74,5 @@ public abstract class AbstractTypeMapping<Type, Id> extends GenericTypeMapping<T
 	protected abstract void setVersion(Type o, Long version);
 
 	@CheckForNull
-	protected abstract Type readObject(Map<String, Object> source);
+	protected abstract Type readObject(Map<String, Object> source, Esi4JSearchIndex index);
 }

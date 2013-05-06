@@ -218,7 +218,7 @@ public class DefaultIndex extends AbstractIndex implements InternalIndex {
 					@Override
 					public GetResponseWrapper apply(GetResponse input) {
 						TypeMapping typeMapping = _mappings.getTypeMapping(input.getType());
-						Object object = typeMapping.read(input);
+						Object object = typeMapping.read(input, DefaultIndex.this);
 						return new DefaultGetResponseWrapper(input, object);
 					}
 				});

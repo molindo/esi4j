@@ -26,6 +26,7 @@ import org.elasticsearch.index.mapper.MapperBuilders;
 import org.elasticsearch.index.mapper.object.ObjectMapper.Dynamic;
 import org.elasticsearch.index.mapper.object.RootObjectMapper.Builder;
 
+import at.molindo.esi4j.core.Esi4JSearchIndex;
 import at.molindo.esi4j.mapping.impl.AbstractIntegerTypeMapping;
 
 public class TweetTypeMapping extends AbstractIntegerTypeMapping<Tweet> {
@@ -76,7 +77,7 @@ public class TweetTypeMapping extends AbstractIntegerTypeMapping<Tweet> {
 	}
 
 	@Override
-	protected Tweet readObject(Map<String, Object> source) {
+	protected Tweet readObject(Map<String, Object> source, Esi4JSearchIndex index) {
 		Tweet tweet = new Tweet();
 		tweet.setMessage((String) source.get(FIELD_MESSAGE));
 		tweet.setUser((String) source.get(FIELD_USER));

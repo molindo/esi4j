@@ -31,6 +31,7 @@ import org.elasticsearch.index.mapper.object.RootObjectMapper.Builder;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHitField;
 
+import at.molindo.esi4j.core.Esi4JSearchIndex;
 import at.molindo.esi4j.mapping.MappingSource;
 import at.molindo.esi4j.mapping.ObjectSource;
 import at.molindo.esi4j.mapping.TypeMapping;
@@ -123,13 +124,13 @@ public abstract class GenericTypeMapping<Type, Id> extends TypeMapping {
 	}
 
 	@Override
-	public final Type read(GetResponse response) {
-		return response.exists() ? read(getSource(response)) : null;
+	public final Type read(GetResponse response, Esi4JSearchIndex index) {
+		return response.exists() ? read(getSource(response), index) : null;
 	}
 
 	@Override
-	public final Type read(SearchHit hit) {
-		return read(getSource(hit));
+	public final Type read(SearchHit hit, Esi4JSearchIndex index) {
+		return read(getSource(hit), index);
 	}
 
 	/**
@@ -248,6 +249,6 @@ public abstract class GenericTypeMapping<Type, Id> extends TypeMapping {
 	/**
 	 * read object from source. Publicly accessible for testing
 	 */
-	public abstract Type read(Map<String, Object> source);
+	public abstract Type read(Map<String, Object> source, Esi4JSearchIndex in);
 
 }

@@ -28,6 +28,7 @@ import org.elasticsearch.client.Client;
 import org.elasticsearch.index.VersionType;
 import org.elasticsearch.search.SearchHit;
 
+import at.molindo.esi4j.core.Esi4JSearchIndex;
 import at.molindo.utils.data.StringUtils;
 
 /**
@@ -132,14 +133,14 @@ public abstract class TypeMapping {
 	 *         applicable or doc doesn't exist
 	 */
 	@CheckForNull
-	public abstract Object read(GetResponse response);
+	public abstract Object read(GetResponse response, Esi4JSearchIndex index);
 
 	/**
 	 * @return the object returned by a {@link SearchHit} or null if not
 	 *         applicable
 	 */
 	@CheckForNull
-	public abstract Object read(SearchHit hit);
+	public abstract Object read(SearchHit hit, Esi4JSearchIndex index);
 
 	/**
 	 * @return null if object is filtered

@@ -99,12 +99,12 @@ public abstract class AbstractIndex implements Esi4JSearchIndex, Esi4JManagedInd
 
 	@Override
 	public final Object read(SearchHit hit) {
-		return findTypeMapping(hit.index(), hit.type()).read(hit);
+		return findTypeMapping(hit.index(), hit.type()).read(hit, this);
 	}
 
 	@Override
 	public Object read(MultiGetItemResponse response) {
-		return findTypeMapping(response.index(), response.type()).read(response.getResponse());
+		return findTypeMapping(response.index(), response.type()).read(response.getResponse(), this);
 	}
 
 	protected static final class Search implements Esi4JOperation<ListenableActionFuture<SearchResponse>> {
