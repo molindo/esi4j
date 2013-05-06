@@ -19,10 +19,8 @@ import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-import org.elasticsearch.action.delete.DeleteRequest;
 import org.elasticsearch.action.delete.DeleteRequestBuilder;
 import org.elasticsearch.action.get.GetResponse;
-import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.action.index.IndexRequestBuilder;
 import org.elasticsearch.client.Client;
 import org.elasticsearch.index.VersionType;
@@ -146,22 +144,13 @@ public abstract class TypeMapping {
 	 * @return null if object is filtered
 	 */
 	@CheckForNull
-	public final IndexRequestBuilder indexRequest(Client client, String indexName, Object o) {
-		return populate(client.prepareIndex(), indexName, o);
+	public final IndexRequestBuilder indexRequest(@Nullable Client client, @Nullable String indexName, Object o) {
+		return populate(new IndexRequestBuilder(client, indexName), o);
 	}
 
-	/**
-	 * @return null if object is filtered
-	 */
-	@CheckForNull
-	public final IndexRequest indexRequest(String indexName, Object o) {
-		IndexRequestBuilder builder = populate(new IndexRequestBuilder(null), indexName, o);
-		return builder == null ? null : builder.request();
-	}
-
-	private IndexRequestBuilder populate(IndexRequestBuilder builder, String indexName, @Nullable Object o) {
+	private IndexRequestBuilder populate(IndexRequestBuilder builder, @Nullable Object o) {
 		if (o != null && !isFiltered(o)) {
-			builder.setIndex(indexName).setType(getTypeAlias()).setId(getIdString(o));
+			builder.setType(getTypeAlias()).setId(getIdString(o));
 
 			Long version = getVersion(o);
 			if (version != null) {
@@ -180,24 +169,7 @@ public abstract class TypeMapping {
 	 * @return null if object doesn't have an id
 	 */
 	@CheckForNull
-	public final DeleteRequest deleteRequest(String indexName, Object o) {
-		return deleteRequest(indexName, getIdString(o), getVersion(o));
-	}
-
-	/**
-	 * @return null if object doesn't have an id
-	 */
-	@CheckForNull
-	public final DeleteRequest deleteRequest(String indexName, String id, Long version) {
-		DeleteRequestBuilder builder = populate(new DeleteRequestBuilder(null), indexName, id, version);
-		return builder == null ? null : builder.request();
-	}
-
-	/**
-	 * @return null if object doesn't have an id
-	 */
-	@CheckForNull
-	public final DeleteRequestBuilder deleteRequest(Client client, String indexName, Object o) {
+	public final DeleteRequestBuilder deleteRequest(@Nullable Client client, @Nullable String indexName, Object o) {
 		return deleteRequest(client, indexName, getIdString(o), getVersion(o));
 	}
 
@@ -205,15 +177,16 @@ public abstract class TypeMapping {
 	 * @return null if object doesn't have an id
 	 */
 	@CheckForNull
-	public final DeleteRequestBuilder deleteRequest(Client client, String indexName, String id, Long version) {
-		return populate(client.prepareDelete(), indexName, id, version);
+	public final DeleteRequestBuilder deleteRequest(@Nullable Client client, @Nullable String indexName, String id,
+			Long version) {
+		return populate(new DeleteRequestBuilder(client, indexName), id, version);
 	}
 
-	private final DeleteRequestBuilder populate(DeleteRequestBuilder builder, String indexName, String id, Long version) {
+	private final DeleteRequestBuilder populate(DeleteRequestBuilder builder, String id, Long version) {
 		if (id == null) {
 			return null;
 		}
-		builder.setIndex(indexName).setType(getTypeAlias()).setId(id);
+		builder.setType(getTypeAlias()).setId(id);
 		if (version != null) {
 			// FIXME `version + 1` see elasticsearch#2946
 			builder.setVersion(version + 1).setVersionType(VersionType.EXTERNAL);

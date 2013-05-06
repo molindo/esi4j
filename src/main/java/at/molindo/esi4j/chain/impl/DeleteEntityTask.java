@@ -62,7 +62,7 @@ public final class DeleteEntityTask extends AbstractEntityTask {
 			id = mapping.getIdString(entity);
 		}
 
-		bulk.add(mapping.deleteRequest(indexName, id, null));
+		bulk.add(mapping.deleteRequest(null, indexName, id, null));
 	}
 
 }
