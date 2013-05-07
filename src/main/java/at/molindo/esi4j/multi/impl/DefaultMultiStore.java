@@ -69,7 +69,7 @@ public class DefaultMultiStore implements Esi4JMultiStore {
 		for (Esi4JStore store : _stores) {
 			if (client == null) {
 				client = store.getClient();
-			} else if (client.getClusterName().equals(store.getClient().getClusterName())) {
+			} else if (!client.getClusterName().equals(store.getClient().getClusterName())) {
 				throw new IllegalArgumentException("can't create store among multiple clusters");
 			}
 		}
