@@ -107,7 +107,11 @@ public abstract class GenericTypeMapping<Type, Id> extends TypeMapping {
 	 */
 	public final XContentBuilder getContentBuilder(Object o) throws IOException {
 		XContentBuilder contentBuilder = JsonXContent.contentBuilder();
+		write(contentBuilder, o);
+		return contentBuilder;
+	}
 
+	public final void write(XContentBuilder contentBuilder, Object o) throws IOException {
 		contentBuilder.startObject();
 
 		// TODO why do we add the id to the document source?
@@ -119,7 +123,6 @@ public abstract class GenericTypeMapping<Type, Id> extends TypeMapping {
 
 		writeObject(contentBuilder, cast(o));
 		contentBuilder.endObject();
-		return contentBuilder;
 	}
 
 	@Override
