@@ -21,6 +21,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 
+import at.molindo.esi4j.core.Esi4JIndex;
 import at.molindo.esi4j.core.Esi4JIndexManager;
 import at.molindo.esi4j.core.impl.AbstractIndex;
 import at.molindo.esi4j.core.internal.InternalIndex;
@@ -74,6 +75,28 @@ public class DefaultManagedMultiIndex extends AbstractIndex implements Esi4JMana
 			}
 		}
 		return false;
+	}
+
+	@Override
+	public String findIndexName(Class<?> type) {
+		Esi4JIndex mappedIndex = null;
+
+		for (InternalIndex index : _indices.values()) {
+			if (index.isMapped(type)) {
+				if (mappedIndex != null) {
+					throw new IllegalArgumentException("can't find index for type mapped on multiple indices: "
+							+ type.getName());
+				} else {
+					mappedIndex = index;
+				}
+			}
+		}
+
+		if (mappedIndex == null) {
+			throw new IllegalArgumentException("unmapped type " + type.getName() + " for index " + getName());
+		}
+
+		return mappedIndex.getName();
 	}
 
 	@Override

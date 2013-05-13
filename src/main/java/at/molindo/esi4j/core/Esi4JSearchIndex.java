@@ -17,12 +17,17 @@ package at.molindo.esi4j.core;
 
 import org.elasticsearch.action.ListenableActionFuture;
 import org.elasticsearch.action.count.CountResponse;
+import org.elasticsearch.action.get.MultiGetResponse;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.index.query.QueryBuilder;
 
 import at.molindo.esi4j.action.CountResponseWrapper;
+import at.molindo.esi4j.action.MultiGetResponseWrapper;
 import at.molindo.esi4j.action.SearchResponseWrapper;
 
+/**
+ * set of operations that are available on single and multi indices
+ */
 public interface Esi4JSearchIndex {
 
 	String getName();
@@ -46,4 +51,9 @@ public interface Esi4JSearchIndex {
 
 	ListenableActionFuture<CountResponseWrapper> executeCount(
 			Esi4JOperation<ListenableActionFuture<CountResponse>> countOperation);
+
+	ListenableActionFuture<MultiGetResponseWrapper> multiGet(Class<?> type, Iterable<?> ids);
+
+	ListenableActionFuture<MultiGetResponseWrapper> executeMultiGet(
+			Esi4JOperation<ListenableActionFuture<MultiGetResponse>> multiGetOperation);
 }

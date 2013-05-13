@@ -26,6 +26,16 @@ public interface Esi4JOperation<T> {
 	public interface OperationContext {
 
 		/**
+		 * @return never null
+		 * 
+		 * @throws IllegalArgumentException
+		 *             is no sub-index or multiple sub-indices of this context
+		 *             have a mapping for this type
+		 * 
+		 */
+		String findIndexName(Class<?> type);
+
+		/**
 		 * @throws IllegalArgumentException
 		 *             if not mapped
 		 */

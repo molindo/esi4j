@@ -19,6 +19,8 @@ import org.elasticsearch.action.ListenableActionFuture;
 import org.elasticsearch.action.count.CountRequestBuilder;
 import org.elasticsearch.action.count.CountResponse;
 import org.elasticsearch.action.get.MultiGetItemResponse;
+import org.elasticsearch.action.get.MultiGetRequestBuilder;
+import org.elasticsearch.action.get.MultiGetResponse;
 import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.client.Client;
@@ -27,9 +29,11 @@ import org.elasticsearch.search.SearchHit;
 
 import at.molindo.esi4j.action.CountResponseWrapper;
 import at.molindo.esi4j.action.MultiGetItemResponseWrapper.MultiGetItemReader;
+import at.molindo.esi4j.action.MultiGetResponseWrapper;
 import at.molindo.esi4j.action.SearchHitWrapper.SearchHitReader;
 import at.molindo.esi4j.action.SearchResponseWrapper;
 import at.molindo.esi4j.action.impl.DefaultCountResponseWrapper;
+import at.molindo.esi4j.action.impl.DefaultMultiGetResponseWrapper;
 import at.molindo.esi4j.action.impl.DefaultSearchResponseWrapper;
 import at.molindo.esi4j.core.Esi4JManagedIndex;
 import at.molindo.esi4j.core.Esi4JOperation;
@@ -98,6 +102,25 @@ public abstract class AbstractIndex implements Esi4JSearchIndex, Esi4JManagedInd
 	}
 
 	@Override
+	public ListenableActionFuture<MultiGetResponseWrapper> multiGet(Class<?> type, Iterable<?> ids) {
+		return executeMultiGet(new MultiGet(type, ids));
+	}
+
+	@Override
+	public ListenableActionFuture<MultiGetResponseWrapper> executeMultiGet(
+			Esi4JOperation<ListenableActionFuture<MultiGetResponse>> multiGetOperation) {
+		return ListenableActionFutureWrapper.wrap(execute(multiGetOperation),
+				new Function<MultiGetResponse, MultiGetResponseWrapper>() {
+
+					@Override
+					public MultiGetResponseWrapper apply(MultiGetResponse input) {
+						return new DefaultMultiGetResponseWrapper(input, AbstractIndex.this);
+					}
+
+				});
+	}
+
+	@Override
 	public final Object read(SearchHit hit) {
 		return findTypeMapping(hit.index(), hit.type()).read(hit);
 	}
@@ -106,6 +129,8 @@ public abstract class AbstractIndex implements Esi4JSearchIndex, Esi4JManagedInd
 	public Object read(MultiGetItemResponse response) {
 		return findTypeMapping(response.index(), response.type()).read(response.getResponse());
 	}
+
+	protected abstract Esi4JStore getStore();
 
 	protected static final class Search implements Esi4JOperation<ListenableActionFuture<SearchResponse>> {
 
@@ -175,6 +200,36 @@ public abstract class AbstractIndex implements Esi4JSearchIndex, Esi4JManagedInd
 
 	}
 
-	protected abstract Esi4JStore getStore();
+	private static final class MultiGet implements Esi4JOperation<ListenableActionFuture<MultiGetResponse>> {
+
+		private final Class<?> _type;
+		private final Iterable<?> _ids;
+
+		private MultiGet(Class<?> type, Iterable<?> ids) {
+			if (type == null) {
+				throw new NullPointerException("type");
+			}
+			if (ids == null) {
+				throw new NullPointerException("ids");
+			}
+			_type = type;
+			_ids = ids;
+		}
+
+		@Override
+		public ListenableActionFuture<MultiGetResponse> execute(Client client, String indexName, OperationContext helper) {
+			final TypeMapping typeMapping = helper.findTypeMapping(_type);
+			final String type = typeMapping.getTypeAlias();
+
+			MultiGetRequestBuilder builder = client.prepareMultiGet();
+			for (Object id : _ids) {
+				// ignore indexName as it may be a multi-index
+				builder.add(helper.findIndexName(_type), type, typeMapping.toIdString(id));
+			}
+
+			return builder.execute();
+		}
+
+	}
 
 }
