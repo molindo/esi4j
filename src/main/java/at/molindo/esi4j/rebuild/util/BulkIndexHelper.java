@@ -20,6 +20,7 @@ import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 
 import org.elasticsearch.action.ActionListener;
+import org.elasticsearch.action.ActionRequestBuilder;
 import org.elasticsearch.action.bulk.BulkItemResponse;
 import org.elasticsearch.action.bulk.BulkRequestBuilder;
 import org.elasticsearch.action.bulk.BulkResponse;
@@ -218,19 +219,24 @@ public class BulkIndexHelper {
 		private final OperationContext _context;
 		private final int _batchSize;
 
-		private final List<Operation> _operations;
+		private final List<ActionRequestBuilder<?, ?, ?>> _requests;
 
 		public Session(Client client, String indexName, OperationContext context, int batchSize) {
 			_client = client;
 			_indexName = indexName;
 			_context = context;
 			_batchSize = batchSize;
-			_operations = Lists.newArrayListWithCapacity(_batchSize);
+			_requests = Lists.newArrayListWithCapacity(_batchSize);
 		}
 
 		public Session index(Object o) {
-			add(new Index(o));
+			add(toIndexRequest(o));
 			return this;
+		}
+
+		public IndexRequestBuilder toIndexRequest(Object object) {
+			TypeMapping mapping = _context.findTypeMapping(object);
+			return mapping.indexRequest(_client, _indexName, object);
 		}
 
 		public Session delete(Object o) {
@@ -240,13 +246,18 @@ public class BulkIndexHelper {
 		}
 
 		public Session delete(Class<?> type, Object id, Long version) {
-			add(new Delete(type, id, version));
+			add(toDeleteRequest(type, id, version));
 			return this;
 		}
 
-		private void add(Operation op) {
-			_operations.add(op);
-			if (_operations.size() == _batchSize) {
+		private DeleteRequestBuilder toDeleteRequest(Class<?> type, Object id, Long version) {
+			TypeMapping mapping = _context.findTypeMapping(type);
+			return mapping.deleteRequest(_client, _indexName, mapping.toIdString(id), version);
+		}
+
+		private void add(ActionRequestBuilder<?, ?, ?> request) {
+			_requests.add(request);
+			if (_requests.size() == _batchSize) {
 				submit();
 			}
 		}
@@ -260,9 +271,7 @@ public class BulkIndexHelper {
 					public BulkRequestBuilder execute(Client client, String indexName,
 							Esi4JOperation.OperationContext helper) {
 						BulkRequestBuilder bulk = client.prepareBulk();
-						for (Operation op : _operations) {
-
-							Object request = op.toRequest(client, indexName, helper);
+						for (ActionRequestBuilder<?, ?, ?> request : _requests) {
 							if (request instanceof IndexRequestBuilder) {
 								bulk.add((IndexRequestBuilder) request);
 							} else if (request instanceof DeleteRequestBuilder) {
@@ -278,60 +287,9 @@ public class BulkIndexHelper {
 
 				}.execute(_client, _indexName, _context));
 			} finally {
-				_operations.clear();
+				_requests.clear();
 			}
 			return BulkIndexHelper.this;
-		}
-
-	}
-
-	private interface Operation {
-
-		Object toRequest(Client client, String indexName, OperationContext helper);
-
-	}
-
-	private static class Delete implements Operation {
-
-		private final Class<?> _type;
-		private final Object _id;
-		private final Long _version;
-
-		public Delete(Class<?> type, Object id, Long version) {
-			if (type == null) {
-				throw new NullPointerException("type");
-			}
-			if (id == null) {
-				throw new NullPointerException("id");
-			}
-			_type = type;
-			_id = id;
-			_version = version;
-		}
-
-		@Override
-		public DeleteRequestBuilder toRequest(Client client, String indexName, OperationContext helper) {
-			TypeMapping mapping = helper.findTypeMapping(_type);
-			return mapping.deleteRequest(client, indexName, mapping.toIdString(_id), _version);
-		}
-
-	}
-
-	private static class Index implements Operation {
-
-		private final Object _object;
-
-		public Index(Object object) {
-			if (object == null) {
-				throw new NullPointerException("object");
-			}
-			_object = object;
-		}
-
-		@Override
-		public IndexRequestBuilder toRequest(Client client, String indexName, OperationContext helper) {
-			TypeMapping mapping = helper.findTypeMapping(_object);
-			return mapping.indexRequest(client, indexName, _object);
 		}
 
 	}
