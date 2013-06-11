@@ -18,11 +18,13 @@ package at.molindo.esi4j.core;
 import org.elasticsearch.action.ListenableActionFuture;
 import org.elasticsearch.action.count.CountResponse;
 import org.elasticsearch.action.get.MultiGetResponse;
+import org.elasticsearch.action.search.MultiSearchResponse;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.index.query.QueryBuilder;
 
 import at.molindo.esi4j.action.CountResponseWrapper;
 import at.molindo.esi4j.action.MultiGetResponseWrapper;
+import at.molindo.esi4j.action.MultiSearchResponseWrapper;
 import at.molindo.esi4j.action.SearchResponseWrapper;
 
 /**
@@ -46,6 +48,9 @@ public interface Esi4JSearchIndex {
 
 	ListenableActionFuture<SearchResponseWrapper> executeSearch(
 			Esi4JOperation<ListenableActionFuture<SearchResponse>> searchOperation);
+
+	ListenableActionFuture<MultiSearchResponseWrapper> executeMultiSearch(
+			Esi4JOperation<ListenableActionFuture<MultiSearchResponse>> multiSearchOperation);
 
 	ListenableActionFuture<CountResponseWrapper> count(QueryBuilder query, Class<?> type);
 

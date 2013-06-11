@@ -21,6 +21,7 @@ import org.elasticsearch.action.count.CountResponse;
 import org.elasticsearch.action.get.MultiGetItemResponse;
 import org.elasticsearch.action.get.MultiGetRequestBuilder;
 import org.elasticsearch.action.get.MultiGetResponse;
+import org.elasticsearch.action.search.MultiSearchResponse;
 import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.client.Client;
@@ -30,10 +31,12 @@ import org.elasticsearch.search.SearchHit;
 import at.molindo.esi4j.action.CountResponseWrapper;
 import at.molindo.esi4j.action.MultiGetItemResponseWrapper.MultiGetItemReader;
 import at.molindo.esi4j.action.MultiGetResponseWrapper;
+import at.molindo.esi4j.action.MultiSearchResponseWrapper;
 import at.molindo.esi4j.action.SearchHitWrapper.SearchHitReader;
 import at.molindo.esi4j.action.SearchResponseWrapper;
 import at.molindo.esi4j.action.impl.DefaultCountResponseWrapper;
 import at.molindo.esi4j.action.impl.DefaultMultiGetResponseWrapper;
+import at.molindo.esi4j.action.impl.DefaultMultiSearchResponseWrapper;
 import at.molindo.esi4j.action.impl.DefaultSearchResponseWrapper;
 import at.molindo.esi4j.core.Esi4JManagedIndex;
 import at.molindo.esi4j.core.Esi4JOperation;
@@ -78,6 +81,19 @@ public abstract class AbstractIndex implements Esi4JSearchIndex, Esi4JManagedInd
 					@Override
 					public SearchResponseWrapper apply(SearchResponse response) {
 						return new DefaultSearchResponseWrapper(response, AbstractIndex.this);
+					}
+				});
+	}
+
+	@Override
+	public ListenableActionFuture<MultiSearchResponseWrapper> executeMultiSearch(
+			Esi4JOperation<ListenableActionFuture<MultiSearchResponse>> multiSearchOperation) {
+		return ListenableActionFutureWrapper.wrap(execute(multiSearchOperation),
+				new Function<MultiSearchResponse, MultiSearchResponseWrapper>() {
+
+					@Override
+					public MultiSearchResponseWrapper apply(MultiSearchResponse response) {
+						return new DefaultMultiSearchResponseWrapper(response, AbstractIndex.this);
 					}
 				});
 	}
