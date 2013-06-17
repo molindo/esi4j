@@ -48,7 +48,7 @@ public class ScrutineerRebuildProcessor implements Esi4JRebuildProcessor {
 
 	@Override
 	public boolean isSupported(TypeMapping mapping) {
-		return mapping.isVersioned();
+		return true;
 	}
 
 	@Override
@@ -59,10 +59,6 @@ public class ScrutineerRebuildProcessor implements Esi4JRebuildProcessor {
 			public Void execute(Client client, String indexName, Esi4JOperation.OperationContext context) {
 
 				final TypeMapping mapping = context.findTypeMapping(type);
-
-				if (!mapping.isVersioned()) {
-					throw new IllegalArgumentException("type must be versioned: " + type);
-				}
 
 				ModuleIdAndVersionStream moduleStream = new ModuleIdAndVersionStream(module, DEFAULT_BATCH_SIZE,
 						mapping);

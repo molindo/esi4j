@@ -132,7 +132,8 @@ public final class ModuleIdAndVersionStream implements IdAndVersionStream {
 			Long version = _mapping.getVersion(next);
 
 			if (version == null) {
-				throw new IllegalArgumentException("version required for scrutineer");
+				// force update
+				version = Long.MAX_VALUE;
 			}
 
 			if (!ObjectIdAndVersion.isIdSupported(id)) {
