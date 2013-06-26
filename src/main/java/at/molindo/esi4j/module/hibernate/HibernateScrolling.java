@@ -19,8 +19,14 @@ import java.util.List;
 
 import org.hibernate.Session;
 
-public interface HibernateScrolling<T> {
+/**
+ * implementations need not be thread-safe or reusable
+ */
+public interface HibernateScrolling {
 
-	List<T> fetch(Session session, int batchSize);
+	/**
+	 * @return the next batch of objects
+	 */
+	List<?> fetch(Session session, int batchSize);
 
 }

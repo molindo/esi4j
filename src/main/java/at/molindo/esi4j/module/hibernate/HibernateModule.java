@@ -40,7 +40,7 @@ public class HibernateModule implements Esi4JModule {
 
 	private final List<Class<?>> _types;
 
-	private final ConcurrentMap<Class<?>, HibernateQueryProvider> _queryProviders = Maps.newConcurrentMap();
+	private final ConcurrentMap<Class<?>, HibernateScrollingProvider> _scrollingProviders = Maps.newConcurrentMap();
 
 	public HibernateModule(SessionFactory sessionFactory) {
 		if (sessionFactory == null) {
@@ -60,23 +60,19 @@ public class HibernateModule implements Esi4JModule {
 	}
 
 	@Override
-	public <T> Esi4JRebuildSession<T> startRebuildSession(final Class<T> type) {
+	public Esi4JRebuildSession startRebuildSession(final Class<?> type) {
 		if (type == null) {
 			throw new NullPointerException("type");
 		} else if (!_rebuilding.add(type)) {
 			throw new IllegalStateException("already indexing " + type.getName());
 		} else {
-			HibernateScrolling<T> scrolling;
-
-			HibernateQueryProvider provider = _queryProviders.get(type);
-			if (provider != null) {
-				scrolling = new CustomQueryScrolling<T>(type, provider);
-			} else {
-				scrolling = new DefaultQueryScrolling<T>(type);
-			}
-
-			return new HibernateRebuildSession<T>(type, _sessionFactory, this, scrolling);
+			return new HibernateRebuildSession(type, _sessionFactory, this, newScrolling(type));
 		}
+	}
+
+	private HibernateScrolling newScrolling(final Class<?> type) {
+		HibernateScrollingProvider scrollingProvider = _scrollingProviders.get(type);
+		return scrollingProvider == null ? new DefaultQueryScrolling(type) : scrollingProvider.newScrolling();
 	}
 
 	void unsetRebuilding(Class<?> type) {
@@ -85,11 +81,11 @@ public class HibernateModule implements Esi4JModule {
 		}
 	}
 
-	public void putQueryProvider(Class<?> type, HibernateQueryProvider queryProvider) {
-		if (queryProvider == null) {
-			throw new NullPointerException("queryProvider");
+	public void putScrollingProvider(HibernateScrollingProvider scrollingProvider) {
+		if (scrollingProvider == null) {
+			throw new NullPointerException("scrollingProvider");
 		}
-		_queryProviders.put(type, queryProvider);
+		_scrollingProviders.put(scrollingProvider.getType(), scrollingProvider);
 	}
 
 	@Override

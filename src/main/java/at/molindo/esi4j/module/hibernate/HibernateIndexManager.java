@@ -68,7 +68,12 @@ public class HibernateIndexManager extends AbstractIndexManager {
 	}
 
 	public HibernateIndexManager queryProvider(Class<?> type, HibernateQueryProvider queryProvider) {
-		getHibernateModule().putQueryProvider(type, queryProvider);
+		scrollingProvider(new CustomQueryScrollingProvider(type, queryProvider));
+		return this;
+	}
+
+	public HibernateIndexManager scrollingProvider(HibernateScrollingProvider scrollingProvider) {
+		getHibernateModule().putScrollingProvider(scrollingProvider);
 		return this;
 	}
 }
