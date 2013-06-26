@@ -143,7 +143,7 @@ public abstract class AbstractIndex implements Esi4JSearchIndex, Esi4JManagedInd
 
 	@Override
 	public Object read(MultiGetItemResponse response) {
-		return findTypeMapping(response.index(), response.type()).read(response.getResponse());
+		return findTypeMapping(response.getIndex(), response.getType()).read(response.getResponse());
 	}
 
 	protected abstract Esi4JStore getStore();

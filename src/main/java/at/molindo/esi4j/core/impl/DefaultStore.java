@@ -100,7 +100,7 @@ public class DefaultStore implements Esi4JStore {
 		IndicesExistsResponse existsResponse = _client.getClient().admin().indices().prepareExists(_indexName)
 				.execute().actionGet();
 
-		if (!existsResponse.exists()) {
+		if (!existsResponse.isExists()) {
 			// create index
 			CreateIndexRequestBuilder request = _client.getClient().admin().indices().prepareCreate(_indexName);
 
@@ -112,7 +112,7 @@ public class DefaultStore implements Esi4JStore {
 			CreateIndexResponse response = request
 					.setTimeout(TimeValue.timeValueSeconds(INDEX_CREATION_TIMEOUT_SECONDS)).execute().actionGet();
 
-			if (!response.acknowledged()) {
+			if (!response.isAcknowledged()) {
 				log.warn("index creation not acknowledged within " + INDEX_CREATION_TIMEOUT_SECONDS + " seconds");
 			}
 
