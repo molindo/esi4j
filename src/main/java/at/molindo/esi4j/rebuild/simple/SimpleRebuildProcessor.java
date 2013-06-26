@@ -59,7 +59,7 @@ public class SimpleRebuildProcessor implements Esi4JRebuildProcessor {
 
 		long start = System.currentTimeMillis();
 
-		Esi4JRebuildSession<?> session = module.startRebuildSession(type);
+		Esi4JRebuildSession session = module.startRebuildSession(type);
 
 		index.execute(new Esi4JOperation<Void>() {
 

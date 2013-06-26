@@ -21,7 +21,7 @@ import org.hibernate.Criteria;
 import org.hibernate.Query;
 import org.hibernate.Session;
 
-public class CustomQueryScrolling<T> implements HibernateScrolling<T> {
+public class CustomQueryScrolling implements HibernateScrolling {
 
 	private final HibernateQueryProvider _queryProvider;
 
@@ -41,8 +41,8 @@ public class CustomQueryScrolling<T> implements HibernateScrolling<T> {
 	}
 
 	@Override
-	public List<T> fetch(Session session, int batchSize) {
-		List<T> list;
+	public List<?> fetch(Session session, int batchSize) {
+		List<?> list;
 
 		Criteria criteria = _queryProvider.createCriteria(_type, session);
 		if (criteria != null) {
@@ -57,14 +57,12 @@ public class CustomQueryScrolling<T> implements HibernateScrolling<T> {
 		return list;
 	}
 
-	@SuppressWarnings("unchecked")
-	private List<T> fetch(Criteria criteria, int first, int max) {
+	private List<?> fetch(Criteria criteria, int first, int max) {
 		// TODO there are better ways to scroll than setFirstResult(..)
 		return criteria.setFirstResult(first).setMaxResults(max).setCacheable(false).list();
 	}
 
-	@SuppressWarnings("unchecked")
-	private List<T> fetch(Query query, int first, int max) {
+	private List<?> fetch(Query query, int first, int max) {
 		// TODO there are better ways to scroll than setFirstResult(..)
 		return query.setFirstResult(first).setMaxResults(max).setCacheable(false).list();
 	}

@@ -20,7 +20,7 @@ import java.util.List;
 
 import at.molindo.esi4j.rebuild.Esi4JRebuildSession;
 
-public final class EmptyRebuildSession<T> implements Esi4JRebuildSession<T> {
+public final class EmptyRebuildSession implements Esi4JRebuildSession {
 
 	private boolean _closed = false;
 
@@ -28,7 +28,7 @@ public final class EmptyRebuildSession<T> implements Esi4JRebuildSession<T> {
 	}
 
 	@Override
-	public List<T> getNext(int batchSize) {
+	public List<?> getNext(int batchSize) {
 		if (_closed) {
 			throw new IllegalStateException("already closed");
 		} else {

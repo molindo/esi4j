@@ -25,11 +25,11 @@ import com.google.common.collect.Lists;
 /**
  * {@link Esi4JRebuildSession} implementation using a simple {@link Iterator}
  */
-public class IteratorRebuildSession<T> implements Esi4JRebuildSession<T> {
+public class IteratorRebuildSession implements Esi4JRebuildSession {
 
-	private Iterator<T> _iterator;
+	private Iterator<?> _iterator;
 
-	public IteratorRebuildSession(Iterator<T> iterator) {
+	public IteratorRebuildSession(Iterator<?> iterator) {
 		if (iterator == null) {
 			throw new NullPointerException("iterator");
 		}
@@ -37,12 +37,12 @@ public class IteratorRebuildSession<T> implements Esi4JRebuildSession<T> {
 	}
 
 	@Override
-	public List<T> getNext(int batchSize) {
+	public List<?> getNext(int batchSize) {
 		if (_iterator == null) {
 			throw new IllegalStateException("already closed");
 		}
 
-		List<T> list = Lists.newArrayListWithCapacity(batchSize);
+		List<Object> list = Lists.newArrayListWithCapacity(batchSize);
 		while (list.size() < batchSize && _iterator.hasNext()) {
 			list.add(_iterator.next());
 		}

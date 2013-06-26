@@ -21,7 +21,7 @@ import java.util.List;
  * Session management for rebuilds. Sessions must always be started before any
  * change to the index.
  */
-public interface Esi4JRebuildSession<T> {
+public interface Esi4JRebuildSession {
 
 	/**
 	 * Must only be called after all elements of previous batch haven been
@@ -32,7 +32,7 @@ public interface Esi4JRebuildSession<T> {
 	 * @return up to the given number of elements. empty list if no more data
 	 *         available
 	 */
-	List<T> getNext(int batchSize);
+	List<?> getNext(int batchSize);
 
 	/**
 	 * release resources. Must always be calledm, even in case of errors.
