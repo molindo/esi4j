@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package at.molindo.esi4j.module.hibernate;
+package at.molindo.esi4j.module.hibernate.scrolling;
 
 import java.io.Serializable;
 import java.util.Collections;
@@ -29,13 +29,14 @@ import org.hibernate.criterion.Restrictions;
 import org.hibernate.impl.SessionImpl;
 import org.hibernate.metadata.ClassMetadata;
 
-public class DefaultQueryScrolling implements HibernateScrolling {
+
+public class DefaultQueryScrollingSession implements ScrollingSession {
 
 	private final Class<?> _type;
 	private Serializable _lastId;
 	private Map<String, FetchMode> _fetchModes;
 
-	public DefaultQueryScrolling(Class<?> type) {
+	public DefaultQueryScrollingSession(Class<?> type) {
 		if (type == null) {
 			throw new NullPointerException("type");
 		}
@@ -43,7 +44,7 @@ public class DefaultQueryScrolling implements HibernateScrolling {
 		_fetchModes = Collections.emptyMap();
 	}
 
-	public DefaultQueryScrolling(Class<?> type, Map<String, FetchMode> fetchModes) {
+	public DefaultQueryScrollingSession(Class<?> type, Map<String, FetchMode> fetchModes) {
 		this(type);
 		_fetchModes = new HashMap<String, FetchMode>(fetchModes);
 	}

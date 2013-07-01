@@ -24,6 +24,9 @@ import org.hibernate.SessionFactory;
 import org.hibernate.metadata.ClassMetadata;
 
 import at.molindo.esi4j.module.Esi4JModule;
+import at.molindo.esi4j.module.hibernate.scrolling.DefaultQueryScrollingSession;
+import at.molindo.esi4j.module.hibernate.scrolling.ScrollingSession;
+import at.molindo.esi4j.module.hibernate.scrolling.ScrollingSessionProvider;
 import at.molindo.esi4j.rebuild.Esi4JRebuildSession;
 import at.molindo.thirdparty.org.compass.core.util.concurrent.ConcurrentHashSet;
 
@@ -40,7 +43,7 @@ public class HibernateModule implements Esi4JModule {
 
 	private final List<Class<?>> _types;
 
-	private final ConcurrentMap<Class<?>, HibernateScrollingProvider> _scrollingProviders = Maps.newConcurrentMap();
+	private final ConcurrentMap<Class<?>, ScrollingSessionProvider> _scrollingProviders = Maps.newConcurrentMap();
 
 	public HibernateModule(SessionFactory sessionFactory) {
 		if (sessionFactory == null) {
@@ -66,13 +69,13 @@ public class HibernateModule implements Esi4JModule {
 		} else if (!_rebuilding.add(type)) {
 			throw new IllegalStateException("already indexing " + type.getName());
 		} else {
-			return new HibernateRebuildSession(type, _sessionFactory, this, newScrolling(type));
+			return new HibernateRebuildSession(type, _sessionFactory, this, newScrollingSession(type));
 		}
 	}
 
-	private HibernateScrolling newScrolling(final Class<?> type) {
-		HibernateScrollingProvider scrollingProvider = _scrollingProviders.get(type);
-		return scrollingProvider == null ? new DefaultQueryScrolling(type) : scrollingProvider.newScrolling();
+	private ScrollingSession newScrollingSession(final Class<?> type) {
+		ScrollingSessionProvider scrollingSessionProvider = _scrollingProviders.get(type);
+		return scrollingSessionProvider == null ? new DefaultQueryScrollingSession(type) : scrollingSessionProvider.newScrollingSession();
 	}
 
 	void unsetRebuilding(Class<?> type) {
@@ -81,10 +84,11 @@ public class HibernateModule implements Esi4JModule {
 		}
 	}
 
-	public void putScrollingProvider(HibernateScrollingProvider scrollingProvider) {
+	public void putScrollingProvider(ScrollingSessionProvider scrollingProvider) {
 		if (scrollingProvider == null) {
 			throw new NullPointerException("scrollingProvider");
 		}
+		// should we fail on duplicate types?
 		_scrollingProviders.put(scrollingProvider.getType(), scrollingProvider);
 	}
 

@@ -13,30 +13,31 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package at.molindo.esi4j.module.hibernate;
+package at.molindo.esi4j.module.hibernate.scrolling;
 
 import java.util.Map;
 
 import org.hibernate.FetchMode;
 
+
 import com.google.common.collect.Maps;
 
-public class DefaultQueryScrollingProvider extends AbstractHibernateScrollingProvider {
+public class DefaultQueryScrollingSessionProvider extends AbstractScrollingSessionProvider {
 
 	private final Map<String, FetchMode> _fetchModes = Maps.newHashMap();
 
-	public DefaultQueryScrollingProvider(Class<?> type) {
+	public DefaultQueryScrollingSessionProvider(Class<?> type) {
 		super(type);
 	}
 
-	public DefaultQueryScrollingProvider setFetchMode(String associationPath, FetchMode fetchMode) {
+	public DefaultQueryScrollingSessionProvider setFetchMode(String associationPath, FetchMode fetchMode) {
 		_fetchModes.put(associationPath, fetchMode);
 		return this;
 	}
 
 	@Override
-	public HibernateScrolling newScrolling() {
-		return new DefaultQueryScrolling(getType(), _fetchModes);
+	public ScrollingSession newScrollingSession() {
+		return new DefaultQueryScrollingSession(getType(), _fetchModes);
 	}
 
 }
