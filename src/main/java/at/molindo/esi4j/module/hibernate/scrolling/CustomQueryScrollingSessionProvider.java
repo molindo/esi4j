@@ -13,13 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package at.molindo.esi4j.module.hibernate;
+package at.molindo.esi4j.module.hibernate.scrolling;
 
-public class CustomQueryScrollingProvider extends AbstractHibernateScrollingProvider {
 
-	private final HibernateQueryProvider _provider;
+public class CustomQueryScrollingSessionProvider extends AbstractScrollingSessionProvider {
 
-	public CustomQueryScrollingProvider(Class<?> type, HibernateQueryProvider provider) {
+	private final QueryProvider _provider;
+
+	public CustomQueryScrollingSessionProvider(Class<?> type, QueryProvider provider) {
 		super(type);
 		if (provider == null) {
 			throw new NullPointerException("provider");
@@ -28,8 +29,8 @@ public class CustomQueryScrollingProvider extends AbstractHibernateScrollingProv
 	}
 
 	@Override
-	public HibernateScrolling newScrolling() {
-		return new CustomQueryScrolling(getType(), _provider);
+	public ScrollingSession newScrollingSession() {
+		return new CustomQueryScrollingSession(getType(), _provider);
 	}
 
 }

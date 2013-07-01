@@ -13,14 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package at.molindo.esi4j.module.hibernate;
+package at.molindo.esi4j.module.hibernate.scrolling;
 
 import org.hibernate.Criteria;
 import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.criterion.DetachedCriteria;
 
-public class SimpleQueryProvider implements HibernateQueryProvider {
+
+public class SimpleQueryProvider implements QueryProvider {
 
 	private final String _hql;
 	private final DetachedCriteria _criteria;

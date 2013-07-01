@@ -13,26 +13,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package at.molindo.esi4j.module.hibernate;
+package at.molindo.esi4j.module.hibernate.scrolling;
 
 import org.hibernate.Criteria;
 import org.hibernate.Query;
 import org.hibernate.Session;
 
-/**
- * simple helper to simplify {@link HibernateQueryProvider} (normally one method
- * less to override)
- */
-public abstract class AbstractQueryProvider implements HibernateQueryProvider {
+public interface QueryProvider {
 
-	@Override
-	public Criteria createCriteria(Class<?> type, Session session) {
-		return null;
-	}
+	/**
+	 * create a criteria for bulk indexing of type
+	 */
+	Criteria createCriteria(Class<?> type, Session session);
 
-	@Override
-	public Query createQuery(Class<?> type, Session session) {
-		return null;
-	}
-
+	/**
+	 * fallback if {@link #createCriteria(Session)} returns null
+	 */
+	Query createQuery(Class<?> type, Session session);
 }

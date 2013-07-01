@@ -13,11 +13,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package at.molindo.esi4j.module.hibernate;
+package at.molindo.esi4j.module.hibernate.scrolling;
 
-public interface HibernateScrollingProvider {
+import java.util.List;
 
-	Class<?> getType();
+import org.hibernate.Session;
 
-	HibernateScrolling newScrolling();
+/**
+ * implementations need not be thread-safe or reusable
+ */
+public interface ScrollingSession {
+
+	/**
+	 * @return the next batch of objects
+	 */
+	List<?> fetch(Session session, int batchSize);
+
 }

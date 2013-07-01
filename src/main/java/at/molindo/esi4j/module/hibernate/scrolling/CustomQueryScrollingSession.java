@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package at.molindo.esi4j.module.hibernate;
+package at.molindo.esi4j.module.hibernate.scrolling;
 
 import java.util.List;
 
@@ -21,15 +21,16 @@ import org.hibernate.Criteria;
 import org.hibernate.Query;
 import org.hibernate.Session;
 
-public class CustomQueryScrolling implements HibernateScrolling {
 
-	private final HibernateQueryProvider _queryProvider;
+public class CustomQueryScrollingSession implements ScrollingSession {
+
+	private final QueryProvider _queryProvider;
 
 	private int _next = 0;
 
 	private final Class<?> _type;
 
-	public CustomQueryScrolling(Class<?> type, HibernateQueryProvider queryProvider) {
+	public CustomQueryScrollingSession(Class<?> type, QueryProvider queryProvider) {
 		if (type == null) {
 			throw new NullPointerException("type");
 		}

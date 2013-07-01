@@ -13,13 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package at.molindo.esi4j.module.hibernate;
+package at.molindo.esi4j.module.hibernate.scrolling;
 
-public abstract class AbstractHibernateScrollingProvider implements HibernateScrollingProvider {
+
+public abstract class AbstractScrollingSessionProvider implements ScrollingSessionProvider {
 
 	private final Class<?> _type;
 
-	public AbstractHibernateScrollingProvider(Class<?> type) {
+	public AbstractScrollingSessionProvider(Class<?> type) {
 		if (type == null) {
 			throw new NullPointerException("type");
 		}

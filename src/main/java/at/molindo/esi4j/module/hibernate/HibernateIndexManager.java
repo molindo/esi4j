@@ -22,6 +22,10 @@ import at.molindo.esi4j.chain.Esi4JBatchedProcessingChain;
 import at.molindo.esi4j.core.Esi4JIndex;
 import at.molindo.esi4j.core.impl.AbstractIndexManager;
 import at.molindo.esi4j.core.internal.InternalIndex;
+import at.molindo.esi4j.module.hibernate.scrolling.CustomQueryScrollingSessionProvider;
+import at.molindo.esi4j.module.hibernate.scrolling.QueryProvider;
+import at.molindo.esi4j.module.hibernate.scrolling.ScrollingSessionProvider;
+import at.molindo.esi4j.module.hibernate.scrolling.SimpleQueryProvider;
 import at.molindo.esi4j.rebuild.Esi4JRebuildManager;
 import at.molindo.esi4j.rebuild.impl.DefaultRebuildManager;
 
@@ -67,12 +71,12 @@ public class HibernateIndexManager extends AbstractIndexManager {
 		return queryProvider(type, new SimpleQueryProvider(criteria));
 	}
 
-	public HibernateIndexManager queryProvider(Class<?> type, HibernateQueryProvider queryProvider) {
-		scrollingProvider(new CustomQueryScrollingProvider(type, queryProvider));
+	public HibernateIndexManager queryProvider(Class<?> type, QueryProvider queryProvider) {
+		scrollingProvider(new CustomQueryScrollingSessionProvider(type, queryProvider));
 		return this;
 	}
 
-	public HibernateIndexManager scrollingProvider(HibernateScrollingProvider scrollingProvider) {
+	public HibernateIndexManager scrollingProvider(ScrollingSessionProvider scrollingProvider) {
 		getHibernateModule().putScrollingProvider(scrollingProvider);
 		return this;
 	}

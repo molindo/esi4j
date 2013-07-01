@@ -13,20 +13,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package at.molindo.esi4j.module.hibernate;
+package at.molindo.esi4j.module.hibernate.scrolling;
 
-import java.util.List;
-
-import org.hibernate.Session;
+import at.molindo.esi4j.module.hibernate.HibernateIndexManager;
+import at.molindo.esi4j.module.hibernate.HibernateModule;
 
 /**
- * implementations need not be thread-safe or reusable
+ * factory for {@link ScrollingSession} instances that are created per session.
+ * There must only be one provider per type and {@link HibernateModule} (and
+ * thus {@link HibernateIndexManager}). If no {@link ScrollingSessionProvider}
+ * is defined for a type, a {@link DefaultQueryScrollingSession} will be used.
  */
-public interface HibernateScrolling {
+public interface ScrollingSessionProvider {
 
-	/**
-	 * @return the next batch of objects
-	 */
-	List<?> fetch(Session session, int batchSize);
+	Class<?> getType();
 
+	ScrollingSession newScrollingSession();
 }
