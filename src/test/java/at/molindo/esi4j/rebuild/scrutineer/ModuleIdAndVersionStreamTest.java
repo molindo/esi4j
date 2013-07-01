@@ -47,20 +47,20 @@ public class ModuleIdAndVersionStreamTest {
 		Esi4JDummyModule module = new Esi4JDummyModule() {
 
 			@Override
-			public <T> Esi4JRebuildSession<T> startRebuildSession(Class<T> type) {
-				final Esi4JRebuildSession<T> session = super.startRebuildSession(type);
+			public Esi4JRebuildSession startRebuildSession(Class<?> type) {
+				final Esi4JRebuildSession session = super.startRebuildSession(type);
 
-				return new Esi4JRebuildSession<T>() {
+				return new Esi4JRebuildSession() {
 
 					@Override
-					public List<T> getNext(int batchSize) {
+					public List<?> getNext(int batchSize) {
 						/*
 						 * all must have been processed before fetching new as
 						 * underlying session might clear previous state
 						 */
 						assertEquals(fetched[0], processed[0]);
 
-						List<T> list = session.getNext(batchSize);
+						List<?> list = session.getNext(batchSize);
 						fetched[0] += list.size();
 
 						return list;

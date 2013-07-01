@@ -13,13 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package at.molindo.esi4j.module.hibernate;
+package at.molindo.esi4j.module.hibernate.scrolling;
 
 import org.hibernate.Criteria;
 import org.hibernate.Query;
 import org.hibernate.Session;
 
-public interface HibernateQueryProvider {
+public interface QueryProvider {
 
 	/**
 	 * create a criteria for bulk indexing of type

@@ -17,7 +17,6 @@ package at.molindo.esi4j.test.module;
 
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Iterator;
 
 import at.molindo.esi4j.module.Esi4JModule;
 import at.molindo.esi4j.rebuild.Esi4JRebuildSession;
@@ -47,12 +46,11 @@ public class Esi4JDummyModule implements Esi4JModule {
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
-	public <T> Esi4JRebuildSession<T> startRebuildSession(Class<T> type) {
+	public Esi4JRebuildSession startRebuildSession(Class<?> type) {
 		if (_type != type) {
 			throw new IllegalArgumentException("unexpected type " + type.getName());
 		}
-		return new IteratorRebuildSession<T>((Iterator<T>) _data.iterator());
+		return new IteratorRebuildSession(_data.iterator());
 	}
 
 	@Override

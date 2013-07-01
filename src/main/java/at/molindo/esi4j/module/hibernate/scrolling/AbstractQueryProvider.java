@@ -13,31 +13,27 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package at.molindo.esi4j.rebuild.util;
+package at.molindo.esi4j.module.hibernate.scrolling;
 
-import java.util.Collections;
-import java.util.List;
+import org.hibernate.Criteria;
+import org.hibernate.Query;
+import org.hibernate.Session;
 
-import at.molindo.esi4j.rebuild.Esi4JRebuildSession;
 
-public final class EmptyRebuildSession implements Esi4JRebuildSession {
+/**
+ * simple helper to simplify {@link QueryProvider} (normally one method
+ * less to override)
+ */
+public abstract class AbstractQueryProvider implements QueryProvider {
 
-	private boolean _closed = false;
-
-	public EmptyRebuildSession() {
+	@Override
+	public Criteria createCriteria(Class<?> type, Session session) {
+		return null;
 	}
 
 	@Override
-	public List<?> getNext(int batchSize) {
-		if (_closed) {
-			throw new IllegalStateException("already closed");
-		} else {
-			return Collections.emptyList();
-		}
+	public Query createQuery(Class<?> type, Session session) {
+		return null;
 	}
 
-	@Override
-	public void close() {
-		_closed = true;
-	}
 }

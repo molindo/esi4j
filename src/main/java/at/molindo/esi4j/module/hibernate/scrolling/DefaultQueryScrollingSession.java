@@ -13,32 +13,44 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package at.molindo.esi4j.module.hibernate;
+package at.molindo.esi4j.module.hibernate.scrolling;
 
 import java.io.Serializable;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.hibernate.Criteria;
+import org.hibernate.FetchMode;
 import org.hibernate.Session;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
 import org.hibernate.impl.SessionImpl;
 import org.hibernate.metadata.ClassMetadata;
 
-public class DefaultQueryScrolling<T> implements HibernateScrolling<T> {
 
-	private final Class<T> _type;
+public class DefaultQueryScrollingSession implements ScrollingSession {
+
+	private final Class<?> _type;
 	private Serializable _lastId;
+	private Map<String, FetchMode> _fetchModes;
 
-	public DefaultQueryScrolling(Class<T> type) {
+	public DefaultQueryScrollingSession(Class<?> type) {
 		if (type == null) {
 			throw new NullPointerException("type");
 		}
 		_type = type;
+		_fetchModes = Collections.emptyMap();
+	}
+
+	public DefaultQueryScrollingSession(Class<?> type, Map<String, FetchMode> fetchModes) {
+		this(type);
+		_fetchModes = new HashMap<String, FetchMode>(fetchModes);
 	}
 
 	@Override
-	public List<T> fetch(Session session, int batchSize) {
+	public List<?> fetch(Session session, int batchSize) {
 		Criteria criteria = session.createCriteria(_type);
 		if (_lastId != null) {
 			criteria.add(Restrictions.gt("id", _lastId));
@@ -47,13 +59,16 @@ public class DefaultQueryScrolling<T> implements HibernateScrolling<T> {
 		criteria.setMaxResults(batchSize);
 		criteria.setCacheable(false);
 
-		@SuppressWarnings("unchecked")
-		List<T> list = criteria.list();
+		for (Map.Entry<String, FetchMode> e : _fetchModes.entrySet()) {
+			criteria.setFetchMode(e.getKey(), e.getValue());
+		}
+
+		List<?> list = criteria.list();
 
 		if (list.size() > 0) {
 			ClassMetadata meta = session.getSessionFactory().getClassMetadata(_type);
 
-			T last = list.get(list.size() - 1);
+			Object last = list.get(list.size() - 1);
 			_lastId = meta.getIdentifier(last, (SessionImpl) session);
 		}
 
