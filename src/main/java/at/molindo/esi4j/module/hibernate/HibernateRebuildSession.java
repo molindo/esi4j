@@ -23,18 +23,19 @@ import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
 import org.hibernate.classic.Session;
 
+import at.molindo.esi4j.module.hibernate.scrolling.ScrollingSession;
 import at.molindo.esi4j.rebuild.Esi4JRebuildSession;
 
-public final class HibernateRebuildSession<T> implements Esi4JRebuildSession<T> {
+public final class HibernateRebuildSession implements Esi4JRebuildSession {
 
 	private final Transaction _tx;
 	private final Session _session;
-	private final Class<T> _type;
+	private final Class<?> _type;
 	private final HibernateModule _module;
-	private final HibernateScrolling<T> _scrolling;
+	private final ScrollingSession _scrollingSession;
 
-	public HibernateRebuildSession(Class<T> type, SessionFactory sessionFactory, HibernateModule module,
-			HibernateScrolling<T> scrolling) {
+	public HibernateRebuildSession(Class<?> type, SessionFactory sessionFactory, HibernateModule module,
+			ScrollingSession scrollingSession) {
 		if (type == null) {
 			throw new NullPointerException("type");
 		}
@@ -47,7 +48,7 @@ public final class HibernateRebuildSession<T> implements Esi4JRebuildSession<T> 
 
 		_type = type;
 		_module = module;
-		_scrolling = scrolling;
+		_scrollingSession = scrollingSession;
 
 		_session = sessionFactory.openSession();
 		_session.setCacheMode(CacheMode.GET);
@@ -57,10 +58,10 @@ public final class HibernateRebuildSession<T> implements Esi4JRebuildSession<T> 
 	}
 
 	@Override
-	public List<T> getNext(int batchSize) {
+	public List<?> getNext(int batchSize) {
 		// clear previous batch
 		_session.clear();
-		return _scrolling.fetch(_session, batchSize);
+		return _scrollingSession.fetch(_session, batchSize);
 	}
 
 	@Override

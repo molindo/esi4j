@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package at.molindo.esi4j.module.hibernate;
+package at.molindo.esi4j.module.hibernate.scrolling;
 
 import java.util.List;
 
@@ -21,15 +21,16 @@ import org.hibernate.Criteria;
 import org.hibernate.Query;
 import org.hibernate.Session;
 
-public class CustomQueryScrolling<T> implements HibernateScrolling<T> {
 
-	private final HibernateQueryProvider _queryProvider;
+public class CustomQueryScrollingSession implements ScrollingSession {
+
+	private final QueryProvider _queryProvider;
 
 	private int _next = 0;
 
 	private final Class<?> _type;
 
-	public CustomQueryScrolling(Class<?> type, HibernateQueryProvider queryProvider) {
+	public CustomQueryScrollingSession(Class<?> type, QueryProvider queryProvider) {
 		if (type == null) {
 			throw new NullPointerException("type");
 		}
@@ -41,8 +42,8 @@ public class CustomQueryScrolling<T> implements HibernateScrolling<T> {
 	}
 
 	@Override
-	public List<T> fetch(Session session, int batchSize) {
-		List<T> list;
+	public List<?> fetch(Session session, int batchSize) {
+		List<?> list;
 
 		Criteria criteria = _queryProvider.createCriteria(_type, session);
 		if (criteria != null) {
@@ -57,14 +58,12 @@ public class CustomQueryScrolling<T> implements HibernateScrolling<T> {
 		return list;
 	}
 
-	@SuppressWarnings("unchecked")
-	private List<T> fetch(Criteria criteria, int first, int max) {
+	private List<?> fetch(Criteria criteria, int first, int max) {
 		// TODO there are better ways to scroll than setFirstResult(..)
 		return criteria.setFirstResult(first).setMaxResults(max).setCacheable(false).list();
 	}
 
-	@SuppressWarnings("unchecked")
-	private List<T> fetch(Query query, int first, int max) {
+	private List<?> fetch(Query query, int first, int max) {
 		// TODO there are better ways to scroll than setFirstResult(..)
 		return query.setFirstResult(first).setMaxResults(max).setCacheable(false).list();
 	}

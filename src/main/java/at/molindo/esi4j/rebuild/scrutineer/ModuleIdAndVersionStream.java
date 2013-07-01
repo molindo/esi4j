@@ -32,7 +32,7 @@ public final class ModuleIdAndVersionStream implements IdAndVersionStream {
 	private final int _batchSize;
 	private final TypeMapping _mapping;
 
-	private Esi4JRebuildSession<?> _session;
+	private Esi4JRebuildSession _session;
 
 	public ModuleIdAndVersionStream(Esi4JModule module, int batchSize, TypeMapping mapping) {
 		_module = module;
