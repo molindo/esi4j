@@ -59,7 +59,7 @@ public class DefaultTaskProcessor extends AbstractTaskProcessor implements Esi4J
 					}).actionGet();
 
 			if (log.isDebugEnabled()) {
-				log.debug("finished bulk indexing " + response.getBulkResponse().items().length + " items");
+				log.debug("finished bulk indexing " + response.getBulkResponse().getItems().length + " items");
 			}
 		} finally {
 			_lock.readLock().unlock();

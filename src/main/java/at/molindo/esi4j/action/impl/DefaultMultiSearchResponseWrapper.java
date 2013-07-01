@@ -47,7 +47,7 @@ public class DefaultMultiSearchResponseWrapper implements MultiSearchResponseWra
 	@Override
 	public synchronized List<MultiSearchItemResponseWrapper> getMultiSearchItemResponses() {
 		if (_objects == null) {
-			MultiSearchResponse.Item[] reps = _response.responses();
+			MultiSearchResponse.Item[] reps = _response.getResponses();
 			_objects = Lists.newArrayListWithCapacity(reps.length);
 			for (int i = 0; i < reps.length; i++) {
 				_objects.add(new DefaultMultiSearchItemResponseWrapper(reps[i], _reader));

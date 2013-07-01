@@ -265,7 +265,7 @@ public class QueuedTaskExecutor {
 			}
 
 			if (log.isDebugEnabled()) {
-				int indexed = response.getBulkResponse().items().length - failed;
+				int indexed = response.getBulkResponse().getItems().length - failed;
 				log.debug("finished bulk indexing " + indexed + " items");
 			}
 		}

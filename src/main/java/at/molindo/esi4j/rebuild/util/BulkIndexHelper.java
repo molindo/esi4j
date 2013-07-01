@@ -111,18 +111,18 @@ public class BulkIndexHelper {
 				int succeeded = 0;
 				int failed = 0;
 
-				BulkItemResponse[] items = response.items();
+				BulkItemResponse[] items = response.getItems();
 				for (int i = 0; i < items.length; i++) {
 
 					BulkItemResponse item = items[i];
 
-					if (item.failed()) {
+					if (item.isFailed()) {
 						failed++;
 					} else {
 						succeeded++;
 
 						if (_responseHandler != null) {
-							_responseHandler.handle(item.id(), item.opType());
+							_responseHandler.handle(item.getId(), item.getOpType());
 						}
 					}
 				}
