@@ -47,7 +47,7 @@ public class DefaultSearchResponseWrapper implements SearchResponseWrapper {
 	@Override
 	public synchronized List<SearchHitWrapper> getSearchHits() {
 		if (_objects == null) {
-			SearchHit[] hits = _response.hits().hits();
+			SearchHit[] hits = _response.getHits().hits();
 			_objects = Lists.newArrayListWithCapacity(hits.length);
 			for (int i = 0; i < hits.length; i++) {
 				_objects.add(new DefaultSearchHitWrapper(hits[i], _reader));

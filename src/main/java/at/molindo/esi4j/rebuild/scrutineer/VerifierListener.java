@@ -55,6 +55,7 @@ public class VerifierListener implements IdAndVersionStreamVerifierListener {
 	@Override
 	public void onVersionMisMatch(IdAndVersion primaryItem, IdAndVersion secondaryItem) {
 		_update++;
+		// TODO use secondaryItem to support partial updates?
 		index(((ObjectIdAndVersion) primaryItem));
 	}
 

@@ -47,7 +47,7 @@ public class DefaultMultiGetResponseWrapper implements MultiGetResponseWrapper {
 	@Override
 	public synchronized List<MultiGetItemResponseWrapper> getMultiGetItemResponses() {
 		if (_objects == null) {
-			MultiGetItemResponse[] reps = _response.responses();
+			MultiGetItemResponse[] reps = _response.getResponses();
 			_objects = Lists.newArrayListWithCapacity(reps.length);
 			for (int i = 0; i < reps.length; i++) {
 				_objects.add(new DefaultMultiGetItemResponseWrapper(reps[i], _reader));

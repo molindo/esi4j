@@ -127,7 +127,7 @@ public abstract class GenericTypeMapping<Type, Id> extends TypeMapping {
 
 	@Override
 	public final Type read(GetResponse response) {
-		return response.exists() ? read(getSource(response)) : null;
+		return response.isExists() ? read(getSource(response)) : null;
 	}
 
 	@Override

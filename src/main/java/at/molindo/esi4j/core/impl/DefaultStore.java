@@ -15,17 +15,21 @@
  */
 package at.molindo.esi4j.core.impl;
 
+import java.util.Map;
 import java.util.Map.Entry;
 
 import org.elasticsearch.action.admin.cluster.state.ClusterStateResponse;
 import org.elasticsearch.action.admin.indices.create.CreateIndexRequestBuilder;
 import org.elasticsearch.action.admin.indices.create.CreateIndexResponse;
 import org.elasticsearch.action.admin.indices.exists.indices.IndicesExistsResponse;
-import org.elasticsearch.cluster.metadata.IndexMetaData;
+import org.elasticsearch.cluster.settings.ClusterDynamicSettings;
+import org.elasticsearch.cluster.settings.DynamicSettings;
+import org.elasticsearch.common.inject.Inject;
 import org.elasticsearch.common.settings.ImmutableSettings;
-import org.elasticsearch.common.settings.ImmutableSettings.Builder;
 import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.common.unit.TimeValue;
+import org.elasticsearch.index.settings.IndexDynamicSettings;
+import org.elasticsearch.node.internal.InternalNode;
 
 import at.molindo.esi4j.core.Esi4JClient;
 import at.molindo.esi4j.core.Esi4JIndex;
@@ -100,7 +104,7 @@ public class DefaultStore implements Esi4JStore {
 		IndicesExistsResponse existsResponse = _client.getClient().admin().indices().prepareExists(_indexName)
 				.execute().actionGet();
 
-		if (!existsResponse.exists()) {
+		if (!existsResponse.isExists()) {
 			// create index
 			CreateIndexRequestBuilder request = _client.getClient().admin().indices().prepareCreate(_indexName);
 
@@ -112,7 +116,7 @@ public class DefaultStore implements Esi4JStore {
 			CreateIndexResponse response = request
 					.setTimeout(TimeValue.timeValueSeconds(INDEX_CREATION_TIMEOUT_SECONDS)).execute().actionGet();
 
-			if (!response.acknowledged()) {
+			if (!response.isAcknowledged()) {
 				log.warn("index creation not acknowledged within " + INDEX_CREATION_TIMEOUT_SECONDS + " seconds");
 			}
 
@@ -123,13 +127,7 @@ public class DefaultStore implements Esi4JStore {
 			Settings settings = getStoreSettings(index);
 			if (settings != null && settings.getAsMap().size() > 0) {
 
-				Settings storeSettings = settings;
-				if (settings.get(IndexMetaData.SETTING_NUMBER_OF_SHARDS) != null) {
-					// es won't allow including number_of_shards
-					Builder builder = ImmutableSettings.settingsBuilder().put(settings);
-					builder.remove(IndexMetaData.SETTING_NUMBER_OF_SHARDS);
-					storeSettings = builder.build();
-				}
+				Settings storeSettings = toDynamicSettings(settings);
 
 				_client.getClient().admin().indices().prepareUpdateSettings(_indexName).setSettings(storeSettings)
 						.execute().actionGet();
@@ -154,6 +152,31 @@ public class DefaultStore implements Esi4JStore {
 				// TODO try closing index to update settings
 			}
 		}
+	}
+
+	private Settings toDynamicSettings(Settings settings) {
+		// FIXME TransportClient?
+		InternalNode node = (InternalNode) ((NodeClient) getClient()).getNode();
+
+		DynamicSettings indexDynamicSettings = node.injector().getInstance(DynamicSettingsBean.class)
+				.getIndexDynamicSettings();
+
+		ImmutableSettings.Builder dynamicSettings = ImmutableSettings.builder();
+
+		for (Map.Entry<String, String> e : settings.getAsMap().entrySet()) {
+			if (indexDynamicSettings.hasDynamicSetting(e.getKey())) {
+				String error = indexDynamicSettings.validateDynamicSetting(e.getKey(), e.getValue());
+				if (error == null) {
+					dynamicSettings.put(e.getKey(), e.getValue());
+				} else {
+					// TODO better error handling
+					throw new IllegalArgumentException("index setting " + e.getKey() + " has invalid value '"
+							+ e.getValue() + " (" + error + ")");
+				}
+			}
+		}
+
+		return dynamicSettings.build();
 	}
 
 	private Settings getStoreSettings(Esi4JIndex index) {
@@ -181,5 +204,28 @@ public class DefaultStore implements Esi4JStore {
 	@Override
 	public void close() {
 		_client.removeStore(this);
+	}
+
+	public static final class DynamicSettingsBean {
+
+		private final DynamicSettings _clusterDynamicSettings;
+		private final DynamicSettings _indexDynamicSettings;
+
+		@Inject
+		public DynamicSettingsBean(@ClusterDynamicSettings DynamicSettings clusterDynamicSettings,
+				@IndexDynamicSettings DynamicSettings indexDynamicSettings) {
+
+			_clusterDynamicSettings = clusterDynamicSettings;
+			_indexDynamicSettings = indexDynamicSettings;
+		}
+
+		public DynamicSettings getClusterDynamicSettings() {
+			return _clusterDynamicSettings;
+		}
+
+		public DynamicSettings getIndexDynamicSettings() {
+			return _indexDynamicSettings;
+		}
+
 	}
 }
