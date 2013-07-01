@@ -29,6 +29,10 @@ public class NodeClient extends TransportClient {
 		_node.start();
 	}
 
+	public Node getNode() {
+		return _node;
+	}
+
 	@Override
 	public void close() {
 		_node.close();
