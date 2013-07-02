@@ -27,13 +27,30 @@ import com.google.common.collect.Lists;
  */
 public class IteratorRebuildSession implements Esi4JRebuildSession {
 
+	private final Class<?> _type;
 	private Iterator<?> _iterator;
+	private final boolean _ordered;
 
-	public IteratorRebuildSession(Iterator<?> iterator) {
+	public IteratorRebuildSession(Class<?> type, Iterator<?> iterator, boolean ordered) {
+		if (type == null) {
+			throw new NullPointerException("type");
+		}
 		if (iterator == null) {
 			throw new NullPointerException("iterator");
 		}
+		_type = type;
 		_iterator = iterator;
+		_ordered = ordered;
+	}
+
+	@Override
+	public Class<?> getType() {
+		return _type;
+	}
+
+	@Override
+	public boolean isOrdered() {
+		return _ordered;
 	}
 
 	@Override
@@ -54,4 +71,5 @@ public class IteratorRebuildSession implements Esi4JRebuildSession {
 	public void close() {
 		_iterator = null;
 	}
+
 }

@@ -16,8 +16,6 @@
 package at.molindo.esi4j.rebuild;
 
 import at.molindo.esi4j.core.internal.InternalIndex;
-import at.molindo.esi4j.mapping.TypeMapping;
-import at.molindo.esi4j.module.Esi4JModule;
 
 /**
  * A strategy to rebuild the index from the given module. Different strategies
@@ -27,14 +25,13 @@ import at.molindo.esi4j.module.Esi4JModule;
 public interface Esi4JRebuildProcessor {
 
 	/**
-	 * @return true if {@link TypeMapping} is supported
+	 * @return true if {@link Esi4JRebuildSession} is supported
 	 */
-	boolean isSupported(TypeMapping mapping);
+	boolean isSupported(Esi4JRebuildSession rebuildSession);
 
 	/**
 	 * rebuild all types in index using data from module
 	 */
-	// FIXME replace InternalIndex with Esi4JStore
-	void rebuild(Esi4JModule module, InternalIndex index, Class<?> type);
+	void rebuild(InternalIndex index, Esi4JRebuildSession rebuildSession);
 
 }

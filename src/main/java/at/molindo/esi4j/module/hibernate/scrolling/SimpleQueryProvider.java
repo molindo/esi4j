@@ -20,26 +20,33 @@ import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.criterion.DetachedCriteria;
 
-
 public class SimpleQueryProvider implements QueryProvider {
 
 	private final String _hql;
 	private final DetachedCriteria _criteria;
+	private final boolean _ordered;
 
-	public SimpleQueryProvider(String hql) {
+	public SimpleQueryProvider(String hql, boolean ordered) {
 		if (hql == null) {
 			throw new NullPointerException("hql");
 		}
 		_hql = hql;
 		_criteria = null;
+		_ordered = ordered;
 	}
 
-	public SimpleQueryProvider(DetachedCriteria criteria) {
+	public SimpleQueryProvider(DetachedCriteria criteria, boolean ordered) {
 		if (criteria == null) {
 			throw new NullPointerException("criteria");
 		}
 		_criteria = criteria;
 		_hql = null;
+		_ordered = ordered;
+	}
+
+	@Override
+	public boolean isOrdered() {
+		return _ordered;
 	}
 
 	@Override

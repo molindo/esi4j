@@ -21,8 +21,8 @@ import org.elasticsearch.client.Client;
 import at.molindo.esi4j.core.Esi4JOperation;
 import at.molindo.esi4j.core.internal.InternalIndex;
 import at.molindo.esi4j.mapping.TypeMapping;
-import at.molindo.esi4j.module.Esi4JModule;
 import at.molindo.esi4j.rebuild.Esi4JRebuildProcessor;
+import at.molindo.esi4j.rebuild.Esi4JRebuildSession;
 import at.molindo.esi4j.rebuild.util.BulkIndexHelper;
 
 import com.aconex.scrutineer.IdAndVersion;
@@ -47,21 +47,21 @@ public class ScrutineerRebuildProcessor implements Esi4JRebuildProcessor {
 	private static final int DEFAULT_BATCH_SIZE = 1000;
 
 	@Override
-	public boolean isSupported(TypeMapping mapping) {
-		return true;
+	public boolean isSupported(Esi4JRebuildSession rebuildSession) {
+		return rebuildSession.isOrdered();
 	}
 
 	@Override
-	public void rebuild(final Esi4JModule module, InternalIndex index, final Class<?> type) {
+	public void rebuild(InternalIndex index, final Esi4JRebuildSession rebuildSession) {
 		index.execute(new Esi4JOperation<Void>() {
 
 			@Override
 			public Void execute(Client client, String indexName, Esi4JOperation.OperationContext context) {
 
-				final TypeMapping mapping = context.findTypeMapping(type);
+				final TypeMapping mapping = context.findTypeMapping(rebuildSession.getType());
 
-				ModuleIdAndVersionStream moduleStream = new ModuleIdAndVersionStream(module, DEFAULT_BATCH_SIZE,
-						mapping);
+				ModuleIdAndVersionStream moduleStream = new ModuleIdAndVersionStream(rebuildSession,
+						DEFAULT_BATCH_SIZE, mapping);
 
 				IdAndVersionFactory factory = new MappedObjectIdAndVersionFactory(mapping);
 

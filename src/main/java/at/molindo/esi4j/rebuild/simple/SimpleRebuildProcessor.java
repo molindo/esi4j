@@ -22,7 +22,6 @@ import org.elasticsearch.client.Client;
 import at.molindo.esi4j.core.Esi4JOperation;
 import at.molindo.esi4j.core.internal.InternalIndex;
 import at.molindo.esi4j.mapping.TypeMapping;
-import at.molindo.esi4j.module.Esi4JModule;
 import at.molindo.esi4j.rebuild.Esi4JRebuildProcessor;
 import at.molindo.esi4j.rebuild.Esi4JRebuildSession;
 import at.molindo.esi4j.rebuild.util.BulkIndexHelper;
@@ -48,18 +47,18 @@ public class SimpleRebuildProcessor implements Esi4JRebuildProcessor {
 	}
 
 	@Override
-	public boolean isSupported(TypeMapping mapping) {
+	public boolean isSupported(Esi4JRebuildSession rebuildSession) {
 		return true;
 	}
 
 	@Override
-	public void rebuild(final Esi4JModule module, InternalIndex index, final Class<?> type) {
+	public void rebuild(InternalIndex index, Esi4JRebuildSession rebuildSession) {
+
+		final Class<?> type = rebuildSession.getType();
 
 		log.info("rebuilding index for object of type " + type.getName());
 
 		long start = System.currentTimeMillis();
-
-		Esi4JRebuildSession session = module.startRebuildSession(type);
 
 		index.execute(new Esi4JOperation<Void>() {
 
@@ -79,7 +78,7 @@ public class SimpleRebuildProcessor implements Esi4JRebuildProcessor {
 			BulkIndexHelper h = new BulkIndexHelper().setMaxRunning(getMaxRunning());
 
 			List<?> list;
-			while ((list = session.getNext(_batchSize)).size() > 0) {
+			while ((list = rebuildSession.getNext(_batchSize)).size() > 0) {
 				h.bulkIndex(index, list);
 			}
 
@@ -101,8 +100,6 @@ public class SimpleRebuildProcessor implements Esi4JRebuildProcessor {
 
 		} catch (InterruptedException e) {
 			log.error("awaiting completion of indexing has been interrupted", e);
-		} finally {
-			session.close();
 		}
 	}
 

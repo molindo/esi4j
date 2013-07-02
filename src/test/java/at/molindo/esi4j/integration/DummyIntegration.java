@@ -66,7 +66,7 @@ public class DummyIntegration {
 		t1.setUser("dummy");
 
 		Esi4JDummyModule module = new Esi4JDummyModule().setData(Tweet.class, Lists.newArrayList(t1));
-		new SimpleRebuildProcessor().rebuild(module, (InternalIndex) index, Tweet.class);
+		new SimpleRebuildProcessor().rebuild((InternalIndex) index, module.startRebuildSession(Tweet.class));
 
 		Tweet t3 = (Tweet) index.get(Tweet.class, id).actionGet().getObject();
 		System.out.println(t1.equals(t3));
