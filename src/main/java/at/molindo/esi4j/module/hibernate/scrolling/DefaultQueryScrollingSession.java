@@ -29,7 +29,6 @@ import org.hibernate.criterion.Restrictions;
 import org.hibernate.impl.SessionImpl;
 import org.hibernate.metadata.ClassMetadata;
 
-
 public class DefaultQueryScrollingSession implements ScrollingSession {
 
 	private final Class<?> _type;
@@ -47,6 +46,11 @@ public class DefaultQueryScrollingSession implements ScrollingSession {
 	public DefaultQueryScrollingSession(Class<?> type, Map<String, FetchMode> fetchModes) {
 		this(type);
 		_fetchModes = new HashMap<String, FetchMode>(fetchModes);
+	}
+
+	@Override
+	public boolean isOrdered() {
+		return true;
 	}
 
 	@Override

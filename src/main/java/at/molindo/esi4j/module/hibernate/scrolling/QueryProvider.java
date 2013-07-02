@@ -22,6 +22,11 @@ import org.hibernate.Session;
 public interface QueryProvider {
 
 	/**
+	 * @see ScrollingSession#isOrdered()
+	 */
+	boolean isOrdered();
+
+	/**
 	 * create a criteria for bulk indexing of type
 	 */
 	Criteria createCriteria(Class<?> type, Session session);
@@ -30,4 +35,5 @@ public interface QueryProvider {
 	 * fallback if {@link #createCriteria(Session)} returns null
 	 */
 	Query createQuery(Class<?> type, Session session);
+
 }

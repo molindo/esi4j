@@ -29,6 +29,7 @@ import at.molindo.esi4j.mapping.TypeMapping;
 import at.molindo.esi4j.module.Esi4JModule;
 import at.molindo.esi4j.rebuild.Esi4JRebuildManager;
 import at.molindo.esi4j.rebuild.Esi4JRebuildProcessor;
+import at.molindo.esi4j.rebuild.Esi4JRebuildSession;
 import at.molindo.esi4j.rebuild.scrutineer.ScrutineerRebuildProcessor;
 import at.molindo.esi4j.rebuild.simple.SimpleRebuildProcessor;
 import at.molindo.utils.collections.ArrayUtils;
@@ -66,8 +67,13 @@ public class DefaultRebuildManager implements Esi4JRebuildManager {
 		// TODO how to handle events while rebuilding clone?
 
 		for (Class<?> type : types) {
-			waitForGreenStatus(index);
-			findRebuildProcessor(index.findTypeMapping(type)).rebuild(module, index, type);
+			Esi4JRebuildSession rebuildSession = module.startRebuildSession(type);
+			try {
+				waitForGreenStatus(index);
+				findRebuildProcessor(rebuildSession).rebuild(index, rebuildSession);
+			} finally {
+				rebuildSession.close();
+			}
 		}
 
 		// optimize index after rebuild
@@ -109,13 +115,14 @@ public class DefaultRebuildManager implements Esi4JRebuildManager {
 	 * @return first {@link Esi4JRebuildProcessor} that supports this
 	 *         {@link TypeMapping}
 	 */
-	private Esi4JRebuildProcessor findRebuildProcessor(TypeMapping mapping) {
+	private Esi4JRebuildProcessor findRebuildProcessor(Esi4JRebuildSession rebuildSession) {
 		for (Esi4JRebuildProcessor processor : _processors) {
-			if (processor.isSupported(mapping)) {
+			if (processor.isSupported(rebuildSession)) {
 				return processor;
 			}
 		}
-		throw new IllegalArgumentException("mapping not supported by any processor: " + mapping.getTypeAlias());
+		throw new IllegalArgumentException("session for type " + rebuildSession.getType()
+				+ " not supported by any processor");
 	}
 
 	@Override

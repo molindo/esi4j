@@ -53,6 +53,16 @@ public class ModuleIdAndVersionStreamTest {
 				return new Esi4JRebuildSession() {
 
 					@Override
+					public Class<?> getType() {
+						return session.getType();
+					}
+
+					@Override
+					public boolean isOrdered() {
+						return session.isOrdered();
+					}
+
+					@Override
 					public List<?> getNext(int batchSize) {
 						/*
 						 * all must have been processed before fetching new as
@@ -77,7 +87,8 @@ public class ModuleIdAndVersionStreamTest {
 
 		}.setData(Tweet.class, t1, t2, t3, t4, t5);
 
-		ModuleIdAndVersionStream stream = new ModuleIdAndVersionStream(module, 2, mapping);
+		ModuleIdAndVersionStream stream = new ModuleIdAndVersionStream(module.startRebuildSession(Tweet.class), 2,
+				mapping);
 		stream.open();
 
 		ModuleIdAndVersionStreamIterator iter = (ModuleIdAndVersionStreamIterator) stream.iterator();

@@ -63,14 +63,33 @@ public class HibernateIndexManager extends AbstractIndexManager {
 		return (HibernateModule) getModule();
 	}
 
-	public HibernateIndexManager query(Class<?> type, String hql) {
-		return queryProvider(type, new SimpleQueryProvider(hql));
+	/**
+	 * @param type
+	 * @param hql
+	 * @param ordered
+	 *            results ordered by id
+	 * @return this
+	 */
+	public HibernateIndexManager query(Class<?> type, String hql, boolean ordered) {
+		return queryProvider(type, new SimpleQueryProvider(hql, ordered));
 	}
 
-	public HibernateIndexManager criteria(Class<?> type, DetachedCriteria criteria) {
-		return queryProvider(type, new SimpleQueryProvider(criteria));
+	/**
+	 * @param type
+	 * @param criteria
+	 * @param ordered
+	 *            results ordered by id
+	 * @return this
+	 */
+	public HibernateIndexManager criteria(Class<?> type, DetachedCriteria criteria, boolean ordered) {
+		return queryProvider(type, new SimpleQueryProvider(criteria, ordered));
 	}
 
+	/**
+	 * @param type
+	 * @param queryProvider
+	 * @return this
+	 */
 	public HibernateIndexManager queryProvider(Class<?> type, QueryProvider queryProvider) {
 		scrollingProvider(new CustomQueryScrollingSessionProvider(type, queryProvider));
 		return this;

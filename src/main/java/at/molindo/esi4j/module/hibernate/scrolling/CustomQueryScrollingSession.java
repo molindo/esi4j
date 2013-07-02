@@ -21,7 +21,6 @@ import org.hibernate.Criteria;
 import org.hibernate.Query;
 import org.hibernate.Session;
 
-
 public class CustomQueryScrollingSession implements ScrollingSession {
 
 	private final QueryProvider _queryProvider;
@@ -39,6 +38,11 @@ public class CustomQueryScrollingSession implements ScrollingSession {
 		}
 		_type = type;
 		_queryProvider = queryProvider;
+	}
+
+	@Override
+	public boolean isOrdered() {
+		return _queryProvider.isOrdered();
 	}
 
 	@Override
@@ -67,4 +71,5 @@ public class CustomQueryScrollingSession implements ScrollingSession {
 		// TODO there are better ways to scroll than setFirstResult(..)
 		return query.setFirstResult(first).setMaxResults(max).setCacheable(false).list();
 	}
+
 }

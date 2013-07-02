@@ -17,11 +17,24 @@ package at.molindo.esi4j.rebuild;
 
 import java.util.List;
 
+import at.molindo.esi4j.rebuild.scrutineer.ScrutineerRebuildProcessor;
+
 /**
  * Session management for rebuilds. Sessions must always be started before any
  * change to the index.
  */
 public interface Esi4JRebuildSession {
+
+	/**
+	 * @return true if session is ordered by id (and thus suited for
+	 *         {@link ScrutineerRebuildProcessor})
+	 */
+	boolean isOrdered();
+
+	/**
+	 * @return the type this session is for
+	 */
+	Class<?> getType();
 
 	/**
 	 * Must only be called after all elements of previous batch haven been

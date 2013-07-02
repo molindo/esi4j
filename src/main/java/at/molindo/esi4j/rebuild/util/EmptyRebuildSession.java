@@ -23,8 +23,23 @@ import at.molindo.esi4j.rebuild.Esi4JRebuildSession;
 public final class EmptyRebuildSession implements Esi4JRebuildSession {
 
 	private boolean _closed = false;
+	private final Class<?> _type;
 
-	public EmptyRebuildSession() {
+	public EmptyRebuildSession(Class<?> type) {
+		if (type == null) {
+			throw new NullPointerException("type");
+		}
+		_type = type;
+	}
+
+	@Override
+	public boolean isOrdered() {
+		return true;
+	}
+
+	@Override
+	public Class<?> getType() {
+		return _type;
 	}
 
 	@Override
@@ -40,4 +55,5 @@ public final class EmptyRebuildSession implements Esi4JRebuildSession {
 	public void close() {
 		_closed = true;
 	}
+
 }

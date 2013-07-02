@@ -19,6 +19,8 @@ import java.util.List;
 
 import org.hibernate.Session;
 
+import at.molindo.esi4j.rebuild.Esi4JRebuildSession;
+
 /**
  * implementations need not be thread-safe or reusable
  */
@@ -28,5 +30,10 @@ public interface ScrollingSession {
 	 * @return the next batch of objects
 	 */
 	List<?> fetch(Session session, int batchSize);
+
+	/**
+	 * @see Esi4JRebuildSession#isOrdered()
+	 */
+	boolean isOrdered();
 
 }

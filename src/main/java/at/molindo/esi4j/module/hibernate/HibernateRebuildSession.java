@@ -58,6 +58,16 @@ public final class HibernateRebuildSession implements Esi4JRebuildSession {
 	}
 
 	@Override
+	public boolean isOrdered() {
+		return _scrollingSession.isOrdered();
+	}
+
+	@Override
+	public Class<?> getType() {
+		return _type;
+	}
+
+	@Override
 	public List<?> getNext(int batchSize) {
 		// clear previous batch
 		_session.clear();
@@ -71,4 +81,5 @@ public final class HibernateRebuildSession implements Esi4JRebuildSession {
 		_tx.commit();
 		_session.close();
 	}
+
 }

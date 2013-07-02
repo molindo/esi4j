@@ -26,6 +26,7 @@ public class Esi4JDummyModule implements Esi4JModule {
 
 	private Class<?> _type;
 	private Collection<? extends Object> _data;
+	private boolean _ordered = false;
 
 	public Esi4JDummyModule() {
 	}
@@ -45,12 +46,21 @@ public class Esi4JDummyModule implements Esi4JModule {
 		return this;
 	}
 
+	public boolean isOrdered() {
+		return _ordered;
+	}
+
+	public Esi4JDummyModule setOrdered(boolean ordered) {
+		_ordered = ordered;
+		return this;
+	}
+
 	@Override
 	public Esi4JRebuildSession startRebuildSession(Class<?> type) {
 		if (_type != type) {
 			throw new IllegalArgumentException("unexpected type " + type.getName());
 		}
-		return new IteratorRebuildSession(_data.iterator());
+		return new IteratorRebuildSession(type, _data.iterator(), _ordered);
 	}
 
 	@Override

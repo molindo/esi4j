@@ -20,7 +20,6 @@ import java.util.List;
 import java.util.NoSuchElementException;
 
 import at.molindo.esi4j.mapping.TypeMapping;
-import at.molindo.esi4j.module.Esi4JModule;
 import at.molindo.esi4j.rebuild.Esi4JRebuildSession;
 
 import com.aconex.scrutineer.IdAndVersion;
@@ -28,22 +27,18 @@ import com.aconex.scrutineer.IdAndVersionStream;
 
 public final class ModuleIdAndVersionStream implements IdAndVersionStream {
 
-	private final Esi4JModule _module;
 	private final int _batchSize;
 	private final TypeMapping _mapping;
+	private Esi4JRebuildSession _rebuildSession;
 
-	private Esi4JRebuildSession _session;
-
-	public ModuleIdAndVersionStream(Esi4JModule module, int batchSize, TypeMapping mapping) {
-		_module = module;
+	public ModuleIdAndVersionStream(Esi4JRebuildSession rebuildSession, int batchSize, TypeMapping mapping) {
+		_rebuildSession = rebuildSession;
 		_batchSize = batchSize;
 		_mapping = mapping;
 	}
 
 	@Override
 	public void open() {
-		verifyNotOpen();
-		_session = _module.startRebuildSession(_mapping.getTypeClass());
 	}
 
 	@Override
@@ -54,10 +49,7 @@ public final class ModuleIdAndVersionStream implements IdAndVersionStream {
 
 	@Override
 	public void close() {
-		if (_session != null) {
-			_session.close();
-			_session = null;
-		}
+		_rebuildSession = null;
 	}
 
 	final class ModuleIdAndVersionStreamIterator implements Iterator<IdAndVersion> {
@@ -103,7 +95,7 @@ public final class ModuleIdAndVersionStream implements IdAndVersionStream {
 			verifyOpen();
 			if (_iter == null || !_lastBatchFetched && !_iter.hasNext()) {
 				// defer calling as long as possible
-				List<?> list = _session.getNext(_batchSize);
+				List<?> list = _rebuildSession.getNext(_batchSize);
 				if (list.size() < _batchSize) {
 					_lastBatchFetched = true;
 				}
@@ -150,14 +142,8 @@ public final class ModuleIdAndVersionStream implements IdAndVersionStream {
 	}
 
 	private void verifyOpen() {
-		if (_session == null) {
+		if (_rebuildSession == null) {
 			throw new IllegalStateException("stream not open");
-		}
-	}
-
-	private void verifyNotOpen() {
-		if (_session != null) {
-			throw new IllegalStateException("stream already open");
 		}
 	}
 
