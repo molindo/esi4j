@@ -10,7 +10,7 @@
 
 	<groupId>at.molindo</groupId>
 	<artifactId>esi4j</artifactId>
-	<version>0.2-alpha-1</version>
+	<version>0.3-SNAPSHOT</version>
 	<packaging>jar</packaging>
 
 	<name>esi4j - Elastic Search Integration for Java</name>
