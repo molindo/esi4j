@@ -17,6 +17,20 @@
 	<name>esi4j - Elastic Search Integration for Java</name>
 	<url>http://github.com/molindo/esi4j</url>
 
+	<scm>
+		<connection>scm:git:git@github.com:molindo/esi4j.git</connection>
+		<developerConnection>scm:git:git@github.com:molindo/esi4j.git</developerConnection>
+		<url>git@github.com:molindo/esi4j.git</url>
+	</scm>
+
+	<licenses>
+		<license>
+			<name>The Apache Software License, Version 2.0</name>
+			<url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+			<distribution>repo</distribution>
+		</license>
+	</licenses>
+
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<elasticsearch.version>0.90.2</elasticsearch.version>
