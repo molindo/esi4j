@@ -8,6 +8,7 @@ jdk:
 branches:
   only:
     - master
+    - es-0.20
 
 # checkout settings
 before_install: 
