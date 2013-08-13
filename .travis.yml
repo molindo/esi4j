@@ -1,0 +1,27 @@
+# deploy Maven artifacts to Sonatype OSS repo
+language: java
+
+jdk:
+  - openjdk6
+
+# whitelist
+branches:
+  only:
+    - master
+    - es-0.20
+
+# checkout settings
+before_install: 
+  - "git clone -b master https://github.com/molindo/travis-settings.git target/travis-settings"
+  - "target/travis-settings/tasks/before_install.sh"
+
+# install and deploy
+install: "target/travis-settings/tasks/install.sh"
+script:  "target/travis-settings/tasks/script.sh"
+
+# travis encrypt 'CI_DEPLOY_USERNAME=username'
+# travis encrypt 'CI_DEPLOY_PASSWORD=password'
+env:
+  global:
+    - secure: "VI58EyEWN2e5KKcffgct0vSwxf4BsWbtqWZCjw9XnMqxIDcYcQEg8z86FFdmNG3Y0qRbj8CfBBVBk1Z0UJjc9eu3XAE/9tWoOtBCacrFmdHAbD9voC/7JWkzNZmL7ZKlbCvQToxvmlo0DivJpyJb8BYWKuhc3NDwkIwPvF0oXAM="
+    - secure: "f4M3i3L2/+JZNt15D2EM6wM4OVQf5XRYvSGsLjtX1+XtsYxLzPM9ACZ+QaV4taKNzocI7ZG498p5xYzmrvFpu7Tvt7s9+h7OMMyANX78ROR07pZGMWQwzRCcAcGTYICVwKCmVu8Wr9cWvR4DbefX9ysDNLn/nn++oN6DId5732g="
