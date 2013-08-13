@@ -19,9 +19,21 @@ before_install:
 install: "target/travis-settings/tasks/install.sh"
 script:  "target/travis-settings/tasks/script.sh"
 
+# travis encrypt 'token@room'
+notifications:
+  email: false
+  hipchat:
+    rooms:
+      - secure: "nMNTrtz3kGh+pv9N+gfymSUXTyV3r3lBkT/48FIxdnLLDd8Uy2MSmTgva1LeFslczRZtaP9XE/9NpvxVtl2ZDzE1It2B9AeVnD/OKtGH6aotp2jA425PpGpAQXzxh8/QAGT2E2U76lZ+stqel/1sNebtFJy2f5010I3n9XqLkUc="
+    template:
+      - '%{repository}#%{build_number} (%{branch} - %{commit} : %{author}): %{message} (<a href="%{build_url}">Details</a>/<a href="%{compare_url}">Change view</a>)'
+    format: html
+    on_success: always
+    on_failure: always
+
 # travis encrypt 'CI_DEPLOY_USERNAME=username'
 # travis encrypt 'CI_DEPLOY_PASSWORD=password'
 env:
   global:
-    - secure: "VI58EyEWN2e5KKcffgct0vSwxf4BsWbtqWZCjw9XnMqxIDcYcQEg8z86FFdmNG3Y0qRbj8CfBBVBk1Z0UJjc9eu3XAE/9tWoOtBCacrFmdHAbD9voC/7JWkzNZmL7ZKlbCvQToxvmlo0DivJpyJb8BYWKuhc3NDwkIwPvF0oXAM="
-    - secure: "f4M3i3L2/+JZNt15D2EM6wM4OVQf5XRYvSGsLjtX1+XtsYxLzPM9ACZ+QaV4taKNzocI7ZG498p5xYzmrvFpu7Tvt7s9+h7OMMyANX78ROR07pZGMWQwzRCcAcGTYICVwKCmVu8Wr9cWvR4DbefX9ysDNLn/nn++oN6DId5732g="
+    - secure: "hlerLdLIxQX4BPgs6+0vOlPwnyBzfufcLqCXBJVTkAWNAIOY+9zulJEzg9zV0egcXfwKx03QBNQ/N/F+fxjtLYhcsqHQzgrpXAN888CIHCU63lwOhZpKIJ27760+zndIcSU8Z0CTAKYzb21bVA41PwMNYfw4c//KdSLgVevdDIE="
+    - secure: "Eu9xOsMAWCfj6v05zC62hnB9q9+LKEdgU+mv2MHms/7FEJZtTuH5Nb0BIhOIOZVA1Ftf7DDIWKVFmqnFrsZli89TCsrbfWVlcUjB/fNaEvHbFKDQEcAqxsTUP8bwYqRNxgBFr9hiky+ZJsVnVpDrudW3Uq9EbEirzrOKoFbT2lM="
