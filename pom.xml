@@ -5,10 +5,9 @@
 	<parent>
 		<groupId>at.molindo</groupId>
 		<artifactId>molindo-oss-pom</artifactId>
-		<version>2</version>
+		<version>4-SNAPSHOT</version>
 	</parent>
 
-	<groupId>at.molindo</groupId>
 	<artifactId>esi4j</artifactId>
 	<version>0.3-SNAPSHOT</version>
 	<packaging>jar</packaging>
@@ -32,7 +31,7 @@
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<elasticsearch.version>0.90.2</elasticsearch.version>
+		<elasticsearch.version>0.90.3</elasticsearch.version>
 		<hibernate.version>3.6.1.Final</hibernate.version>
 		<spring.version>3.0.5.RELEASE</spring.version>
 	</properties>
