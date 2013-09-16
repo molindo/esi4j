@@ -26,7 +26,7 @@ import org.elasticsearch.common.collect.Tuple;
 import org.elasticsearch.common.settings.ImmutableSettings;
 import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.env.Environment;
-import org.elasticsearch.node.internal.InternalSettingsPerparer;
+import org.elasticsearch.node.internal.InternalSettingsPreparer;
 
 import at.molindo.esi4j.core.Esi4J;
 import at.molindo.esi4j.core.Esi4JClient;
@@ -63,7 +63,7 @@ public class DefaultEsi4J implements Esi4J {
 	}
 
 	public DefaultEsi4J(Settings settings, boolean loadConfigSettings) {
-		Tuple<Settings, Environment> tuple = InternalSettingsPerparer.prepareSettings(settings, loadConfigSettings);
+		Tuple<Settings, Environment> tuple = InternalSettingsPreparer.prepareSettings(settings, loadConfigSettings);
 		_settings = settingsBuilder().put(tuple.v1()).put("esi4j.enabled", true).build();
 		_environment = tuple.v2();
 
