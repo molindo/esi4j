@@ -15,9 +15,10 @@
  */
 package at.molindo.esi4j.core;
 
+import at.molindo.esi4j.module.Esi4JModule;
+
 /**
- *
- *
+ * TODO define relationship to {@link Esi4JModule}
  */
 public interface Esi4JIndexManager {
 
