@@ -61,14 +61,6 @@
 				</exclusion>
 			</exclusions>
 		</dependency>
-		<!--
-		<dependency>
-			<groupId>at.molindo</groupId>
-			<artifactId>elasticsearch-osem</artifactId>
-			<version>0.1-SNAPSHOT</version>
-			<optional>true</optional>
-		</dependency>
-		-->
 		<dependency>
 			<groupId>org.hibernate</groupId>
 			<artifactId>hibernate-core</artifactId>
@@ -101,7 +93,7 @@
 		<dependency>
 			<groupId>at.molindo</groupId>
 			<artifactId>molindo-utils</artifactId>
-			<version>1.1-SNAPSHOT</version>
+			<version>1.1.0</version>
 		</dependency>
 
 		<dependency>
