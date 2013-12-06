@@ -21,6 +21,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import org.elasticsearch.action.get.GetResponse;
+import org.elasticsearch.common.xcontent.ToXContent;
 import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.elasticsearch.common.xcontent.json.JsonXContent;
 import org.elasticsearch.index.get.GetField;
@@ -36,6 +37,7 @@ import at.molindo.esi4j.mapping.ObjectSource;
 import at.molindo.esi4j.mapping.TypeMapping;
 import at.molindo.utils.collections.CollectionUtils;
 
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 
 /**
@@ -71,7 +73,7 @@ public abstract class GenericTypeMapping<Type, Id> extends TypeMapping {
 	@Override
 	public final MappingSource getMappingSource() {
 		try {
-			if (_mapping == null) {
+			if (_mapping == null || isDynamicMapping()) {
 				Builder mapperBuilder = new RootObjectMapper.Builder(getTypeAlias());
 
 				buildMapping(mapperBuilder);
@@ -79,7 +81,19 @@ public abstract class GenericTypeMapping<Type, Id> extends TypeMapping {
 				XContentBuilder contentBuilder = JsonXContent.contentBuilder();
 
 				contentBuilder.startObject();
-				mapperBuilder.build(new BuilderContext(null, new ContentPath())).toXContent(contentBuilder, null);
+				mapperBuilder.build(new BuilderContext(null, new ContentPath())).toXContent(contentBuilder, null,
+						new ToXContent() {
+
+							@Override
+							public XContentBuilder toXContent(XContentBuilder builder, Params params)
+									throws IOException {
+								ImmutableMap<String, Object> meta = meta();
+								if (meta != null && !meta.isEmpty()) {
+									builder.field("_meta", meta);
+								}
+								return builder;
+							}
+						});
 				contentBuilder.endObject();
 
 				// cache mapping as string for easy debugging
@@ -89,6 +103,17 @@ public abstract class GenericTypeMapping<Type, Id> extends TypeMapping {
 		} catch (IOException e) {
 			throw new RuntimeException();
 		}
+	}
+
+	/**
+	 * @return true if mapping must not be cached
+	 */
+	public boolean isDynamicMapping() {
+		return false;
+	}
+
+	public ImmutableMap<String, Object> meta() {
+		return null;
 	}
 
 	@Override
