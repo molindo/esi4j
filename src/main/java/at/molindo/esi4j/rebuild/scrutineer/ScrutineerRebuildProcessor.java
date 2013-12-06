@@ -53,6 +53,8 @@ public class ScrutineerRebuildProcessor implements Esi4JRebuildProcessor {
 
 	@Override
 	public void rebuild(InternalIndex index, final Esi4JRebuildSession rebuildSession) {
+		index.updateMapping(rebuildSession.getType());
+
 		index.execute(new Esi4JOperation<Void>() {
 
 			@Override
