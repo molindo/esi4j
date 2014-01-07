@@ -30,7 +30,8 @@ public interface Esi4JRebuildProcessor {
 	boolean isSupported(Esi4JRebuildSession rebuildSession);
 
 	/**
-	 * rebuild all types in index using data from module
+	 * rebuild all types in index using data from module. returns after indexing
+	 * has finished
 	 */
 	void rebuild(InternalIndex index, Esi4JRebuildSession rebuildSession);
 

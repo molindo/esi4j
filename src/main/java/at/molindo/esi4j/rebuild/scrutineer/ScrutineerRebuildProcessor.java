@@ -17,6 +17,8 @@ package at.molindo.esi4j.rebuild.scrutineer;
 
 import org.apache.commons.lang.SystemUtils;
 import org.elasticsearch.client.Client;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import at.molindo.esi4j.core.Esi4JOperation;
 import at.molindo.esi4j.core.internal.InternalIndex;
@@ -45,6 +47,8 @@ public class ScrutineerRebuildProcessor implements Esi4JRebuildProcessor {
 
 	private static final int DEFAULT_SORT_MEM = 256 * 1024 * 1024;
 	private static final int DEFAULT_BATCH_SIZE = 1000;
+
+	private static final Logger log = LoggerFactory.getLogger(ScrutineerRebuildProcessor.class);
 
 	@Override
 	public boolean isSupported(Esi4JRebuildSession rebuildSession) {
@@ -75,8 +79,10 @@ public class ScrutineerRebuildProcessor implements Esi4JRebuildProcessor {
 						new ElasticSearchDownloader(client, indexName, "_type:" + mapping.getTypeAlias(), factory),
 						elasticSearchSorter, iteratorFactory, workingDirectory);
 
-				BulkIndexHelper bulkHelper = new BulkIndexHelper().setMaxRunning(2);
-				bulkHelper.setResponseHandler(new BulkIndexHelper.IResponseHandler() {
+				long start = System.currentTimeMillis();
+
+				BulkIndexHelper h = new BulkIndexHelper().setMaxRunning(2);
+				h.setResponseHandler(new BulkIndexHelper.IResponseHandler() {
 
 					@Override
 					public void handle(String id, String type) {
@@ -89,7 +95,7 @@ public class ScrutineerRebuildProcessor implements Esi4JRebuildProcessor {
 
 				});
 
-				VerifierListener listener = new VerifierListener(client, indexName, context, mapping, bulkHelper,
+				VerifierListener listener = new VerifierListener(client, indexName, context, mapping, h,
 						DEFAULT_BATCH_SIZE);
 
 				try {
@@ -100,6 +106,27 @@ public class ScrutineerRebuildProcessor implements Esi4JRebuildProcessor {
 					 * with streams
 					 */
 					listener.close();
+				}
+
+				try {
+					h.await();
+
+					long seconds = (System.currentTimeMillis() - start) / 1000;
+
+					// logging
+					StringBuilder logMsg = new StringBuilder("finished indexing of ").append(h.getSucceeded())
+							.append(" objects of type ").append(rebuildSession.getType().getName()).append(" in ")
+							.append(seconds).append(" seconds");
+
+					if (h.getFailed() > 0) {
+						logMsg.append(" (").append(h.getFailed()).append(" failed)");
+						log.warn(logMsg.toString());
+					} else {
+						log.info(logMsg.toString());
+					}
+
+				} catch (InterruptedException e) {
+					log.error("awaiting completion of indexing has been interrupted", e);
 				}
 
 				return null;
