@@ -15,50 +15,46 @@
  */
 package at.molindo.esi4j.rebuild.util;
 
-import java.util.Collections;
 import java.util.List;
 
 import at.molindo.esi4j.rebuild.Esi4JRebuildSession;
 
-public final class EmptyRebuildSession implements Esi4JRebuildSession {
+public class MetadataRebuildSessionWrapper implements Esi4JRebuildSession {
 
-	private boolean _closed = false;
-	private final Class<?> _type;
+	private final Esi4JRebuildSession _wrapped;
+	private final Object _metadata;
 
-	public EmptyRebuildSession(Class<?> type) {
-		if (type == null) {
-			throw new NullPointerException("type");
+	public MetadataRebuildSessionWrapper(Esi4JRebuildSession wrapped, Object metadata) {
+		if (wrapped == null) {
+			throw new NullPointerException("wrapped");
 		}
-		_type = type;
+		_wrapped = wrapped;
+		_metadata = metadata;
 	}
 
 	@Override
 	public boolean isOrdered() {
-		return true;
+		return _wrapped.isOrdered();
 	}
 
 	@Override
 	public Class<?> getType() {
-		return _type;
+		return _wrapped.getType();
 	}
 
 	@Override
 	public List<?> getNext(int batchSize) {
-		if (_closed) {
-			throw new IllegalStateException("already closed");
-		} else {
-			return Collections.emptyList();
-		}
-	}
-
-	@Override
-	public Object getMetadata() {
-		return null;
+		return _wrapped.getNext(batchSize);
 	}
 
 	@Override
 	public void close() {
-		_closed = true;
+		_wrapped.close();
+	}
+
+	@Override
+	public Object getMetadata() {
+		return _metadata;
 	}
 
 }

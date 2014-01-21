@@ -48,7 +48,15 @@ public interface Esi4JRebuildSession {
 	List<?> getNext(int batchSize);
 
 	/**
-	 * release resources. Must always be calledm, even in case of errors.
+	 * @return an optional metadata object that will be written to index after
+	 *         successful rebuild. May be <code>null</code>. Metadata type must
+	 *         be mapped.
+	 */
+	Object getMetadata();
+
+	/**
+	 * release resources. Must always be called, even in case of errors.
 	 */
 	void close();
+
 }

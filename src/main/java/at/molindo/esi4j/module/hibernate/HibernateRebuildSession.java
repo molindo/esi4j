@@ -75,6 +75,11 @@ public final class HibernateRebuildSession implements Esi4JRebuildSession {
 	}
 
 	@Override
+	public Object getMetadata() {
+		return null;
+	}
+
+	@Override
 	public void close() {
 		_session.clear();
 		_module.unsetRebuilding(_type);

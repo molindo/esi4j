@@ -71,9 +71,17 @@ public class DefaultRebuildManager implements Esi4JRebuildManager {
 			try {
 				waitForGreenStatus(index);
 				findRebuildProcessor(rebuildSession).rebuild(index, rebuildSession);
+
+				// update metadata after succesful build
+				Object meta = rebuildSession.getMetadata();
+				if (meta != null) {
+					index.index(meta);
+				}
+
 			} finally {
 				rebuildSession.close();
 			}
+
 		}
 
 		// optimize index after rebuild

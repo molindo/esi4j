@@ -77,6 +77,11 @@ public class ModuleIdAndVersionStreamTest {
 					}
 
 					@Override
+					public Object getMetadata() {
+						return null;
+					}
+
+					@Override
 					public void close() {
 						assertEquals(fetched[0], processed[0]);
 						session.close();

@@ -68,6 +68,11 @@ public class IteratorRebuildSession implements Esi4JRebuildSession {
 	}
 
 	@Override
+	public Object getMetadata() {
+		return null;
+	}
+
+	@Override
 	public void close() {
 		_iterator = null;
 	}
