@@ -92,7 +92,7 @@ public class ElasticsearchModule implements Esi4JModule {
 						if (_scrollId == null) {
 							// first request
 							SearchRequestBuilder builder = new SearchRequestBuilder(_client)
-									.setIndices(mapping.getTypeAlias()).setFilter(FilterBuilders.matchAllFilter())
+									.setIndices(mapping.getTypeAlias()).setPostFilter(FilterBuilders.matchAllFilter())
 									.setScroll(TimeValue.timeValueSeconds(_scrollTimeoutSeconds))
 									.addSort("_id", SortOrder.ASC).setSize(batchSize);
 

@@ -15,6 +15,8 @@
  */
 package at.molindo.esi4j.mapping.impl;
 
+import static org.elasticsearch.common.xcontent.ToXContent.EMPTY_PARAMS;
+
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
@@ -81,8 +83,8 @@ public abstract class GenericTypeMapping<Type, Id> extends TypeMapping {
 				XContentBuilder contentBuilder = JsonXContent.contentBuilder();
 
 				contentBuilder.startObject();
-				mapperBuilder.build(new BuilderContext(null, new ContentPath())).toXContent(contentBuilder, null,
-						new ToXContent() {
+				mapperBuilder.build(new BuilderContext(null, new ContentPath())).toXContent(contentBuilder,
+						EMPTY_PARAMS, new ToXContent() {
 
 							@Override
 							public XContentBuilder toXContent(XContentBuilder builder, Params params)
