@@ -19,7 +19,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-import org.elasticsearch.ElasticSearchException;
+import org.elasticsearch.ElasticsearchException;
 import org.elasticsearch.action.ActionListener;
 import org.elasticsearch.action.ListenableActionFuture;
 import org.elasticsearch.common.unit.TimeValue;
@@ -80,27 +80,27 @@ public final class ListenableActionFutureWrapper<F, T> implements ListenableActi
 	}
 
 	@Override
-	public T actionGet() throws ElasticSearchException {
+	public T actionGet() throws ElasticsearchException {
 		return applyFunction(_future.actionGet());
 	}
 
 	@Override
-	public T actionGet(String timeout) throws ElasticSearchException {
+	public T actionGet(String timeout) throws ElasticsearchException {
 		return applyFunction(_future.actionGet(timeout));
 	}
 
 	@Override
-	public T actionGet(long timeoutMillis) throws ElasticSearchException {
+	public T actionGet(long timeoutMillis) throws ElasticsearchException {
 		return applyFunction(_future.actionGet(timeoutMillis));
 	}
 
 	@Override
-	public T actionGet(long timeout, TimeUnit unit) throws ElasticSearchException {
+	public T actionGet(long timeout, TimeUnit unit) throws ElasticsearchException {
 		return applyFunction(_future.actionGet(timeout, unit));
 	}
 
 	@Override
-	public T actionGet(TimeValue timeout) throws ElasticSearchException {
+	public T actionGet(TimeValue timeout) throws ElasticsearchException {
 		return applyFunction(_future.actionGet(timeout));
 	}
 

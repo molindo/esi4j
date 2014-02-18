@@ -22,7 +22,7 @@ import static org.easymock.EasyMock.verify;
 import static org.elasticsearch.common.settings.ImmutableSettings.settingsBuilder;
 
 import org.elasticsearch.common.settings.Settings;
-import org.testng.annotations.Test;
+import org.junit.Test;
 
 import at.molindo.esi4j.core.Esi4JClient;
 import at.molindo.esi4j.core.internal.InternalIndex;

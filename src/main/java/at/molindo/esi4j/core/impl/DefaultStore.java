@@ -133,7 +133,7 @@ public class DefaultStore implements Esi4JStore {
 						.execute().actionGet();
 
 				ClusterStateResponse state = _client.getClient().admin().cluster().prepareState()
-						.setFilterIndices(_indexName).setFilterAll().setFilterMetaData(false).execute().actionGet();
+						.setIndices(_indexName).setMetaData(true).execute().actionGet();
 
 				Settings indexSettings = state.getState().getMetaData().getIndices().get(_indexName).getSettings();
 

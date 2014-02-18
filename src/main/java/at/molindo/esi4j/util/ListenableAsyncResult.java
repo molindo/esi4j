@@ -17,7 +17,7 @@ package at.molindo.esi4j.util;
 
 import java.util.concurrent.TimeUnit;
 
-import org.elasticsearch.ElasticSearchException;
+import org.elasticsearch.ElasticsearchException;
 import org.elasticsearch.action.ActionListener;
 import org.elasticsearch.action.ActionRequest;
 import org.elasticsearch.action.ListenableActionFuture;
@@ -47,27 +47,27 @@ public class ListenableAsyncResult<V> extends AsyncResult<V> implements Listenab
 	}
 
 	@Override
-	public V actionGet() throws ElasticSearchException {
+	public V actionGet() throws ElasticsearchException {
 		return get();
 	}
 
 	@Override
-	public V actionGet(String timeout) throws ElasticSearchException {
+	public V actionGet(String timeout) throws ElasticsearchException {
 		return get();
 	}
 
 	@Override
-	public V actionGet(long timeoutMillis) throws ElasticSearchException {
+	public V actionGet(long timeoutMillis) throws ElasticsearchException {
 		return get();
 	}
 
 	@Override
-	public V actionGet(long timeout, TimeUnit unit) throws ElasticSearchException {
+	public V actionGet(long timeout, TimeUnit unit) throws ElasticsearchException {
 		return get();
 	}
 
 	@Override
-	public V actionGet(TimeValue timeout) throws ElasticSearchException {
+	public V actionGet(TimeValue timeout) throws ElasticsearchException {
 		return get();
 	}
 

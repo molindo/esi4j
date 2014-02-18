@@ -16,13 +16,13 @@
 package at.molindo.esi4j.chain.impl;
 
 import static org.easymock.EasyMock.createMock;
-import static org.testng.AssertJUnit.assertFalse;
-import static org.testng.AssertJUnit.assertTrue;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 import java.util.Map.Entry;
 
 import org.easymock.EasyMock;
-import org.testng.annotations.Test;
+import org.junit.Test;
 
 import at.molindo.esi4j.chain.Esi4JEntityTask;
 import at.molindo.esi4j.chain.Esi4JTaskProcessor;

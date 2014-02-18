@@ -18,7 +18,7 @@ package at.molindo.esi4j.util;
 import java.lang.reflect.Constructor;
 import java.util.Map.Entry;
 
-import org.elasticsearch.ElasticSearchException;
+import org.elasticsearch.ElasticsearchException;
 import org.elasticsearch.common.Nullable;
 import org.elasticsearch.common.settings.ImmutableSettings;
 import org.elasticsearch.common.settings.ImmutableSettings.Builder;
@@ -38,7 +38,7 @@ public class Esi4JUtils {
 			try {
 				return constructor.newInstance(settings);
 			} catch (Exception e) {
-				throw new ElasticSearchException("Failed to create instance [" + cls + "]", e);
+				throw new ElasticsearchException("Failed to create instance [" + cls + "]", e);
 			}
 		} catch (NoSuchMethodException e) {
 			try {
@@ -46,10 +46,10 @@ public class Esi4JUtils {
 				try {
 					return constructor.newInstance();
 				} catch (Exception e1) {
-					throw new ElasticSearchException("Failed to create instance [" + cls + "]", e);
+					throw new ElasticsearchException("Failed to create instance [" + cls + "]", e);
 				}
 			} catch (NoSuchMethodException e1) {
-				throw new ElasticSearchException("No constructor for [" + cls + "]");
+				throw new ElasticsearchException("No constructor for [" + cls + "]");
 			}
 		}
 	}
@@ -66,7 +66,7 @@ public class Esi4JUtils {
 			try {
 				return constructor.newInstance(arg, settings);
 			} catch (Exception e) {
-				throw new ElasticSearchException("Failed to create instance [" + cls + "]", e);
+				throw new ElasticsearchException("Failed to create instance [" + cls + "]", e);
 			}
 		} catch (NoSuchMethodException e) {
 			try {
@@ -74,10 +74,10 @@ public class Esi4JUtils {
 				try {
 					return constructor.newInstance(arg);
 				} catch (Exception e1) {
-					throw new ElasticSearchException("Failed to create instance [" + cls + "]", e);
+					throw new ElasticsearchException("Failed to create instance [" + cls + "]", e);
 				}
 			} catch (NoSuchMethodException e1) {
-				throw new ElasticSearchException("No constructor for [" + cls + "] and argument " + arg.getClass());
+				throw new ElasticsearchException("No constructor for [" + cls + "] and argument " + arg.getClass());
 			}
 		}
 	}

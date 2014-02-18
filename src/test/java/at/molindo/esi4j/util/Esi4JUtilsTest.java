@@ -15,10 +15,12 @@
  */
 package at.molindo.esi4j.util;
 
-import static org.testng.Assert.*;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+
 import org.elasticsearch.common.settings.ImmutableSettings;
 import org.elasticsearch.common.settings.Settings;
-import org.testng.annotations.Test;
+import org.junit.Test;
 
 public class Esi4JUtilsTest {
 

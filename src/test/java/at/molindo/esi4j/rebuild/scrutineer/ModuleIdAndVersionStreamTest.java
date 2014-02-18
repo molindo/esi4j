@@ -15,12 +15,12 @@
  */
 package at.molindo.esi4j.rebuild.scrutineer;
 
-import static org.testng.AssertJUnit.assertEquals;
-import static org.testng.AssertJUnit.assertNotNull;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
 import java.util.List;
 
-import org.testng.annotations.Test;
+import org.junit.Test;
 
 import at.molindo.esi4j.rebuild.Esi4JRebuildSession;
 import at.molindo.esi4j.rebuild.scrutineer.ModuleIdAndVersionStream.ModuleIdAndVersionStreamIterator;
@@ -74,6 +74,11 @@ public class ModuleIdAndVersionStreamTest {
 						fetched[0] += list.size();
 
 						return list;
+					}
+
+					private void assertEquals(int i, int j) {
+						// TODO Auto-generated method stub
+
 					}
 
 					@Override
