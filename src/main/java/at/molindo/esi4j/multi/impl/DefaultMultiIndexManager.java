@@ -17,12 +17,14 @@ package at.molindo.esi4j.multi.impl;
 
 import java.util.Arrays;
 import java.util.LinkedHashSet;
-import java.util.Map.Entry;
 import java.util.Set;
 
 import at.molindo.esi4j.core.internal.InternalIndex;
 import at.molindo.esi4j.multi.Esi4JManagedMultiIndex;
 import at.molindo.esi4j.multi.Esi4JMultiIndexManager;
+import at.molindo.utils.collections.ArrayUtils;
+import at.molindo.utils.collections.IteratorUtils;
+import at.molindo.utils.data.Function;
 
 import com.google.common.collect.Sets;
 
@@ -32,12 +34,20 @@ import com.google.common.collect.Sets;
 public class DefaultMultiIndexManager implements Esi4JMultiIndexManager {
 
 	private final Esi4JManagedMultiIndex _index;
+	private final Iterable<InternalIndex> _managedIndices;
 
 	public DefaultMultiIndexManager(Esi4JManagedMultiIndex index) {
 		if (index == null) {
 			throw new NullPointerException("index");
 		}
 		_index = index;
+		_managedIndices = IteratorUtils.readOnly(IteratorUtils.filter(getIndex().getIndices().values(),
+				new Function<InternalIndex, Boolean>() {
+					@Override
+					public Boolean apply(InternalIndex index) {
+						return index != null && index.getIndexManager() != null;
+					}
+				}));
 	}
 
 	/**
@@ -45,37 +55,51 @@ public class DefaultMultiIndexManager implements Esi4JMultiIndexManager {
 	 */
 	@Override
 	public void rebuild(Class<?>... types) {
-		for (InternalIndex index : getIndex().getIndices().values()) {
+		if (ArrayUtils.empty(types)) {
+			// default is to rebuild all
+			for (InternalIndex index : getManagedIndices()) {
+				index.getIndexManager().rebuild();
+			}
+		} else {
+			for (InternalIndex index : getManagedIndices()) {
 
-			LinkedHashSet<Class<?>> typeSet = Sets.newLinkedHashSet(Arrays.asList(types));
-			typeSet.retainAll(Arrays.asList(index.getIndexManager().getTypes()));
+				// find type managed by this index manager
+				LinkedHashSet<Class<?>> typeSet = Sets.newLinkedHashSet(Arrays.asList(types));
+				typeSet.retainAll(Arrays.asList(index.getIndexManager().getTypes()));
 
-			Class<?>[] managedTypes = typeSet.toArray(new Class<?>[typeSet.size()]);
-
-			index.getIndexManager().rebuild(managedTypes);
+				if (!typeSet.isEmpty()) {
+					// only rebuild if any type managed by this manager
+					Class<?>[] managedTypes = typeSet.toArray(new Class<?>[typeSet.size()]);
+					index.getIndexManager().rebuild(managedTypes);
+				}
+			}
 		}
 
 	}
 
 	@Override
 	public void refresh() {
-		for (Entry<String, InternalIndex> e : _index.getIndices().entrySet()) {
-			e.getValue().getIndexManager().refresh();
+		for (InternalIndex index : getManagedIndices()) {
+			index.getIndexManager().refresh();
 		}
 	}
 
 	@Override
 	public Class<?>[] getTypes() {
 		Set<Class<?>> types = Sets.newLinkedHashSet();
-		for (InternalIndex index : getIndex().getIndices().values()) {
+		for (InternalIndex index : getManagedIndices()) {
 			types.addAll(Arrays.asList(index.getIndexManager().getTypes()));
 		}
 		return types.toArray(new Class<?>[types.size()]);
 	}
 
 	@Override
-	public Esi4JManagedMultiIndex getIndex() {
+	public final Esi4JManagedMultiIndex getIndex() {
 		return _index;
+	}
+
+	protected final Iterable<InternalIndex> getManagedIndices() {
+		return _managedIndices;
 	}
 
 	@Override
