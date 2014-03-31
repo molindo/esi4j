@@ -88,11 +88,14 @@ public class ScrutineerRebuildProcessor implements Esi4JRebuildProcessor {
 					public void handle(String id, String type) {
 						if ("delete".equals(type)) {
 							onDelete(mapping.getTypeClass(), mapping.toId(id));
-						} else {
+						} else if ("index".equals(type)) {
 							onIndex(mapping.getTypeClass(), mapping.toId(id));
+						} else if ("create".equals(type)) {
+							onCreate(mapping.getTypeClass(), mapping.toId(id));
+						} else {
+							log.warn("unexpected operation type {}", type);
 						}
 					}
-
 				});
 
 				VerifierListener listener = new VerifierListener(client, indexName, context, mapping, h,
@@ -151,6 +154,10 @@ public class ScrutineerRebuildProcessor implements Esi4JRebuildProcessor {
 	}
 
 	protected void onDelete(Class<?> type, Object id) {
+	}
+
+	protected void onCreate(Class<?> type, Object id) {
+		onIndex(type, id);
 	}
 
 }

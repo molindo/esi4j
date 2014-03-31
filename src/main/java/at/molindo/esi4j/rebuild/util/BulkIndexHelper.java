@@ -209,6 +209,15 @@ public class BulkIndexHelper {
 	}
 
 	public interface IResponseHandler {
+
+		/**
+		 * @param id
+		 *            the index id
+		 * @param type
+		 *            The operation type ("index", "create" or "delete").
+		 * 
+		 * @see BulkItemResponse#getOpType()
+		 */
 		void handle(String id, String type);
 	}
 
