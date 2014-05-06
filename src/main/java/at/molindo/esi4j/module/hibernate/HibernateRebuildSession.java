@@ -19,9 +19,9 @@ import java.util.List;
 
 import org.hibernate.CacheMode;
 import org.hibernate.FlushMode;
+import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
-import org.hibernate.classic.Session;
 
 import at.molindo.esi4j.module.hibernate.scrolling.ScrollingSession;
 import at.molindo.esi4j.rebuild.Esi4JRebuildSession;

@@ -26,7 +26,7 @@ import org.hibernate.FetchMode;
 import org.hibernate.Session;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
-import org.hibernate.impl.SessionImpl;
+import org.hibernate.internal.SessionImpl;
 import org.hibernate.metadata.ClassMetadata;
 
 public class DefaultQueryScrollingSession implements ScrollingSession {

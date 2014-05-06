@@ -23,13 +23,13 @@ import javax.transaction.Status;
 import javax.transaction.Synchronization;
 
 import org.hibernate.Transaction;
-import org.hibernate.event.EventSource;
-import org.hibernate.event.PostDeleteEvent;
-import org.hibernate.event.PostDeleteEventListener;
-import org.hibernate.event.PostInsertEvent;
-import org.hibernate.event.PostInsertEventListener;
-import org.hibernate.event.PostUpdateEvent;
-import org.hibernate.event.PostUpdateEventListener;
+import org.hibernate.event.spi.EventSource;
+import org.hibernate.event.spi.PostDeleteEvent;
+import org.hibernate.event.spi.PostDeleteEventListener;
+import org.hibernate.event.spi.PostInsertEvent;
+import org.hibernate.event.spi.PostInsertEventListener;
+import org.hibernate.event.spi.PostUpdateEvent;
+import org.hibernate.event.spi.PostUpdateEventListener;
 
 import at.molindo.esi4j.chain.Esi4JBatchedEventProcessor;
 import at.molindo.esi4j.chain.Esi4JBatchedEventProcessor.EventSession;
@@ -56,6 +56,7 @@ public class HibernateEventListener implements PostDeleteEventListener, PostInse
 
 	}
 
+	@Override
 	public void onPostInsert(PostInsertEvent event) {
 		EventSession eventSession = findEventSession(event.getSession());
 		if (eventSession != null) {
@@ -65,6 +66,7 @@ public class HibernateEventListener implements PostDeleteEventListener, PostInse
 		}
 	}
 
+	@Override
 	public void onPostUpdate(PostUpdateEvent event) {
 		EventSession eventSession = findEventSession(event.getSession());
 		if (eventSession != null) {
@@ -74,6 +76,7 @@ public class HibernateEventListener implements PostDeleteEventListener, PostInse
 		}
 	}
 
+	@Override
 	public void onPostDelete(PostDeleteEvent event) {
 		EventSession eventSession = findEventSession(event.getSession());
 		if (eventSession != null) {

@@ -19,7 +19,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ConcurrentMap;
 
-import org.hibernate.EntityMode;
 import org.hibernate.SessionFactory;
 import org.hibernate.metadata.ClassMetadata;
 
@@ -54,7 +53,7 @@ public class HibernateModule implements Esi4JModule {
 		// calculate types
 		List<Class<?>> list = Lists.newArrayList();
 		for (ClassMetadata classMetadata : sessionFactory.getAllClassMetadata().values()) {
-			Class<?> type = classMetadata.getMappedClass(EntityMode.POJO);
+			Class<?> type = classMetadata.getMappedClass();
 			if (type != null) {
 				list.add(type);
 			}
@@ -75,7 +74,8 @@ public class HibernateModule implements Esi4JModule {
 
 	private ScrollingSession newScrollingSession(final Class<?> type) {
 		ScrollingSessionProvider scrollingSessionProvider = _scrollingProviders.get(type);
-		return scrollingSessionProvider == null ? new DefaultQueryScrollingSession(type) : scrollingSessionProvider.newScrollingSession();
+		return scrollingSessionProvider == null ? new DefaultQueryScrollingSession(type) : scrollingSessionProvider
+				.newScrollingSession();
 	}
 
 	void unsetRebuilding(Class<?> type) {
