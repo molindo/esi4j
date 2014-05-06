@@ -20,11 +20,10 @@ import java.util.Date;
 import java.util.Map.Entry;
 
 import org.hibernate.CacheMode;
-import org.hibernate.EntityMode;
 import org.hibernate.FlushMode;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
-import org.hibernate.impl.SessionImpl;
+import org.hibernate.internal.SessionImpl;
 import org.hibernate.metadata.ClassMetadata;
 
 import at.molindo.esi4j.chain.Esi4JEntityResolver;
@@ -45,7 +44,7 @@ public class HibernateEntityResolver implements Esi4JEntityResolver {
 
 		for (Entry<String, ClassMetadata> e : sessionFactory.getAllClassMetadata().entrySet()) {
 
-			Class<?> mappedClass = e.getValue().getMappedClass(EntityMode.POJO);
+			Class<?> mappedClass = e.getValue().getMappedClass();
 
 			if (mappedClass != null) {
 				_entityNames.put(mappedClass, e.getKey());
@@ -68,11 +67,10 @@ public class HibernateEntityResolver implements Esi4JEntityResolver {
 
 		ClassMetadata meta = factory.getClassMetadata(entityName);
 
-		EntityMode entityMode = session.getEntityMode();
-		Class<?> type = meta.getMappedClass(entityMode);
+		Class<?> type = meta.getMappedClass();
 
 		Serializable id = meta.getIdentifier(entity, (SessionImpl) session);
-		Long version = toLongVersion(meta.getVersion(entity, entityMode));
+		Long version = toLongVersion(meta.getVersion(entity));
 
 		return new ObjectKey(type, id, version);
 	}
