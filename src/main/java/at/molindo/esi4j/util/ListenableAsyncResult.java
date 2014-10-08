@@ -22,7 +22,7 @@ import org.elasticsearch.action.ActionListener;
 import org.elasticsearch.action.ActionRequest;
 import org.elasticsearch.action.ListenableActionFuture;
 import org.elasticsearch.client.Client;
-import org.elasticsearch.client.internal.InternalClient;
+import org.elasticsearch.client.transport.support.InternalTransportClient;
 import org.elasticsearch.common.unit.TimeValue;
 import org.elasticsearch.threadpool.ThreadPool;
 
@@ -37,8 +37,8 @@ public class ListenableAsyncResult<V> extends AsyncResult<V> implements Listenab
 	}
 
 	public static <V> ListenableAsyncResult<V> create(V value, Client client, ActionRequest<?> request) {
-		return new ListenableAsyncResult<V>(value, request.listenerThreaded() ? ((InternalClient) client).threadPool()
-				: null);
+		return new ListenableAsyncResult<V>(value,
+				request.listenerThreaded() ? ((InternalTransportClient) client).threadPool() : null);
 	}
 
 	public ListenableAsyncResult(V value, ThreadPool threadPool) {
@@ -89,11 +89,6 @@ public class ListenableAsyncResult<V> extends AsyncResult<V> implements Listenab
 				listener.onResponse(get());
 			}
 		});
-	}
-
-	@Override
-	public void addListener(final Runnable listener) {
-		executeListener(listener);
 	}
 
 	private void executeListener(final Runnable listener) {

@@ -31,7 +31,7 @@
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<elasticsearch.version>1.0.0</elasticsearch.version>
+		<elasticsearch.version>1.4.0.beta1</elasticsearch.version>
 		<hibernate.version>4.2.12.Final</hibernate.version>
 		<spring.version>3.2.4.RELEASE</spring.version>
 	</properties>
