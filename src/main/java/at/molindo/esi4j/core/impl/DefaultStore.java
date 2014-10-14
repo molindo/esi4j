@@ -15,6 +15,7 @@
  */
 package at.molindo.esi4j.core.impl;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -22,13 +23,19 @@ import org.elasticsearch.action.admin.cluster.state.ClusterStateResponse;
 import org.elasticsearch.action.admin.indices.create.CreateIndexRequestBuilder;
 import org.elasticsearch.action.admin.indices.create.CreateIndexResponse;
 import org.elasticsearch.action.admin.indices.exists.indices.IndicesExistsResponse;
+import org.elasticsearch.action.admin.indices.recovery.RecoveryRequestBuilder;
+import org.elasticsearch.action.admin.indices.recovery.RecoveryResponse;
+import org.elasticsearch.action.admin.indices.recovery.ShardRecoveryResponse;
+import org.elasticsearch.cluster.block.ClusterBlockException;
 import org.elasticsearch.cluster.settings.ClusterDynamicSettings;
 import org.elasticsearch.cluster.settings.DynamicSettings;
 import org.elasticsearch.common.inject.Inject;
 import org.elasticsearch.common.settings.ImmutableSettings;
 import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.common.unit.TimeValue;
+import org.elasticsearch.gateway.GatewayService;
 import org.elasticsearch.index.settings.IndexDynamicSettings;
+import org.elasticsearch.indices.IndexMissingException;
 import org.elasticsearch.node.internal.InternalNode;
 
 import at.molindo.esi4j.core.Esi4JClient;
@@ -42,6 +49,9 @@ public class DefaultStore implements Esi4JStore {
 	private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(DefaultStore.class);
 
 	private static final long INDEX_CREATION_TIMEOUT_SECONDS = 30;
+
+	private static final int MAX_RECOVERY_STATE_RETRIES = 5;
+	private static final long RECOVERY_RETRY_SLEEP = 500;
 
 	private final Esi4JClient _client;
 
@@ -101,6 +111,8 @@ public class DefaultStore implements Esi4JStore {
 	}
 
 	void assertIndex(Esi4JIndex index) {
+		assertRecoveryState();
+
 		IndicesExistsResponse existsResponse = _client.getClient().admin().indices().prepareExists(_indexName)
 				.execute().actionGet();
 
@@ -151,6 +163,62 @@ public class DefaultStore implements Esi4JStore {
 				// TODO reset previously set settings to their defaults
 				// TODO try closing index to update settings
 			}
+		}
+	}
+
+	private void assertRecoveryState() {
+		if (!getRecoveryState(0)) {
+			throw new IllegalStateException("unable to recover index state for index " + _indexName);
+		}
+	}
+
+	private boolean getRecoveryState(int retry) {
+		try {
+
+			RecoveryResponse recoveryRespone = _client
+					.getClient()
+					.admin()
+					.indices()
+					.recoveries(
+							new RecoveryRequestBuilder(_client.getClient().admin().indices()).setIndices(_indexName)
+									.request()).actionGet();
+
+			Map<String, List<ShardRecoveryResponse>> shardResponses = recoveryRespone.shardResponses();
+
+			/*
+			 * TODO check response stage, currently allow all, the important
+			 * part here is that the service is available
+			 */
+
+			if (log.isDebugEnabled()) {
+				for (Map.Entry<String, List<ShardRecoveryResponse>> entry : shardResponses.entrySet()) {
+					log.debug("shard responses for index {}", entry.getKey());
+					for (ShardRecoveryResponse sr : entry.getValue()) {
+						log.debug("  shard: {}, status: {}", sr.getShardId(), sr.recoveryState().getStage());
+					}
+				}
+			}
+
+			return true;
+
+		} catch (ClusterBlockException ex) {
+			log.debug("recovery state not available");
+			if (ex.retryable() && ex.blocks().contains(GatewayService.STATE_NOT_RECOVERED_BLOCK)) {
+				if (retry < MAX_RECOVERY_STATE_RETRIES) {
+					log.debug("operation is retryable: retrying getting recovery state after 500ms");
+					try {
+						Thread.sleep(RECOVERY_RETRY_SLEEP);
+						getRecoveryState(retry++);
+					} catch (InterruptedException e) {
+					}
+				} else {
+					log.debug("max retries reached, abort");
+				}
+			}
+			return false;
+		} catch (IndexMissingException ex) {
+			// that's ok, service is available, create index
+			return true;
 		}
 	}
 
