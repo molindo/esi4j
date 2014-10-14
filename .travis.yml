@@ -9,6 +9,7 @@ branches:
   only:
     - master
     - es-0.20
+    - es-1.0
 
 # checkout settings
 before_install: 
