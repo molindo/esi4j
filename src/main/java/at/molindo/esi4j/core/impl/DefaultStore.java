@@ -208,7 +208,7 @@ public class DefaultStore implements Esi4JStore {
 					log.debug("operation is retryable: retrying getting recovery state after 500ms");
 					try {
 						Thread.sleep(RECOVERY_RETRY_SLEEP);
-						getRecoveryState(retry++);
+						return getRecoveryState(retry++);
 					} catch (InterruptedException e) {
 					}
 				} else {
