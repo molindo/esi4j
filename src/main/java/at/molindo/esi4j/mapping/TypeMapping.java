@@ -153,8 +153,8 @@ public abstract class TypeMapping {
 	 * @return null if object is filtered
 	 */
 	@CheckForNull
-	public final IndexRequest indexRequest(String indexName, Object o) {
-		IndexRequestBuilder builder = populate(new IndexRequestBuilder(null), indexName, o);
+	public final IndexRequest indexBuilderRequest(Client client, String indexName, Object o) {
+		IndexRequestBuilder builder = populate(new IndexRequestBuilder(client), indexName, o);
 		return builder == null ? null : builder.request();
 	}
 
@@ -179,16 +179,16 @@ public abstract class TypeMapping {
 	 * @return null if object doesn't have an id
 	 */
 	@CheckForNull
-	public final DeleteRequest deleteRequest(String indexName, Object o) {
-		return deleteRequest(indexName, getIdString(o), getVersion(o));
+	public final DeleteRequest deleteBuilderRequest(Client client, String indexName, Object o) {
+		return deleteBuilderRequest(client, indexName, getIdString(o), getVersion(o));
 	}
 
 	/**
 	 * @return null if object doesn't have an id
 	 */
 	@CheckForNull
-	public final DeleteRequest deleteRequest(String indexName, String id, Long version) {
-		DeleteRequestBuilder builder = populate(new DeleteRequestBuilder(null), indexName, id, version);
+	public final DeleteRequest deleteBuilderRequest(Client client, String indexName, String id, Long version) {
+		DeleteRequestBuilder builder = populate(new DeleteRequestBuilder(client), indexName, id, version);
 		return builder == null ? null : builder.request();
 	}
 

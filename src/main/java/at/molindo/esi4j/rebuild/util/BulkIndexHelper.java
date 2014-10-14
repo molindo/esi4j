@@ -219,7 +219,7 @@ public class BulkIndexHelper {
 		private final OperationContext _context;
 		private final int _batchSize;
 
-		private final List<ActionRequestBuilder<?, ?, ?>> _requests;
+		private final List<ActionRequestBuilder<?, ?, ?, ?>> _requests;
 
 		public Session(Client client, String indexName, OperationContext context, int batchSize) {
 			_client = client;
@@ -255,7 +255,7 @@ public class BulkIndexHelper {
 			return mapping.deleteRequest(_client, _indexName, mapping.toIdString(id), version);
 		}
 
-		private void add(ActionRequestBuilder<?, ?, ?> request) {
+		private void add(ActionRequestBuilder<?, ?, ?, ?> request) {
 			_requests.add(request);
 			if (_requests.size() == _batchSize) {
 				submit();
@@ -271,7 +271,7 @@ public class BulkIndexHelper {
 					public BulkRequestBuilder execute(Client client, String indexName,
 							Esi4JOperation.OperationContext helper) {
 						BulkRequestBuilder bulk = client.prepareBulk();
-						for (ActionRequestBuilder<?, ?, ?> request : _requests) {
+						for (ActionRequestBuilder<?, ?, ?, ?> request : _requests) {
 							if (request instanceof IndexRequestBuilder) {
 								bulk.add((IndexRequestBuilder) request);
 							} else if (request instanceof DeleteRequestBuilder) {

@@ -244,7 +244,7 @@ public class QueuedTaskExecutor {
 							BulkRequestBuilder bulk = client.prepareBulk();
 
 							for (int i = 0; i < _tasks.length; i++) {
-								_tasks[i].addToBulk(bulk, indexName, helper);
+								_tasks[i].addToBulk(client, bulk, indexName, helper);
 							}
 
 							ListenableActionFuture<BulkResponse> response = bulk.execute();

@@ -18,6 +18,7 @@ package at.molindo.esi4j.chain;
 import java.io.Serializable;
 
 import org.elasticsearch.action.bulk.BulkRequestBuilder;
+import org.elasticsearch.client.Client;
 
 import at.molindo.esi4j.core.Esi4JOperation.OperationContext;
 
@@ -43,7 +44,7 @@ public interface Esi4JEntityTask extends Serializable, Cloneable {
 	/**
 	 * add necessary index operations to bulk request
 	 */
-	void addToBulk(BulkRequestBuilder bulk, String indexName, OperationContext context);
+	void addToBulk(Client client, BulkRequestBuilder bulk, String indexName, OperationContext context);
 
 	/**
 	 * @return a clone of this task

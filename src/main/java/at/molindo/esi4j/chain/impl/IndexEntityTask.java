@@ -18,6 +18,7 @@ package at.molindo.esi4j.chain.impl;
 import org.elasticsearch.action.bulk.BulkRequestBuilder;
 import org.elasticsearch.action.delete.DeleteRequest;
 import org.elasticsearch.action.index.IndexRequest;
+import org.elasticsearch.client.Client;
 
 import at.molindo.esi4j.chain.Esi4JEntityResolver;
 import at.molindo.esi4j.chain.Esi4JEntityTask;
@@ -47,16 +48,16 @@ public final class IndexEntityTask extends AbstractEntityTask {
 	}
 
 	@Override
-	public void addToBulk(BulkRequestBuilder bulk, String indexName, OperationContext context) {
+	public void addToBulk(Client client, BulkRequestBuilder bulk, String indexName, OperationContext context) {
 		Object entity = getEntity();
 		if (entity != null) {
 			TypeMapping mapping = context.findTypeMapping(entity);
-			IndexRequest index = mapping.indexRequest(indexName, entity);
+			IndexRequest index = mapping.indexBuilderRequest(client, indexName, entity);
 
 			if (index != null) {
 				bulk.add(index);
 			} else {
-				DeleteRequest delete = mapping.deleteRequest(indexName, entity);
+				DeleteRequest delete = mapping.deleteBuilderRequest(client, indexName, entity);
 				if (delete != null) {
 					bulk.add(delete);
 				}

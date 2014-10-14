@@ -23,6 +23,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import org.elasticsearch.action.get.GetResponse;
+import org.elasticsearch.common.settings.ImmutableSettings;
 import org.elasticsearch.common.xcontent.ToXContent;
 import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.elasticsearch.common.xcontent.json.JsonXContent;
@@ -83,8 +84,8 @@ public abstract class GenericTypeMapping<Type, Id> extends TypeMapping {
 				XContentBuilder contentBuilder = JsonXContent.contentBuilder();
 
 				contentBuilder.startObject();
-				mapperBuilder.build(new BuilderContext(null, new ContentPath())).toXContent(contentBuilder,
-						EMPTY_PARAMS, new ToXContent() {
+				mapperBuilder.build(new BuilderContext(ImmutableSettings.EMPTY, new ContentPath())).toXContent(
+						contentBuilder, EMPTY_PARAMS, new ToXContent() {
 
 							@Override
 							public XContentBuilder toXContent(XContentBuilder builder, Params params)
