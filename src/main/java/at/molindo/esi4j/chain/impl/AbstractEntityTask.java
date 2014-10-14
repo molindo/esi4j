@@ -41,7 +41,8 @@ public abstract class AbstractEntityTask implements Esi4JEntityTask {
 	/**
 	 * @return never null
 	 */
-	protected final Object getEntity() {
+	@Override
+	public final Object getEntity() {
 		return _entity;
 	}
 

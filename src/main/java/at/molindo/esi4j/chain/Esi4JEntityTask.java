@@ -51,4 +51,9 @@ public interface Esi4JEntityTask extends Serializable, Cloneable {
 	 */
 	Esi4JEntityTask clone();
 
+	/**
+	 * @return the entity to perform the task on
+	 */
+	Object getEntity();
+
 }

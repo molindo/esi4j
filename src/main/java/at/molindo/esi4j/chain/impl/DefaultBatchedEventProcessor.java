@@ -15,6 +15,7 @@
  */
 package at.molindo.esi4j.chain.impl;
 
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -38,12 +39,74 @@ public class DefaultBatchedEventProcessor extends DefaultEventProcessor implemen
 
 	@Override
 	public EventSession startSession() {
-		return new SimpleEventSession();
+		return new UniqueEntityEventSession();
+	}
+
+	/**
+	 * Only executes one task for the same entity in the same session. If there
+	 * are multiple tasks added for the same entity, then the <strong>only the
+	 * task added last</strong> will be executed.
+	 */
+	public class UniqueEntityEventSession extends AbstractEventListener implements EventSession {
+
+		private final List<Esi4JEntityTask> _tasks = Lists.newArrayList();
+
+		@Override
+		public void onPostInsert(Object o) {
+			addTasks(getPostInsertTasks(o));
+		}
+
+		@Override
+		public void onPostUpdate(Object o) {
+			addTasks(getPostUpdateTasks(o));
+		}
+
+		@Override
+		public void onPostDelete(Object o) {
+			addTasks(getPostDeleteTasks(o));
+		}
+
+		private void addTasks(Esi4JEntityTask[] tasks) {
+			if (!ArrayUtils.empty(tasks)) {
+				for (Esi4JEntityTask task : tasks) {
+					addUnique(task);
+				}
+			}
+		}
+
+		private void addUnique(Esi4JEntityTask task) {
+			findAndDeleteEntity(task.getEntity());
+			_tasks.add(task);
+		}
+
+		private void findAndDeleteEntity(Object entity) {
+			Iterator<Esi4JEntityTask> iter = _tasks.iterator();
+			boolean deleted = false;
+			while (!deleted && iter.hasNext()) {
+				Esi4JEntityTask task = iter.next();
+
+				if (entity.equals(task.getEntity())) {
+					iter.remove();
+					deleted = true;
+				}
+
+			}
+		}
+
+		@Override
+		public void flush() {
+			Esi4JEntityTask[] allTasks = _tasks.toArray(new Esi4JEntityTask[0]);
+
+			_tasks.clear();
+
+			processTasks(allTasks);
+		}
+
 	}
 
 	public class SimpleEventSession extends AbstractEventListener implements EventSession {
 
-		private List<Esi4JEntityTask[]> _tasks = Lists.newArrayList();
+		private final List<Esi4JEntityTask[]> _tasks = Lists.newArrayList();
 		private int _taskCount = 0;
 
 		@Override
