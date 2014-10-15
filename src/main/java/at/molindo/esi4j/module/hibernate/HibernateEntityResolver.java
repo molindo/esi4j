@@ -27,6 +27,7 @@ import org.hibernate.internal.SessionImpl;
 import org.hibernate.metadata.ClassMetadata;
 
 import at.molindo.esi4j.chain.Esi4JEntityResolver;
+import at.molindo.esi4j.mapping.ObjectKey;
 import at.molindo.utils.collections.ClassMap;
 
 public class HibernateEntityResolver implements Esi4JEntityResolver {

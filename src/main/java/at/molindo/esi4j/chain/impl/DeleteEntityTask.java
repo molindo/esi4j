@@ -19,9 +19,9 @@ import org.elasticsearch.action.bulk.BulkRequestBuilder;
 import org.elasticsearch.client.Client;
 
 import at.molindo.esi4j.chain.Esi4JEntityResolver;
-import at.molindo.esi4j.chain.Esi4JEntityResolver.ObjectKey;
 import at.molindo.esi4j.chain.Esi4JEntityTask;
 import at.molindo.esi4j.core.Esi4JOperation.OperationContext;
+import at.molindo.esi4j.mapping.ObjectKey;
 import at.molindo.esi4j.mapping.TypeMapping;
 
 public final class DeleteEntityTask extends AbstractEntityTask {

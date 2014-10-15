@@ -21,6 +21,7 @@ import org.elasticsearch.action.bulk.BulkRequestBuilder;
 import org.elasticsearch.client.Client;
 
 import at.molindo.esi4j.core.Esi4JOperation.OperationContext;
+import at.molindo.esi4j.mapping.ObjectKey;
 
 /**
  * A task to be processed by an {@link Esi4JTaskProcessor}. A task needs to be
@@ -37,7 +38,7 @@ public interface Esi4JEntityTask extends Serializable, Cloneable {
 	/**
 	 * optional, might be implemented as noop if
 	 * {@link #replaceEntity(Esi4JEntityResolver)} is a noop or entity is a
-	 * {@link Esi4JEntityResolver.ObjectKey}
+	 * {@link ObjectKey}
 	 */
 	void resolveEntity(Esi4JEntityResolver entityResolver);
 
