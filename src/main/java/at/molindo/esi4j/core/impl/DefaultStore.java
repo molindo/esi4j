@@ -19,10 +19,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import org.elasticsearch.action.admin.cluster.health.ClusterHealthRequestBuilder;
+import org.elasticsearch.action.admin.cluster.health.ClusterHealthResponse;
+import org.elasticsearch.action.admin.cluster.health.ClusterHealthStatus;
 import org.elasticsearch.action.admin.cluster.state.ClusterStateResponse;
 import org.elasticsearch.action.admin.indices.create.CreateIndexRequestBuilder;
 import org.elasticsearch.action.admin.indices.create.CreateIndexResponse;
-import org.elasticsearch.action.admin.indices.exists.indices.IndicesExistsResponse;
 import org.elasticsearch.action.admin.indices.recovery.RecoveryRequestBuilder;
 import org.elasticsearch.action.admin.indices.recovery.RecoveryResponse;
 import org.elasticsearch.action.admin.indices.recovery.ShardRecoveryResponse;
@@ -36,12 +38,14 @@ import org.elasticsearch.common.unit.TimeValue;
 import org.elasticsearch.gateway.GatewayService;
 import org.elasticsearch.index.settings.IndexDynamicSettings;
 import org.elasticsearch.indices.IndexMissingException;
+import org.elasticsearch.indices.recovery.RecoveryState;
 import org.elasticsearch.node.internal.InternalNode;
 
 import at.molindo.esi4j.core.Esi4JClient;
 import at.molindo.esi4j.core.Esi4JIndex;
 import at.molindo.esi4j.core.Esi4JStore;
 import at.molindo.esi4j.core.internal.InternalIndex;
+import at.molindo.utils.collections.CollectionUtils;
 import at.molindo.utils.data.StringUtils;
 
 public class DefaultStore implements Esi4JStore {
@@ -50,14 +54,13 @@ public class DefaultStore implements Esi4JStore {
 
 	private static final long INDEX_CREATION_TIMEOUT_SECONDS = 30;
 
-	private static final int MAX_RECOVERY_STATE_RETRIES = 5;
-	private static final long RECOVERY_RETRY_SLEEP = 500;
-
 	private final Esi4JClient _client;
 
 	private final String _indexName;
 
 	private Esi4JIndex _index;
+
+	private final TimeValue _healthTimeout = TimeValue.timeValueSeconds(10);
 
 	public DefaultStore(Esi4JClient client, String indexName) {
 		if (client == null) {
@@ -111,12 +114,7 @@ public class DefaultStore implements Esi4JStore {
 	}
 
 	void assertIndex(Esi4JIndex index) {
-		assertRecoveryState();
-
-		IndicesExistsResponse existsResponse = _client.getClient().admin().indices().prepareExists(_indexName)
-				.execute().actionGet();
-
-		if (!existsResponse.isExists()) {
+		if (!indexExists()) {
 			// create index
 			CreateIndexRequestBuilder request = _client.getClient().admin().indices().prepareCreate(_indexName);
 
@@ -166,13 +164,35 @@ public class DefaultStore implements Esi4JStore {
 		}
 	}
 
-	private void assertRecoveryState() {
-		if (!getRecoveryState(0)) {
-			throw new IllegalStateException("unable to recover index state for index " + _indexName);
+	private boolean indexExists() {
+		try {
+			if (isRecovering()) {
+				// index exists but is recovering
+				waitForYellowStatus();
+			}
+			return true;
+		} catch (MissingIndexException e) {
+			log.info("index missing: {}", _indexName);
+			return false;
 		}
 	}
 
-	private boolean getRecoveryState(int retry) {
+	private void waitForYellowStatus() {
+		if (_healthTimeout != null && _healthTimeout.seconds() > 0) {
+			ClusterHealthRequestBuilder request = _client.getClient().admin().cluster().prepareHealth(_indexName);
+
+			request.setWaitForYellowStatus().setTimeout(_healthTimeout);
+
+			ClusterHealthResponse response = request.execute().actionGet();
+
+			if (response.getStatus() == ClusterHealthStatus.RED) {
+				throw new IllegalStateException("cluster not ready for settings update (status " + response.getStatus()
+						+ ")");
+			}
+		}
+	}
+
+	private boolean isRecovering() throws MissingIndexException {
 		try {
 
 			RecoveryResponse recoveryRespone = _client
@@ -190,35 +210,31 @@ public class DefaultStore implements Esi4JStore {
 			 * part here is that the service is available
 			 */
 
-			if (log.isDebugEnabled()) {
-				for (Map.Entry<String, List<ShardRecoveryResponse>> entry : shardResponses.entrySet()) {
-					log.debug("shard responses for index {}", entry.getKey());
-					for (ShardRecoveryResponse sr : entry.getValue()) {
-						log.debug("  shard: {}, status: {}", sr.getShardId(), sr.recoveryState().getStage());
+			List<ShardRecoveryResponse> responses = shardResponses.get(_indexName);
+			if (CollectionUtils.empty(responses)) {
+				log.warn("shard recovery response does not contain index: {}", _indexName);
+				return false;
+			} else {
+				for (ShardRecoveryResponse response : responses) {
+					if (response.recoveryState().getStage() != RecoveryState.Stage.DONE) {
+						log.debug("cluster recovering: {}", _indexName);
+						return true;
 					}
 				}
+				log.debug("cluster finished recovering: {}", _indexName);
+				return false;
 			}
-
-			return true;
-
 		} catch (ClusterBlockException ex) {
 			log.debug("recovery state not available");
-			if (ex.retryable() && ex.blocks().contains(GatewayService.STATE_NOT_RECOVERED_BLOCK)) {
-				if (retry < MAX_RECOVERY_STATE_RETRIES) {
-					log.debug("operation is retryable: retrying getting recovery state after 500ms");
-					try {
-						Thread.sleep(RECOVERY_RETRY_SLEEP);
-						return getRecoveryState(retry++);
-					} catch (InterruptedException e) {
-					}
-				} else {
-					log.debug("max retries reached, abort");
-				}
+			if (ex.blocks().contains(GatewayService.STATE_NOT_RECOVERED_BLOCK)) {
+				log.debug("cluster blocked, indext not yet recovering: {}", _indexName);
+				return true;
+			} else {
+				log.warn("unexpected cluster block, expect index does not exist", ex);
+				throw new MissingIndexException(_indexName);
 			}
-			return false;
 		} catch (IndexMissingException ex) {
-			// that's ok, service is available, create index
-			return true;
+			throw new MissingIndexException(_indexName, ex);
 		}
 	}
 
@@ -293,6 +309,20 @@ public class DefaultStore implements Esi4JStore {
 
 		public DynamicSettings getIndexDynamicSettings() {
 			return _indexDynamicSettings;
+		}
+
+	}
+
+	private static class MissingIndexException extends Exception {
+
+		private static final long serialVersionUID = 1L;
+
+		public MissingIndexException(String indexName) {
+			this(indexName, null);
+		}
+
+		public MissingIndexException(String indexName, IndexMissingException cause) {
+			super("index missing: " + indexName, cause);
 		}
 
 	}
