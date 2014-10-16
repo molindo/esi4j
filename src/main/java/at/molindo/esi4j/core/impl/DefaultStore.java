@@ -164,16 +164,27 @@ public class DefaultStore implements Esi4JStore {
 		}
 	}
 
+	/**
+	 * we don't use "indices exists" due to elasticsearch#8105
+	 * 
+	 * @return true if the index exists
+	 */
 	private boolean indexExists() {
 		try {
 			if (isRecovering()) {
 				// index exists but is recovering
 				if (!waitForYellowStatus()) {
+					// waiting timed out, during recovery. not a good sign.
 					log.warn("cluster not ready for settings update, assume index {} missing", _indexName);
 					return false;
+				} else {
+					// existing and ready
+					return true;
 				}
+			} else {
+				// not recovering, no need to wait
+				return true;
 			}
-			return true;
 		} catch (MissingIndexException e) {
 			log.info("index missing: {}", _indexName);
 			return false;
@@ -190,6 +201,12 @@ public class DefaultStore implements Esi4JStore {
 		return !response.isTimedOut() && response.getStatus() != ClusterHealthStatus.RED;
 	}
 
+	/**
+	 * @return <code>true</code> if index exists and is recovering,
+	 *         <code>false</code> if it exists but isn't recovering
+	 * @throws MissingIndexException
+	 *             if index does not exist
+	 */
 	private boolean isRecovering() throws MissingIndexException {
 		try {
 
