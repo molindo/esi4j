@@ -15,26 +15,37 @@
  */
 package at.molindo.esi4j.core.impl;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import org.elasticsearch.action.admin.cluster.health.ClusterHealthRequestBuilder;
+import org.elasticsearch.action.admin.cluster.health.ClusterHealthResponse;
+import org.elasticsearch.action.admin.cluster.health.ClusterHealthStatus;
 import org.elasticsearch.action.admin.cluster.state.ClusterStateResponse;
 import org.elasticsearch.action.admin.indices.create.CreateIndexRequestBuilder;
 import org.elasticsearch.action.admin.indices.create.CreateIndexResponse;
-import org.elasticsearch.action.admin.indices.exists.indices.IndicesExistsResponse;
+import org.elasticsearch.action.admin.indices.recovery.RecoveryRequestBuilder;
+import org.elasticsearch.action.admin.indices.recovery.RecoveryResponse;
+import org.elasticsearch.action.admin.indices.recovery.ShardRecoveryResponse;
+import org.elasticsearch.cluster.block.ClusterBlockException;
 import org.elasticsearch.cluster.settings.ClusterDynamicSettings;
 import org.elasticsearch.cluster.settings.DynamicSettings;
 import org.elasticsearch.common.inject.Inject;
 import org.elasticsearch.common.settings.ImmutableSettings;
 import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.common.unit.TimeValue;
+import org.elasticsearch.gateway.GatewayService;
 import org.elasticsearch.index.settings.IndexDynamicSettings;
+import org.elasticsearch.indices.IndexMissingException;
+import org.elasticsearch.indices.recovery.RecoveryState;
 import org.elasticsearch.node.internal.InternalNode;
 
 import at.molindo.esi4j.core.Esi4JClient;
 import at.molindo.esi4j.core.Esi4JIndex;
 import at.molindo.esi4j.core.Esi4JStore;
 import at.molindo.esi4j.core.internal.InternalIndex;
+import at.molindo.utils.collections.CollectionUtils;
 import at.molindo.utils.data.StringUtils;
 
 public class DefaultStore implements Esi4JStore {
@@ -48,6 +59,8 @@ public class DefaultStore implements Esi4JStore {
 	private final String _indexName;
 
 	private Esi4JIndex _index;
+
+	private final TimeValue _healthTimeout = TimeValue.timeValueSeconds(10);
 
 	public DefaultStore(Esi4JClient client, String indexName) {
 		if (client == null) {
@@ -101,10 +114,7 @@ public class DefaultStore implements Esi4JStore {
 	}
 
 	void assertIndex(Esi4JIndex index) {
-		IndicesExistsResponse existsResponse = _client.getClient().admin().indices().prepareExists(_indexName)
-				.execute().actionGet();
-
-		if (!existsResponse.isExists()) {
+		if (!indexExists()) {
 			// create index
 			CreateIndexRequestBuilder request = _client.getClient().admin().indices().prepareCreate(_indexName);
 
@@ -151,6 +161,95 @@ public class DefaultStore implements Esi4JStore {
 				// TODO reset previously set settings to their defaults
 				// TODO try closing index to update settings
 			}
+		}
+	}
+
+	/**
+	 * we don't use "indices exists" due to elasticsearch#8105
+	 * 
+	 * @return true if the index exists
+	 */
+	private boolean indexExists() {
+		try {
+			if (isRecovering()) {
+				// index exists but is recovering
+				if (!waitForYellowStatus()) {
+					// waiting timed out, during recovery. not a good sign.
+					log.warn("cluster not ready for settings update, assume index {} missing", _indexName);
+					return false;
+				} else {
+					// existing and ready
+					return true;
+				}
+			} else {
+				// not recovering, no need to wait
+				return true;
+			}
+		} catch (MissingIndexException e) {
+			log.info("index missing: {}", _indexName);
+			return false;
+		}
+	}
+
+	private boolean waitForYellowStatus() {
+		ClusterHealthRequestBuilder request = _client.getClient().admin().cluster().prepareHealth(_indexName);
+
+		request.setWaitForYellowStatus().setTimeout(_healthTimeout);
+
+		ClusterHealthResponse response = request.execute().actionGet();
+
+		return !response.isTimedOut() && response.getStatus() != ClusterHealthStatus.RED;
+	}
+
+	/**
+	 * @return <code>true</code> if index exists and is recovering,
+	 *         <code>false</code> if it exists but isn't recovering
+	 * @throws MissingIndexException
+	 *             if index does not exist
+	 */
+	private boolean isRecovering() throws MissingIndexException {
+		try {
+
+			RecoveryResponse recoveryRespone = _client
+					.getClient()
+					.admin()
+					.indices()
+					.recoveries(
+							new RecoveryRequestBuilder(_client.getClient().admin().indices()).setIndices(_indexName)
+									.request()).actionGet();
+
+			Map<String, List<ShardRecoveryResponse>> shardResponses = recoveryRespone.shardResponses();
+
+			/*
+			 * TODO check response stage, currently allow all, the important
+			 * part here is that the service is available
+			 */
+
+			List<ShardRecoveryResponse> responses = shardResponses.get(_indexName);
+			if (CollectionUtils.empty(responses)) {
+				log.warn("shard recovery response does not contain index: {}", _indexName);
+				return false;
+			} else {
+				for (ShardRecoveryResponse response : responses) {
+					if (response.recoveryState().getStage() != RecoveryState.Stage.DONE) {
+						log.debug("cluster recovering: {}", _indexName);
+						return true;
+					}
+				}
+				log.debug("cluster finished recovering: {}", _indexName);
+				return false;
+			}
+		} catch (ClusterBlockException ex) {
+			log.debug("recovery state not available");
+			if (ex.blocks().contains(GatewayService.STATE_NOT_RECOVERED_BLOCK)) {
+				log.debug("cluster blocked, indext not yet recovering: {}", _indexName);
+				return true;
+			} else {
+				log.warn("unexpected cluster block, expect index does not exist", ex);
+				throw new MissingIndexException(_indexName);
+			}
+		} catch (IndexMissingException ex) {
+			throw new MissingIndexException(_indexName, ex);
 		}
 	}
 
@@ -225,6 +324,20 @@ public class DefaultStore implements Esi4JStore {
 
 		public DynamicSettings getIndexDynamicSettings() {
 			return _indexDynamicSettings;
+		}
+
+	}
+
+	private static class MissingIndexException extends Exception {
+
+		private static final long serialVersionUID = 1L;
+
+		public MissingIndexException(String indexName) {
+			this(indexName, null);
+		}
+
+		public MissingIndexException(String indexName, IndexMissingException cause) {
+			super("index missing: " + indexName, cause);
 		}
 
 	}
