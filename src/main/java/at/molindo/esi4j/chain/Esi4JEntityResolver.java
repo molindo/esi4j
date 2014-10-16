@@ -16,6 +16,7 @@
 package at.molindo.esi4j.chain;
 
 import at.molindo.esi4j.chain.impl.QueuedTaskExecutor;
+import at.molindo.esi4j.ex.EntityNotResolveableException;
 import at.molindo.esi4j.mapping.ObjectKey;
 
 /**
@@ -39,7 +40,9 @@ public interface Esi4JEntityResolver {
 
 	/**
 	 * @return the replaced entity, the given entity if not replaced or
-	 *         <code>null</code> if entity cannot be resolved
+	 * @throws EntityNotResolveableException
+	 *             if entity cannot be resolved
 	 */
-	Object resolveEntity(Object replacedEntity);
+	Object resolveEntity(Object replacedEntity) throws EntityNotResolveableException;
+
 }

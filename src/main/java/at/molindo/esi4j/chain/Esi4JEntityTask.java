@@ -21,6 +21,7 @@ import org.elasticsearch.action.bulk.BulkRequestBuilder;
 import org.elasticsearch.client.Client;
 
 import at.molindo.esi4j.core.Esi4JOperation.OperationContext;
+import at.molindo.esi4j.ex.EntityNotResolveableException;
 import at.molindo.esi4j.mapping.ObjectKey;
 
 /**
@@ -40,7 +41,12 @@ public interface Esi4JEntityTask extends Serializable, Cloneable {
 	 * {@link #replaceEntity(Esi4JEntityResolver)} is a noop or entity is a
 	 * {@link ObjectKey}
 	 */
-	void resolveEntity(Esi4JEntityResolver entityResolver);
+	void resolveEntity(Esi4JEntityResolver entityResolver) throws EntityNotResolveableException;
+
+	/**
+	 * returns the entities {@link ObjectKey}
+	 */
+	ObjectKey toObjectKey(Esi4JEntityResolver entityResolver);
 
 	/**
 	 * add necessary index operations to bulk request
@@ -51,10 +57,5 @@ public interface Esi4JEntityTask extends Serializable, Cloneable {
 	 * @return a clone of this task
 	 */
 	Esi4JEntityTask clone();
-
-	/**
-	 * @return the entity to perform the task on
-	 */
-	Object getEntity();
 
 }

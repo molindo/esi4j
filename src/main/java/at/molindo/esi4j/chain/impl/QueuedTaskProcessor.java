@@ -15,7 +15,7 @@
  */
 package at.molindo.esi4j.chain.impl;
 
-import at.molindo.esi4j.chain.Esi4JEntityResolver;
+import at.molindo.esi4j.chain.Esi4JBatchedEntityResolver;
 import at.molindo.esi4j.chain.Esi4JEntityTask;
 import at.molindo.esi4j.chain.Esi4JTaskProcessor;
 import at.molindo.esi4j.core.Esi4JIndex;
@@ -29,12 +29,12 @@ public class QueuedTaskProcessor extends AbstractTaskProcessor implements Esi4JT
 
 	private final QueuedTaskExecutor _executor;
 
-	public QueuedTaskProcessor(Esi4JIndex index, Esi4JEntityResolver entityResolver) {
+	public QueuedTaskProcessor(Esi4JIndex index, Esi4JBatchedEntityResolver entityResolver) {
 		super(index);
 		_executor = new QueuedTaskExecutor(this, entityResolver);
 	}
 
-	public Esi4JEntityResolver getEntityResolver() {
+	public Esi4JBatchedEntityResolver getEntityResolver() {
 		return _executor.getEntityResolver();
 	}
 

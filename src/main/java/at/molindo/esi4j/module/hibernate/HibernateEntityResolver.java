@@ -17,26 +17,39 @@ package at.molindo.esi4j.module.hibernate;
 
 import java.io.Serializable;
 import java.util.Date;
+import java.util.IdentityHashMap;
 import java.util.Map.Entry;
 
 import org.hibernate.CacheMode;
 import org.hibernate.FlushMode;
+import org.hibernate.ObjectNotFoundException;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.internal.SessionImpl;
 import org.hibernate.metadata.ClassMetadata;
+import org.hibernate.proxy.HibernateProxy;
 
-import at.molindo.esi4j.chain.Esi4JEntityResolver;
+import at.molindo.esi4j.chain.Esi4JBatchedEntityResolver;
+import at.molindo.esi4j.chain.Esi4JEntityTask;
+import at.molindo.esi4j.ex.EntityNotResolveableException;
 import at.molindo.esi4j.mapping.ObjectKey;
+import at.molindo.utils.collections.ArrayUtils;
 import at.molindo.utils.collections.ClassMap;
 
-public class HibernateEntityResolver implements Esi4JEntityResolver {
+public class HibernateEntityResolver implements Esi4JBatchedEntityResolver {
 
 	private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(HibernateEntityResolver.class);
 
 	private final SessionFactory _sessionFactory;
 	private final ClassMap<String> _entityNames = ClassMap.create();
-	private final ThreadLocal<Session> _localSession = new ThreadLocal<Session>();
+	private final ThreadLocal<Session> _localSession = new ThreadLocal<>();
+
+	/**
+	 * this is an optimization while bulk resolving. Use
+	 * {@link Session#load(Class, Serializable)} to resolve and fetch later
+	 * using configured bulk fetching.
+	 */
+	private final ThreadLocal<EntityBatchResolve> _batchResolve = new ThreadLocal<>();
 
 	public HibernateEntityResolver(SessionFactory sessionFactory) {
 		if (sessionFactory == null) {
@@ -95,6 +108,7 @@ public class HibernateEntityResolver implements Esi4JEntityResolver {
 		return toObjectKey(entity);
 	}
 
+	@Override
 	public void openResolveSession() {
 		Session session = _localSession.get();
 
@@ -112,6 +126,7 @@ public class HibernateEntityResolver implements Esi4JEntityResolver {
 		_localSession.set(session);
 	}
 
+	@Override
 	public void closeResolveSession() {
 		Session session = _localSession.get();
 		if (session != null) {
@@ -134,12 +149,19 @@ public class HibernateEntityResolver implements Esi4JEntityResolver {
 				throw new IllegalStateException("no session available");
 			}
 
+			EntityBatchResolve batchResolve = _batchResolve.get();
+
 			// ignore version, use latest, use load for batch fetching
-			Object resolvedEntity = session.load(key.getType(), key.getId());
+			Object resolvedEntity;
+			if (batchResolve != null) {
+				resolvedEntity = session.load(key.getType(), key.getId());
+				batchResolve.resolved(resolvedEntity);
+			} else {
+				resolvedEntity = session.get(key.getType(), key.getId());
+			}
 
 			if (resolvedEntity == null) {
 				log.error("can't resolve object " + key);
-				return null;
 			}
 
 			return resolvedEntity;
@@ -148,6 +170,35 @@ public class HibernateEntityResolver implements Esi4JEntityResolver {
 			return replacedEntity;
 		}
 
+	}
+
+	@Override
+	public void resolveEntities(Esi4JEntityTask[] tasks) {
+		if (!ArrayUtils.empty(tasks)) {
+
+			EntityBatchResolve batchResolve = new EntityBatchResolve(tasks.length);
+			_batchResolve.set(batchResolve);
+			try {
+				for (int i = 0; i < tasks.length; i++) {
+					Esi4JEntityTask task = tasks[i];
+					if (task != null) {
+						batchResolve.task(task);
+						try {
+							task.resolveEntity(this);
+						} catch (EntityNotResolveableException e) {
+							// this should never happen or something is wrong
+							log.warn("can't resolve entity although proxy expected");
+							tasks[i] = null;
+						}
+					}
+
+				}
+			} finally {
+				_batchResolve.remove();
+			}
+
+			batchResolve.resolve(tasks);
+		}
 	}
 
 	protected Session getCurrentSession(SessionFactory factory) {
@@ -162,4 +213,44 @@ public class HibernateEntityResolver implements Esi4JEntityResolver {
 		return _sessionFactory;
 	}
 
+	private final class EntityBatchResolve {
+
+		private final IdentityHashMap<Esi4JEntityTask, Object> _resolved;
+		private Esi4JEntityTask _task;
+
+		private EntityBatchResolve(int expectedMaxSize) {
+			_resolved = new IdentityHashMap<>(expectedMaxSize);
+		}
+
+		public void resolve(Esi4JEntityTask tasks[]) {
+			for (int i = 0; i < tasks.length; i++) {
+				Esi4JEntityTask task = tasks[i];
+				if (task != null) {
+					Object resolved = _resolved.get(task);
+					if (resolved instanceof HibernateProxy) {
+						try {
+							((HibernateProxy) resolved).getHibernateLazyInitializer().initialize();
+						} catch (ObjectNotFoundException e) {
+							log.debug("can't initialize proxy, removing task");
+							tasks[i] = null;
+						}
+					}
+				}
+
+			}
+		}
+
+		private void task(Esi4JEntityTask task) {
+			_task = task;
+		}
+
+		private void resolved(Object resolvedEntity) {
+			if (_task == null) {
+				throw new IllegalStateException("no entity expected");
+			}
+			_resolved.put(_task, resolvedEntity);
+			_task = null;
+		}
+
+	}
 }

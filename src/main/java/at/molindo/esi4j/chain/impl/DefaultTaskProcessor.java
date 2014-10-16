@@ -51,7 +51,9 @@ public class DefaultTaskProcessor extends AbstractTaskProcessor implements Esi4J
 							BulkRequestBuilder bulk = client.prepareBulk();
 
 							for (int i = 0; i < tasks.length; i++) {
-								tasks[i].addToBulk(client, bulk, indexName, helper);
+								if (tasks[i] != null) {
+									tasks[i].addToBulk(client, bulk, indexName, helper);
+								}
 							}
 
 							return bulk.execute();

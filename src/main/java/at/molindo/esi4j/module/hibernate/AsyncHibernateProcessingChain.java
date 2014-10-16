@@ -45,12 +45,12 @@ public class AsyncHibernateProcessingChain implements Esi4JBatchedProcessingChai
 
 			@Override
 			protected void onBeforeBulkIndex() {
-				((HibernateEntityResolver) getEntityResolver()).openResolveSession();
+				getEntityResolver().openResolveSession();
 			}
 
 			@Override
 			protected void onAfterBulkIndex() {
-				((HibernateEntityResolver) getEntityResolver()).closeResolveSession();
+				getEntityResolver().closeResolveSession();
 			}
 
 		};

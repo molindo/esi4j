@@ -15,7 +15,9 @@
  */
 package at.molindo.esi4j.chain.impl;
 
+import at.molindo.esi4j.chain.Esi4JEntityResolver;
 import at.molindo.esi4j.chain.Esi4JEntityTask;
+import at.molindo.esi4j.mapping.ObjectKey;
 
 public abstract class AbstractEntityTask implements Esi4JEntityTask {
 
@@ -41,8 +43,7 @@ public abstract class AbstractEntityTask implements Esi4JEntityTask {
 	/**
 	 * @return never null
 	 */
-	@Override
-	public final Object getEntity() {
+	protected final Object getEntity() {
 		return _entity;
 	}
 
@@ -51,6 +52,16 @@ public abstract class AbstractEntityTask implements Esi4JEntityTask {
 			throw new NullPointerException("entity");
 		}
 		_entity = entity;
+	}
+
+	@Override
+	public final ObjectKey toObjectKey(Esi4JEntityResolver entityResolver) {
+		Object entity = getEntity();
+		if (entity instanceof ObjectKey) {
+			return (ObjectKey) entity;
+		} else {
+			return entityResolver.toObjectKey(entity);
+		}
 	}
 
 	protected abstract void initClone(Esi4JEntityTask clone);

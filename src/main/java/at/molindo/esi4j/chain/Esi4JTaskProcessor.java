@@ -29,6 +29,11 @@ public interface Esi4JTaskProcessor {
 	 */
 	Esi4JIndex getIndex();
 
+	/**
+	 * @param tasks
+	 *            an array of {@link Esi4JEntityTask}, may contain multiple
+	 *            tasks for the same entity or <code>null</code>
+	 */
 	void processTasks(Esi4JEntityTask[] tasks);
 
 	/**

@@ -22,6 +22,7 @@ import org.elasticsearch.client.Client;
 import at.molindo.esi4j.chain.Esi4JEntityResolver;
 import at.molindo.esi4j.chain.Esi4JEntityTask;
 import at.molindo.esi4j.core.Esi4JOperation.OperationContext;
+import at.molindo.esi4j.ex.EntityNotResolveableException;
 
 /**
  * TODO unused
@@ -44,7 +45,7 @@ public abstract class UpdateEntityTask extends AbstractEntityTask {
 	}
 
 	@Override
-	public void resolveEntity(Esi4JEntityResolver entityResolver) {
+	public void resolveEntity(Esi4JEntityResolver entityResolver) throws EntityNotResolveableException {
 		setEntity(entityResolver.resolveEntity(getEntity()));
 	}
 
