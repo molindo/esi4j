@@ -168,7 +168,10 @@ public class DefaultStore implements Esi4JStore {
 		try {
 			if (isRecovering()) {
 				// index exists but is recovering
-				waitForYellowStatus();
+				if (!waitForYellowStatus()) {
+					log.warn("cluster not ready for settings update, assume index {} missing", _indexName);
+					return false;
+				}
 			}
 			return true;
 		} catch (MissingIndexException e) {
@@ -177,19 +180,14 @@ public class DefaultStore implements Esi4JStore {
 		}
 	}
 
-	private void waitForYellowStatus() {
-		if (_healthTimeout != null && _healthTimeout.seconds() > 0) {
-			ClusterHealthRequestBuilder request = _client.getClient().admin().cluster().prepareHealth(_indexName);
+	private boolean waitForYellowStatus() {
+		ClusterHealthRequestBuilder request = _client.getClient().admin().cluster().prepareHealth(_indexName);
 
-			request.setWaitForYellowStatus().setTimeout(_healthTimeout);
+		request.setWaitForYellowStatus().setTimeout(_healthTimeout);
 
-			ClusterHealthResponse response = request.execute().actionGet();
+		ClusterHealthResponse response = request.execute().actionGet();
 
-			if (response.getStatus() == ClusterHealthStatus.RED) {
-				throw new IllegalStateException("cluster not ready for settings update (status " + response.getStatus()
-						+ ")");
-			}
-		}
+		return !response.isTimedOut() && response.getStatus() != ClusterHealthStatus.RED;
 	}
 
 	private boolean isRecovering() throws MissingIndexException {
