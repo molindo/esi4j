@@ -18,6 +18,7 @@ package at.molindo.esi4j.chain.impl;
 import at.molindo.esi4j.chain.Esi4JEntityTask;
 import at.molindo.esi4j.chain.Esi4JTaskProcessor;
 import at.molindo.esi4j.core.Esi4JIndex;
+import at.molindo.utils.collections.ArrayUtils;
 
 /**
  * 
@@ -35,11 +36,16 @@ public abstract class AbstractTaskProcessor implements Esi4JTaskProcessor {
 
 	@Override
 	public void processTasks(Iterable<Esi4JEntityTask[]> tasks) {
-		for (Esi4JEntityTask[] t : tasks) {
-			processTasks(t);
+		if (tasks != null) {
+			for (Esi4JEntityTask[] t : tasks) {
+				if (!ArrayUtils.empty(t)) {
+					processTasks(t);
+				}
+			}
 		}
 	}
 
+	@Override
 	public Esi4JIndex getIndex() {
 		return _index;
 	}

@@ -15,13 +15,13 @@
  */
 package at.molindo.esi4j.chain;
 
-import java.io.Serializable;
-
 import at.molindo.esi4j.chain.impl.QueuedTaskExecutor;
+import at.molindo.esi4j.ex.EntityNotResolveableException;
+import at.molindo.esi4j.mapping.ObjectKey;
 
 /**
- * replaces objects with placeholders (e.g. for serialization) and resolves them
- * for indexing. For deletions, an
+ * replaces objects with placeholders (e.g. for serialization or queuing) and
+ * resolves them for indexing.
  * 
  * @see QueuedTaskExecutor
  */
@@ -40,67 +40,9 @@ public interface Esi4JEntityResolver {
 
 	/**
 	 * @return the replaced entity, the given entity if not replaced or
-	 *         <code>null</code> if entity cannot be resolved
+	 * @throws EntityNotResolveableException
+	 *             if entity cannot be resolved
 	 */
-	Object resolveEntity(Object replacedEntity);
+	Object resolveEntity(Object replacedEntity) throws EntityNotResolveableException;
 
-	/**
-	 * an identifier consisting of a type, a {@link Serializable} id and
-	 * optionally a version
-	 */
-	public static final class ObjectKey implements Serializable {
-
-		private static final long serialVersionUID = 1L;
-
-		private final Class<?> _type;
-		private final Serializable _id;
-		private final Long _version;
-
-		public ObjectKey(Class<?> type, Serializable id) {
-			this(type, id, null);
-		}
-
-		public ObjectKey(Class<?> type, Serializable id, Long version) {
-			if (type == null) {
-				throw new NullPointerException("type");
-			}
-			if (id == null) {
-				throw new NullPointerException("id");
-			}
-			_type = type;
-			_id = id;
-			_version = version;
-		}
-
-		/**
-		 * @return the object type
-		 */
-		public Class<?> getType() {
-			return _type;
-		}
-
-		/**
-		 * @return never null
-		 */
-		public Serializable getId() {
-			return _id;
-		}
-
-		/**
-		 * @return the object version or null if not available
-		 */
-		public Long getVersion() {
-			return _version;
-		}
-
-		@Override
-		public String toString() {
-			StringBuilder buf = new StringBuilder(_type.getSimpleName()).append("#").append(_id);
-			if (_version != null) {
-				buf.append(" (").append(_version).append(")");
-			}
-			return buf.toString();
-		}
-
-	}
 }

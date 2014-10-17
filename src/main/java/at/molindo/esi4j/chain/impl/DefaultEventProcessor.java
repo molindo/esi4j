@@ -111,6 +111,7 @@ public class DefaultEventProcessor extends AbstractEventListener implements Esi4
 		return src == null ? null : src.getPostDeleteTasks(o);
 	}
 
+	@Override
 	public Esi4JTaskProcessor getTaskProcessor() {
 		return _taskProcessor;
 	}

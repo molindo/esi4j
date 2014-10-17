@@ -43,7 +43,7 @@ public class DefaultBatchedEventProcessor extends DefaultEventProcessor implemen
 
 	public class SimpleEventSession extends AbstractEventListener implements EventSession {
 
-		private List<Esi4JEntityTask[]> _tasks = Lists.newArrayList();
+		private final List<Esi4JEntityTask[]> _tasks = Lists.newArrayList();
 		private int _taskCount = 0;
 
 		@Override
@@ -80,6 +80,10 @@ public class DefaultBatchedEventProcessor extends DefaultEventProcessor implemen
 			_tasks.clear();
 			_taskCount = 0;
 
+			/*
+			 * important: process all tasks in a single batch so we can later
+			 * identify duplicates
+			 */
 			processTasks(allTasks);
 		}
 

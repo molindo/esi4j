@@ -16,6 +16,10 @@
 package at.molindo.esi4j.chain.impl;
 
 import java.io.Serializable;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.ListIterator;
+import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -33,10 +37,13 @@ import org.elasticsearch.action.bulk.BulkResponse;
 import org.elasticsearch.client.Client;
 
 import at.molindo.esi4j.action.BulkResponseWrapper;
+import at.molindo.esi4j.chain.Esi4JBatchedEntityResolver;
 import at.molindo.esi4j.chain.Esi4JEntityResolver;
 import at.molindo.esi4j.chain.Esi4JEntityTask;
 import at.molindo.esi4j.core.Esi4JOperation;
+import at.molindo.esi4j.mapping.ObjectKey;
 import at.molindo.utils.collections.ArrayUtils;
+import at.molindo.utils.collections.ListMap;
 
 /**
  * wrapping a {@link ThreadPoolExecutor} to execute {@link Esi4JEntityTask}s
@@ -53,7 +60,7 @@ public class QueuedTaskExecutor {
 	private final AtomicInteger _threadNumber = new AtomicInteger(1);
 
 	private final QueuedTaskProcessor _queuedTaskProcessor;
-	private final Esi4JEntityResolver _entityResolver;
+	private final Esi4JBatchedEntityResolver _entityResolver;
 	private final ThreadPoolExecutor _executorService;
 
 	/*
@@ -65,7 +72,7 @@ public class QueuedTaskExecutor {
 
 	private final int _poolSize;
 
-	public QueuedTaskExecutor(QueuedTaskProcessor queuedTaskProcessor, Esi4JEntityResolver entityResolver) {
+	public QueuedTaskExecutor(QueuedTaskProcessor queuedTaskProcessor, Esi4JBatchedEntityResolver entityResolver) {
 		if (queuedTaskProcessor == null) {
 			throw new NullPointerException("queuedTaskProcessor");
 		}
@@ -102,11 +109,55 @@ public class QueuedTaskExecutor {
 	public void execute(Esi4JEntityTask[] tasks) {
 		if (!ArrayUtils.empty(tasks)) {
 			if (_entityResolver != null) {
-				for (int i = 0; i < tasks.length; i++) {
-					tasks[i].replaceEntity(_entityResolver);
-				}
+				ListMap<ObjectKey, Integer> taskIndices = replaceEntities(tasks);
+				resolveDuplicates(tasks, taskIndices);
+
 			}
 			_executorService.execute(new BulkIndexRunnable(tasks));
+		}
+	}
+
+	/**
+	 * call {@link Esi4JEntityResolver#replaceEntity(Object)} for each task. At
+	 * the same time, we create a map of {@link ObjectKey}s.
+	 */
+	private ListMap<ObjectKey, Integer> replaceEntities(Esi4JEntityTask[] tasks) {
+		ListMap<ObjectKey, Integer> map = new ObjectKeyListMap(tasks.length);
+
+		for (int i = 0; i < tasks.length; i++) {
+			Esi4JEntityTask task = tasks[i];
+			if (task != null) {
+				task.replaceEntity(_entityResolver);
+				map.add(task.toObjectKey(_entityResolver), i);
+			}
+		}
+		return map;
+	}
+
+	/**
+	 * reduce number of operations by replacing duplicates. If a task isn't an
+	 * update, we ignore everything before it.
+	 */
+	static void resolveDuplicates(Esi4JEntityTask[] tasks, ListMap<ObjectKey, Integer> map) {
+		for (Map.Entry<ObjectKey, List<Integer>> e : map.entrySet()) {
+
+			List<Integer> taskIndices = e.getValue();
+			if (taskIndices.size() > 1) {
+				// resolving duplicates
+
+				ListIterator<Integer> iter = taskIndices.listIterator(taskIndices.size());
+				boolean overwritePrevious = false;
+				while (iter.hasPrevious()) {
+					int taskIndex = iter.previous();
+
+					if (overwritePrevious) {
+						tasks[taskIndex] = null;
+						iter.remove();
+					} else if (!tasks[taskIndex].isUpdate()) {
+						overwritePrevious = true;
+					}
+				}
+			}
 		}
 	}
 
@@ -141,7 +192,7 @@ public class QueuedTaskExecutor {
 		return _queuedTaskProcessor;
 	}
 
-	public Esi4JEntityResolver getEntityResolver() {
+	public Esi4JBatchedEntityResolver getEntityResolver() {
 		return _entityResolver;
 	}
 
@@ -202,6 +253,10 @@ public class QueuedTaskExecutor {
 
 		private final Esi4JEntityTask[] _tasks;
 
+		/**
+		 * @param tasks
+		 *            might contain <code>null</code>
+		 */
 		public BulkIndexRunnable(Esi4JEntityTask[] tasks) {
 			_tasks = tasks;
 		}
@@ -227,12 +282,10 @@ public class QueuedTaskExecutor {
 		}
 
 		private void index(final QueuedTaskExecutor executor) {
-			Esi4JEntityResolver entityResolver = executor.getEntityResolver();
+			Esi4JBatchedEntityResolver entityResolver = executor.getEntityResolver();
 
 			if (entityResolver != null) {
-				for (int i = 0; i < _tasks.length; i++) {
-					_tasks[i].resolveEntity(entityResolver);
-				}
+				entityResolver.resolveEntities(_tasks);
 			}
 
 			BulkResponseWrapper response = executor.getTaskProcessor().getIndex()
@@ -244,7 +297,9 @@ public class QueuedTaskExecutor {
 							BulkRequestBuilder bulk = client.prepareBulk();
 
 							for (int i = 0; i < _tasks.length; i++) {
-								_tasks[i].addToBulk(client, bulk, indexName, helper);
+								if (_tasks[i] != null) {
+									_tasks[i].addToBulk(client, bulk, indexName, helper);
+								}
 							}
 
 							ListenableActionFuture<BulkResponse> response = bulk.execute();
@@ -271,4 +326,17 @@ public class QueuedTaskExecutor {
 		}
 	}
 
+	static final class ObjectKeyListMap extends ListMap<ObjectKey, Integer> {
+
+		private final int _capacity;
+
+		public ObjectKeyListMap(int capacity) {
+			_capacity = capacity;
+		}
+
+		@Override
+		protected Map<ObjectKey, List<Integer>> newMap() {
+			return new LinkedHashMap<>(_capacity * 2, 0.75f, false);
+		}
+	}
 }
