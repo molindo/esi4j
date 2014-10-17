@@ -41,19 +41,7 @@ public class AsyncHibernateProcessingChain implements Esi4JBatchedProcessingChai
 			throw new NullPointerException("entityResolver");
 		}
 
-		_taksProcessor = new QueuedTaskProcessor(index, entityResolver) {
-
-			@Override
-			protected void onBeforeBulkIndex() {
-				getEntityResolver().openResolveSession();
-			}
-
-			@Override
-			protected void onAfterBulkIndex() {
-				getEntityResolver().closeResolveSession();
-			}
-
-		};
+		_taksProcessor = new QueuedTaskProcessor(index, entityResolver);
 
 		_batchedEventProcessor = new DefaultBatchedEventProcessor(_taksProcessor, taskSources);
 	}

@@ -31,12 +31,13 @@ import org.hibernate.proxy.HibernateProxy;
 
 import at.molindo.esi4j.chain.Esi4JBatchedEntityResolver;
 import at.molindo.esi4j.chain.Esi4JEntityTask;
+import at.molindo.esi4j.chain.Esi4JSessionEntityResolver;
 import at.molindo.esi4j.ex.EntityNotResolveableException;
 import at.molindo.esi4j.mapping.ObjectKey;
 import at.molindo.utils.collections.ArrayUtils;
 import at.molindo.utils.collections.ClassMap;
 
-public class HibernateEntityResolver implements Esi4JBatchedEntityResolver {
+public class HibernateEntityResolver implements Esi4JBatchedEntityResolver, Esi4JSessionEntityResolver {
 
 	private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(HibernateEntityResolver.class);
 
@@ -109,7 +110,7 @@ public class HibernateEntityResolver implements Esi4JBatchedEntityResolver {
 	}
 
 	@Override
-	public void openResolveSession() {
+	public void startResolveSession() {
 		Session session = _localSession.get();
 
 		if (session != null) {

@@ -15,18 +15,22 @@
  */
 package at.molindo.esi4j.chain;
 
+import at.molindo.esi4j.module.hibernate.HibernateEntityResolver;
+
 /**
- * Same as {@link Esi4JEntityResolver} but allows for batch optimizations
+ * an {@link Esi4JEntityResolver} that requires a session to work, e.g.
+ * {@link HibernateEntityResolver}
  */
-public interface Esi4JBatchedEntityResolver extends Esi4JEntityResolver {
+public interface Esi4JSessionEntityResolver extends Esi4JEntityResolver {
 
 	/**
-	 * calls {@link Esi4JEntityTask#resolveEntity(Esi4JEntityResolver)} for all
-	 * tasks
-	 * 
-	 * @param tasks
-	 *            may contain <code>null</code>
+	 * starts a session. must be called before calling
+	 * {@link #resolveEntity(Object)}
 	 */
-	void resolveEntities(Esi4JEntityTask[] tasks);
+	public void startResolveSession();
 
+	/**
+	 * closes the session. must be called after {@link #startResolveSession()}
+	 */
+	public void closeResolveSession();
 }
