@@ -17,6 +17,9 @@ package at.molindo.esi4j.chain.impl;
 
 import java.io.Serializable;
 import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.ListIterator;
+import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -35,10 +38,12 @@ import org.elasticsearch.client.Client;
 
 import at.molindo.esi4j.action.BulkResponseWrapper;
 import at.molindo.esi4j.chain.Esi4JBatchedEntityResolver;
+import at.molindo.esi4j.chain.Esi4JEntityResolver;
 import at.molindo.esi4j.chain.Esi4JEntityTask;
 import at.molindo.esi4j.core.Esi4JOperation;
 import at.molindo.esi4j.mapping.ObjectKey;
 import at.molindo.utils.collections.ArrayUtils;
+import at.molindo.utils.collections.ListMap;
 
 /**
  * wrapping a {@link ThreadPoolExecutor} to execute {@link Esi4JEntityTask}s
@@ -104,21 +109,55 @@ public class QueuedTaskExecutor {
 	public void execute(Esi4JEntityTask[] tasks) {
 		if (!ArrayUtils.empty(tasks)) {
 			if (_entityResolver != null) {
-				LinkedHashMap<ObjectKey, Integer> map = new LinkedHashMap<>(tasks.length * 2, 0.75f, false);
-				for (int i = 0; i < tasks.length; i++) {
-					Esi4JEntityTask task = tasks[i];
-					if (task != null) {
-						task.replaceEntity(_entityResolver);
-						Integer prev = map.put(task.toObjectKey(_entityResolver), i);
-						if (prev != null) {
-							// remove duplicate, latest wins
-							// tasks[prev] = null;
-							log.info("duplicate");
-						}
+				ListMap<ObjectKey, Integer> taskIndices = replaceEntities(tasks);
+				resolveDuplicates(tasks, taskIndices);
+
+			}
+			_executorService.execute(new BulkIndexRunnable(tasks));
+		}
+	}
+
+	/**
+	 * call {@link Esi4JEntityResolver#replaceEntity(Object)} for each task. At
+	 * the same time, we create a map of {@link ObjectKey}s.
+	 */
+	private ListMap<ObjectKey, Integer> replaceEntities(Esi4JEntityTask[] tasks) {
+		ListMap<ObjectKey, Integer> map = new ObjectKeyListMap(tasks.length);
+
+		for (int i = 0; i < tasks.length; i++) {
+			Esi4JEntityTask task = tasks[i];
+			if (task != null) {
+				task.replaceEntity(_entityResolver);
+				map.add(task.toObjectKey(_entityResolver), i);
+			}
+		}
+		return map;
+	}
+
+	/**
+	 * reduce number of operations by replacing duplicates. If a task isn't an
+	 * update, we ignore everything before it.
+	 */
+	static void resolveDuplicates(Esi4JEntityTask[] tasks, ListMap<ObjectKey, Integer> map) {
+		for (Map.Entry<ObjectKey, List<Integer>> e : map.entrySet()) {
+
+			List<Integer> taskIndices = e.getValue();
+			if (taskIndices.size() > 1) {
+				// resolving duplicates
+
+				ListIterator<Integer> iter = taskIndices.listIterator(taskIndices.size());
+				boolean overwritePrevious = false;
+				while (iter.hasPrevious()) {
+					int taskIndex = iter.previous();
+
+					if (overwritePrevious) {
+						tasks[taskIndex] = null;
+						iter.remove();
+					} else if (!tasks[taskIndex].isUpdate()) {
+						overwritePrevious = true;
 					}
 				}
 			}
-			_executorService.execute(new BulkIndexRunnable(tasks));
 		}
 	}
 
@@ -287,4 +326,17 @@ public class QueuedTaskExecutor {
 		}
 	}
 
+	static final class ObjectKeyListMap extends ListMap<ObjectKey, Integer> {
+
+		private final int _capacity;
+
+		public ObjectKeyListMap(int capacity) {
+			_capacity = capacity;
+		}
+
+		@Override
+		protected Map<ObjectKey, List<Integer>> newMap() {
+			return new LinkedHashMap<>(_capacity * 2, 0.75f, false);
+		}
+	}
 }

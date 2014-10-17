@@ -33,6 +33,11 @@ public final class DeleteEntityTask extends AbstractEntityTask {
 	}
 
 	@Override
+	public boolean isUpdate() {
+		return false;
+	}
+
+	@Override
 	protected void initClone(Esi4JEntityTask clone) {
 	}
 

@@ -25,11 +25,19 @@ import at.molindo.esi4j.ex.EntityNotResolveableException;
 import at.molindo.esi4j.mapping.ObjectKey;
 
 /**
- * A task to be processed by an {@link Esi4JTaskProcessor}. A task needs to be
- * {@link Serializable} after {@link #replaceEntity(Esi4JEntityResolver)} was
- * called
+ * A task is a single operation (index, update, delete) on a single entity to be
+ * processed by an {@link Esi4JTaskProcessor}.
+ * 
+ * A task needs to be {@link Serializable} after
+ * {@link #replaceEntity(Esi4JEntityResolver)} was called.
  */
 public interface Esi4JEntityTask extends Serializable, Cloneable {
+
+	/**
+	 * @return <code>true</code> if this updates an existing state,
+	 *         <code>false</code> if it overwrites the previous state
+	 */
+	boolean isUpdate();
 
 	/**
 	 * optional, might be implemented as noop
@@ -49,7 +57,7 @@ public interface Esi4JEntityTask extends Serializable, Cloneable {
 	ObjectKey toObjectKey(Esi4JEntityResolver entityResolver);
 
 	/**
-	 * add necessary index operations to bulk request
+	 * add necessary index operation to bulk request
 	 */
 	void addToBulk(Client client, BulkRequestBuilder bulk, String indexName, OperationContext context);
 

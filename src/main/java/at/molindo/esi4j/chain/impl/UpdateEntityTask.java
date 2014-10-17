@@ -36,6 +36,11 @@ public abstract class UpdateEntityTask extends AbstractEntityTask {
 	}
 
 	@Override
+	public boolean isUpdate() {
+		return true;
+	}
+
+	@Override
 	protected void initClone(Esi4JEntityTask clone) {
 	}
 
