@@ -125,6 +125,11 @@ public final class ListenableActionFutureWrapper<F, T> implements ListenableActi
 		});
 	}
 
+	@Override
+	public void addListener(Runnable listener) {
+		_future.addListener(listener);
+	}
+
 	private T applyFunction(F raw) {
 		if (_result == null) {
 			_raw = raw;

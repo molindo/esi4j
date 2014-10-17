@@ -91,6 +91,11 @@ public class ListenableAsyncResult<V> extends AsyncResult<V> implements Listenab
 		});
 	}
 
+	@Override
+	public void addListener(final Runnable listener) {
+		executeListener(listener);
+	}
+
 	private void executeListener(final Runnable listener) {
 		if (_threadPool != null) {
 			_threadPool.generic().execute(listener);
