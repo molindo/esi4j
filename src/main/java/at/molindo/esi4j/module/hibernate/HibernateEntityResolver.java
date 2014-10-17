@@ -214,6 +214,11 @@ public class HibernateEntityResolver implements Esi4JBatchedEntityResolver, Esi4
 		return _sessionFactory;
 	}
 
+	/**
+	 * collect entities created by {@link Session#load(Class, Serializable)} and
+	 * load them, giving Hibernate a change to use it's bulk configuration to
+	 * reduce number of queries.
+	 */
 	private final class EntityBatchResolve {
 
 		private final IdentityHashMap<Esi4JEntityTask, Object> _resolved;
