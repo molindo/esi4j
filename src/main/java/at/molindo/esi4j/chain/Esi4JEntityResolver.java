@@ -20,8 +20,8 @@ import at.molindo.esi4j.ex.EntityNotResolveableException;
 import at.molindo.esi4j.mapping.ObjectKey;
 
 /**
- * replaces objects with placeholders (e.g. for serialization) and resolves them
- * for indexing. For deletions, an
+ * replaces objects with placeholders (e.g. for serialization or queuing) and
+ * resolves them for indexing.
  * 
  * @see QueuedTaskExecutor
  */
