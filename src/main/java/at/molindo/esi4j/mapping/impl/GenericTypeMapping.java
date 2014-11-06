@@ -23,7 +23,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import org.elasticsearch.action.get.GetResponse;
-import org.elasticsearch.common.settings.ImmutableSettings;
+import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.common.xcontent.ToXContent;
 import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.elasticsearch.common.xcontent.json.JsonXContent;
@@ -74,7 +74,7 @@ public abstract class GenericTypeMapping<Type, Id> extends TypeMapping {
 	}
 
 	@Override
-	public final MappingSource getMappingSource() {
+	public final MappingSource getMappingSource(final Settings settings) {
 		try {
 			if (_mapping == null || isDynamicMapping()) {
 				Builder mapperBuilder = new RootObjectMapper.Builder(getTypeAlias());
@@ -84,8 +84,9 @@ public abstract class GenericTypeMapping<Type, Id> extends TypeMapping {
 				XContentBuilder contentBuilder = JsonXContent.contentBuilder();
 
 				contentBuilder.startObject();
-				mapperBuilder.build(new BuilderContext(ImmutableSettings.EMPTY, new ContentPath())).toXContent(
-						contentBuilder, EMPTY_PARAMS, new ToXContent() {
+
+				mapperBuilder.build(new BuilderContext(settings, new ContentPath())).toXContent(contentBuilder,
+						EMPTY_PARAMS, new ToXContent() {
 
 							@Override
 							public XContentBuilder toXContent(XContentBuilder builder, Params params)

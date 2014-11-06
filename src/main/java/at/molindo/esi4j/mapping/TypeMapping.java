@@ -25,6 +25,7 @@ import org.elasticsearch.action.get.GetResponse;
 import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.action.index.IndexRequestBuilder;
 import org.elasticsearch.client.Client;
+import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.index.VersionType;
 import org.elasticsearch.search.SearchHit;
 
@@ -120,7 +121,7 @@ public abstract class TypeMapping {
 	/**
 	 * @return a new {@link MappingSource} for this type
 	 */
-	public abstract MappingSource getMappingSource();
+	public abstract MappingSource getMappingSource(Settings indexSettings);
 
 	/**
 	 * @return a new {@link ObjectSource} for this object
