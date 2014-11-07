@@ -176,7 +176,7 @@ public class DefaultIndex extends AbstractIndex implements InternalIndex {
 					public ListenableActionFuture<PutMappingResponse> execute(Client client, String indexName) {
 						PutMappingRequestBuilder request = client.admin().indices().preparePutMapping(indexName);
 						request.setType(typeMapping.getTypeAlias());
-						typeMapping.getMappingSource().setSource(request);
+						typeMapping.getMappingSource(getSettings()).setSource(request);
 						return request.execute();
 					}
 
