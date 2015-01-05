@@ -66,10 +66,8 @@ public class TweetTypeMapping extends AbstractIntegerTypeMapping<Tweet> {
 	@Override
 	protected void buildMapping(Builder mapperBuilder) throws IOException {
 		mapperBuilder.dynamic(Dynamic.STRICT).add(source().enabled(true))
-				.add(all().enabled(EnabledAttributeMapper.ENABLED))
-
-				.add(MapperBuilders.stringField(FIELD_MESSAGE)).add(MapperBuilders.stringField(FIELD_USER));
-
+		.add(all().enabled(EnabledAttributeMapper.ENABLED)).add(MapperBuilders.stringField(FIELD_MESSAGE))
+		.add(MapperBuilders.stringField(FIELD_USER));
 	}
 
 	@Override
