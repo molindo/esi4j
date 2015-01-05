@@ -23,6 +23,7 @@ import java.util.Map;
 
 import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.elasticsearch.index.mapper.MapperBuilders;
+import org.elasticsearch.index.mapper.internal.EnabledAttributeMapper;
 import org.elasticsearch.index.mapper.object.ObjectMapper.Dynamic;
 import org.elasticsearch.index.mapper.object.RootObjectMapper.Builder;
 
@@ -64,9 +65,10 @@ public class TweetTypeMapping extends AbstractIntegerTypeMapping<Tweet> {
 
 	@Override
 	protected void buildMapping(Builder mapperBuilder) throws IOException {
-		mapperBuilder.dynamic(Dynamic.STRICT).add(source().enabled(true)).add(all().enabled(true))
+		mapperBuilder.dynamic(Dynamic.STRICT).add(source().enabled(true))
+				.add(all().enabled(EnabledAttributeMapper.ENABLED))
 
-		.add(MapperBuilders.stringField(FIELD_MESSAGE)).add(MapperBuilders.stringField(FIELD_USER));
+				.add(MapperBuilders.stringField(FIELD_MESSAGE)).add(MapperBuilders.stringField(FIELD_USER));
 
 	}
 
