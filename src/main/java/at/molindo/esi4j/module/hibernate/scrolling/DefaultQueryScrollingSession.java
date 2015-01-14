@@ -26,7 +26,7 @@ import org.hibernate.FetchMode;
 import org.hibernate.Session;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
-import org.hibernate.internal.SessionImpl;
+import org.hibernate.engine.spi.SessionImplementor;
 import org.hibernate.metadata.ClassMetadata;
 
 public class DefaultQueryScrollingSession implements ScrollingSession {
@@ -73,7 +73,7 @@ public class DefaultQueryScrollingSession implements ScrollingSession {
 			ClassMetadata meta = session.getSessionFactory().getClassMetadata(_type);
 
 			Object last = list.get(list.size() - 1);
-			_lastId = meta.getIdentifier(last, (SessionImpl) session);
+			_lastId = meta.getIdentifier(last, (SessionImplementor) session);
 		}
 
 		return list;

@@ -25,7 +25,7 @@ import org.hibernate.FlushMode;
 import org.hibernate.ObjectNotFoundException;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
-import org.hibernate.internal.SessionImpl;
+import org.hibernate.engine.spi.SessionImplementor;
 import org.hibernate.metadata.ClassMetadata;
 import org.hibernate.proxy.HibernateProxy;
 
@@ -84,7 +84,7 @@ public class HibernateEntityResolver implements Esi4JBatchedEntityResolver, Esi4
 
 		Class<?> type = meta.getMappedClass();
 
-		Serializable id = meta.getIdentifier(entity, (SessionImpl) session);
+		Serializable id = meta.getIdentifier(entity, (SessionImplementor) session);
 		Long version = toLongVersion(meta.getVersion(entity));
 
 		return new ObjectKey(type, id, version);
