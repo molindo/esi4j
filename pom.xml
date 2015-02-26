@@ -9,7 +9,7 @@
 	</parent>
 
 	<artifactId>esi4j</artifactId>
-	<version>1.0.3-SNAPSHOT</version>
+	<version>1.0.3</version>
 	<packaging>jar</packaging>
 
 	<name>esi4j - Elastic Search Integration for Java</name>
