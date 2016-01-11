@@ -60,8 +60,6 @@ public class DefaultStore implements Esi4JStore {
 
 	private Esi4JIndex _index;
 
-	private final TimeValue _healthTimeout = TimeValue.timeValueSeconds(10);
-
 	public DefaultStore(Esi4JClient client, String indexName) {
 		if (client == null) {
 			throw new NullPointerException("client");
@@ -194,7 +192,7 @@ public class DefaultStore implements Esi4JStore {
 	private boolean waitForYellowStatus() {
 		ClusterHealthRequestBuilder request = _client.getClient().admin().cluster().prepareHealth(_indexName);
 
-		request.setWaitForYellowStatus().setTimeout(_healthTimeout);
+		request.setWaitForYellowStatus().setTimeout(TimeValue.timeValueSeconds(INDEX_CREATION_TIMEOUT_SECONDS));
 
 		ClusterHealthResponse response = request.execute().actionGet();
 
