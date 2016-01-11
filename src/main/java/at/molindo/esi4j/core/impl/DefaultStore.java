@@ -52,7 +52,7 @@ public class DefaultStore implements Esi4JStore {
 
 	private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(DefaultStore.class);
 
-	private static final long INDEX_CREATION_TIMEOUT_SECONDS = 30;
+	private static final long INDEX_CREATION_TIMEOUT_SECONDS = 300;
 
 	private final Esi4JClient _client;
 
