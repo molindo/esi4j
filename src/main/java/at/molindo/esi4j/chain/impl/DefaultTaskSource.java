@@ -21,17 +21,17 @@ import at.molindo.esi4j.chain.Esi4JTaskSource;
 public class DefaultTaskSource implements Esi4JTaskSource {
 
 	@Override
-	public Esi4JEntityTask[] getPostInsertTasks(Object entity) {
+	public Esi4JEntityTask[] getPostInsertTasks(final Object entity) {
 		return new Esi4JEntityTask[] { new IndexEntityTask(entity) };
 	}
 
 	@Override
-	public Esi4JEntityTask[] getPostUpdateTasks(Object entity) {
+	public Esi4JEntityTask[] getPostUpdateTasks(final Object entity) {
 		return getPostInsertTasks(entity);
 	}
 
 	@Override
-	public Esi4JEntityTask[] getPostDeleteTasks(Object entity) {
+	public Esi4JEntityTask[] getPostDeleteTasks(final Object entity) {
 		return new Esi4JEntityTask[] { new DeleteEntityTask(entity) };
 	}
 

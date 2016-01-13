@@ -33,13 +33,11 @@ public class HibernateIndexManager extends AbstractIndexManager {
 
 	private final HibernateLifecycleInjector _lifecycleInjector;
 
-	public HibernateIndexManager(SessionFactory sessionFactory, Esi4JIndex index,
-			Esi4JBatchedProcessingChain processingChain) {
+	public HibernateIndexManager(final SessionFactory sessionFactory, final Esi4JIndex index, final Esi4JBatchedProcessingChain processingChain) {
 		this(sessionFactory, index, processingChain, new DefaultRebuildManager());
 	}
 
-	public HibernateIndexManager(SessionFactory sessionFactory, Esi4JIndex index,
-			Esi4JBatchedProcessingChain processingChain, Esi4JRebuildManager rebuildManager) {
+	public HibernateIndexManager(final SessionFactory sessionFactory, final Esi4JIndex index, final Esi4JBatchedProcessingChain processingChain, final Esi4JRebuildManager rebuildManager) {
 		super(new HibernateModule(sessionFactory), (InternalIndex) index, processingChain, rebuildManager);
 
 		// inject listener into session factory and start processing
@@ -49,7 +47,7 @@ public class HibernateIndexManager extends AbstractIndexManager {
 
 	@Override
 	protected void onBeforeClose() {
-		SessionFactory sessionFactory = getHibernateModule().getSessionFactory();
+		final SessionFactory sessionFactory = getHibernateModule().getSessionFactory();
 		if (sessionFactory != null) {
 			_lifecycleInjector.removeLifecycle(sessionFactory);
 		}
@@ -70,7 +68,7 @@ public class HibernateIndexManager extends AbstractIndexManager {
 	 *            results ordered by id
 	 * @return this
 	 */
-	public HibernateIndexManager query(Class<?> type, String hql, boolean ordered) {
+	public HibernateIndexManager query(final Class<?> type, final String hql, final boolean ordered) {
 		return queryProvider(type, new SimpleQueryProvider(hql, ordered));
 	}
 
@@ -81,7 +79,7 @@ public class HibernateIndexManager extends AbstractIndexManager {
 	 *            results ordered by id
 	 * @return this
 	 */
-	public HibernateIndexManager criteria(Class<?> type, DetachedCriteria criteria, boolean ordered) {
+	public HibernateIndexManager criteria(final Class<?> type, final DetachedCriteria criteria, final boolean ordered) {
 		return queryProvider(type, new SimpleQueryProvider(criteria, ordered));
 	}
 
@@ -90,12 +88,12 @@ public class HibernateIndexManager extends AbstractIndexManager {
 	 * @param queryProvider
 	 * @return this
 	 */
-	public HibernateIndexManager queryProvider(Class<?> type, QueryProvider queryProvider) {
+	public HibernateIndexManager queryProvider(final Class<?> type, final QueryProvider queryProvider) {
 		scrollingProvider(new CustomQueryScrollingSessionProvider(type, queryProvider));
 		return this;
 	}
 
-	public HibernateIndexManager scrollingProvider(ScrollingSessionProvider scrollingProvider) {
+	public HibernateIndexManager scrollingProvider(final ScrollingSessionProvider scrollingProvider) {
 		getHibernateModule().putScrollingProvider(scrollingProvider);
 		return this;
 	}

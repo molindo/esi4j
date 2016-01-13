@@ -15,11 +15,8 @@
  */
 package at.molindo.esi4j.rebuild.util;
 
-import static org.easymock.EasyMock.createMock;
-import static org.easymock.EasyMock.replay;
-import static org.easymock.EasyMock.verify;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
+import static org.easymock.EasyMock.*;
+import static org.junit.Assert.*;
 
 import org.junit.Test;
 
@@ -34,20 +31,20 @@ public class BulkIndexHelperTest {
 
 	@Test
 	public void test() throws Exception {
-		Esi4J esi4j = TestUtils.newEsi4j();
-		Esi4JIndex index = esi4j.getIndex();
+		final Esi4J esi4j = TestUtils.newEsi4j();
+		final Esi4JIndex index = esi4j.getIndex();
 
 		((InternalIndex) index).addTypeMapping(new TweetTypeMapping("tweet"));
 
-		BulkIndexHelper helper = new BulkIndexHelper();
-		BulkIndexHelper.IResponseHandler handler = createMock(BulkIndexHelper.IResponseHandler.class);
+		final BulkIndexHelper helper = new BulkIndexHelper();
+		final BulkIndexHelper.IResponseHandler handler = createMock(BulkIndexHelper.IResponseHandler.class);
 		handler.handle("1", "index");
 		handler.handle("1", "delete");
 		helper.setResponseHandler(handler);
 
 		replay(handler);
 
-		Tweet tweet = new Tweet(1, 4, "bob", "hello world");
+		final Tweet tweet = new Tweet(1, 4, "bob", "hello world");
 
 		helper.newSession(index, 10).index(tweet).submit().await();
 		assertEquals(1, helper.getSucceeded());

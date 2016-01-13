@@ -18,14 +18,12 @@ package at.molindo.esi4j.chain;
 import at.molindo.esi4j.module.hibernate.HibernateEntityResolver;
 
 /**
- * an {@link Esi4JEntityResolver} that requires a session to work, e.g.
- * {@link HibernateEntityResolver}
+ * an {@link Esi4JEntityResolver} that requires a session to work, e.g. {@link HibernateEntityResolver}
  */
 public interface Esi4JSessionEntityResolver extends Esi4JEntityResolver {
 
 	/**
-	 * starts a session. must be called before calling
-	 * {@link #resolveEntity(Object)}
+	 * starts a session. must be called before calling {@link #resolveEntity(Object)}
 	 */
 	public void startResolveSession();
 

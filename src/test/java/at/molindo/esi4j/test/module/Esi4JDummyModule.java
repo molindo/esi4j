@@ -36,11 +36,11 @@ public class Esi4JDummyModule implements Esi4JModule {
 		return new Class<?>[] { _type };
 	}
 
-	public <T> Esi4JDummyModule setData(Class<T> type, T... data) {
+	public <T> Esi4JDummyModule setData(final Class<T> type, final T... data) {
 		return setData(type, Arrays.asList(data));
 	}
 
-	public <T> Esi4JDummyModule setData(Class<T> type, Collection<? extends T> data) {
+	public <T> Esi4JDummyModule setData(final Class<T> type, final Collection<? extends T> data) {
 		_type = type;
 		_data = data;
 		return this;
@@ -50,13 +50,13 @@ public class Esi4JDummyModule implements Esi4JModule {
 		return _ordered;
 	}
 
-	public Esi4JDummyModule setOrdered(boolean ordered) {
+	public Esi4JDummyModule setOrdered(final boolean ordered) {
 		_ordered = ordered;
 		return this;
 	}
 
 	@Override
-	public Esi4JRebuildSession startRebuildSession(Class<?> type) {
+	public Esi4JRebuildSession startRebuildSession(final Class<?> type) {
 		if (_type != type) {
 			throw new IllegalArgumentException("unexpected type " + type.getName());
 		}

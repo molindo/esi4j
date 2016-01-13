@@ -31,13 +31,12 @@ import org.hibernate.event.spi.PostInsertEventListener;
 import org.hibernate.event.spi.PostUpdateEvent;
 import org.hibernate.event.spi.PostUpdateEventListener;
 
+import com.google.common.collect.Maps;
+
 import at.molindo.esi4j.chain.Esi4JBatchedEventProcessor;
 import at.molindo.esi4j.chain.Esi4JBatchedEventProcessor.EventSession;
 
-import com.google.common.collect.Maps;
-
-public class HibernateEventListener implements PostDeleteEventListener, PostInsertEventListener,
-		PostUpdateEventListener {
+public class HibernateEventListener implements PostDeleteEventListener, PostInsertEventListener, PostUpdateEventListener {
 
 	private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(HibernateEventListener.class);
 
@@ -48,7 +47,7 @@ public class HibernateEventListener implements PostDeleteEventListener, PostInse
 	// TODO make weak for uncompleted transactions??
 	private final ConcurrentMap<Transaction, EventSession> _map = Maps.newConcurrentMap();
 
-	public HibernateEventListener(Esi4JBatchedEventProcessor batchedEventProcessor) {
+	public HibernateEventListener(final Esi4JBatchedEventProcessor batchedEventProcessor) {
 		if (batchedEventProcessor == null) {
 			throw new NullPointerException("batchedEventProcessor");
 		}
@@ -57,8 +56,8 @@ public class HibernateEventListener implements PostDeleteEventListener, PostInse
 	}
 
 	@Override
-	public void onPostInsert(PostInsertEvent event) {
-		EventSession eventSession = findEventSession(event.getSession());
+	public void onPostInsert(final PostInsertEvent event) {
+		final EventSession eventSession = findEventSession(event.getSession());
 		if (eventSession != null) {
 			eventSession.onPostInsert(event.getEntity());
 		} else {
@@ -67,8 +66,8 @@ public class HibernateEventListener implements PostDeleteEventListener, PostInse
 	}
 
 	@Override
-	public void onPostUpdate(PostUpdateEvent event) {
-		EventSession eventSession = findEventSession(event.getSession());
+	public void onPostUpdate(final PostUpdateEvent event) {
+		final EventSession eventSession = findEventSession(event.getSession());
 		if (eventSession != null) {
 			eventSession.onPostUpdate(event.getEntity());
 		} else {
@@ -77,8 +76,8 @@ public class HibernateEventListener implements PostDeleteEventListener, PostInse
 	}
 
 	@Override
-	public void onPostDelete(PostDeleteEvent event) {
-		EventSession eventSession = findEventSession(event.getSession());
+	public void onPostDelete(final PostDeleteEvent event) {
+		final EventSession eventSession = findEventSession(event.getSession());
 		if (eventSession != null) {
 			eventSession.onPostDelete(event.getEntity());
 		} else {
@@ -86,7 +85,7 @@ public class HibernateEventListener implements PostDeleteEventListener, PostInse
 		}
 	}
 
-	private EventSession findEventSession(EventSource hibernateSession) {
+	private EventSession findEventSession(final EventSource hibernateSession) {
 		if (hibernateSession.isTransactionInProgress()) {
 			final Transaction transaction = hibernateSession.getTransaction();
 			EventSession session = _map.get(transaction);
@@ -112,7 +111,7 @@ public class HibernateEventListener implements PostDeleteEventListener, PostInse
 
 		private final Transaction _transaction;
 
-		private Esi4JHibernateSynchronization(Transaction transaction) {
+		private Esi4JHibernateSynchronization(final Transaction transaction) {
 			if (transaction == null) {
 				throw new NullPointerException("transaction");
 			}
@@ -124,9 +123,9 @@ public class HibernateEventListener implements PostDeleteEventListener, PostInse
 		}
 
 		@Override
-		public void afterCompletion(int status) {
+		public void afterCompletion(final int status) {
 
-			EventSession session = _map.remove(_transaction);
+			final EventSession session = _map.remove(_transaction);
 
 			if (session == null) {
 				log.error("no session registered for transaction");

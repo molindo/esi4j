@@ -22,15 +22,15 @@ public abstract class Esi4JException extends Exception {
 	public Esi4JException() {
 	}
 
-	public Esi4JException(String message) {
+	public Esi4JException(final String message) {
 		super(message);
 	}
 
-	public Esi4JException(Throwable cause) {
+	public Esi4JException(final Throwable cause) {
 		super(cause);
 	}
 
-	public Esi4JException(String message, Throwable cause) {
+	public Esi4JException(final String message, final Throwable cause) {
 		super(message, cause);
 	}
 

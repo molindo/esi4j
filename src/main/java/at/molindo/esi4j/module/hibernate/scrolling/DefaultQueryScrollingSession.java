@@ -35,7 +35,7 @@ public class DefaultQueryScrollingSession implements ScrollingSession {
 	private Serializable _lastId;
 	private Map<String, FetchMode> _fetchModes;
 
-	public DefaultQueryScrollingSession(Class<?> type) {
+	public DefaultQueryScrollingSession(final Class<?> type) {
 		if (type == null) {
 			throw new NullPointerException("type");
 		}
@@ -43,7 +43,7 @@ public class DefaultQueryScrollingSession implements ScrollingSession {
 		_fetchModes = Collections.emptyMap();
 	}
 
-	public DefaultQueryScrollingSession(Class<?> type, Map<String, FetchMode> fetchModes) {
+	public DefaultQueryScrollingSession(final Class<?> type, final Map<String, FetchMode> fetchModes) {
 		this(type);
 		_fetchModes = new HashMap<String, FetchMode>(fetchModes);
 	}
@@ -54,8 +54,8 @@ public class DefaultQueryScrollingSession implements ScrollingSession {
 	}
 
 	@Override
-	public List<?> fetch(Session session, int batchSize) {
-		Criteria criteria = session.createCriteria(_type);
+	public List<?> fetch(final Session session, final int batchSize) {
+		final Criteria criteria = session.createCriteria(_type);
 		if (_lastId != null) {
 			criteria.add(Restrictions.gt("id", _lastId));
 		}
@@ -63,16 +63,16 @@ public class DefaultQueryScrollingSession implements ScrollingSession {
 		criteria.setMaxResults(batchSize);
 		criteria.setCacheable(false);
 
-		for (Map.Entry<String, FetchMode> e : _fetchModes.entrySet()) {
+		for (final Map.Entry<String, FetchMode> e : _fetchModes.entrySet()) {
 			criteria.setFetchMode(e.getKey(), e.getValue());
 		}
 
-		List<?> list = criteria.list();
+		final List<?> list = criteria.list();
 
 		if (list.size() > 0) {
-			ClassMetadata meta = session.getSessionFactory().getClassMetadata(_type);
+			final ClassMetadata meta = session.getSessionFactory().getClassMetadata(_type);
 
-			Object last = list.get(list.size() - 1);
+			final Object last = list.get(list.size() - 1);
 			_lastId = meta.getIdentifier(last, (SessionImplementor) session);
 		}
 

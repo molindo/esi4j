@@ -20,11 +20,11 @@ import java.util.List;
 import org.elasticsearch.action.get.MultiGetItemResponse;
 import org.elasticsearch.action.get.MultiGetResponse;
 
+import com.google.common.collect.Lists;
+
 import at.molindo.esi4j.action.MultiGetItemResponseWrapper;
 import at.molindo.esi4j.action.MultiGetItemResponseWrapper.MultiGetItemReader;
 import at.molindo.esi4j.action.MultiGetResponseWrapper;
-
-import com.google.common.collect.Lists;
 
 public class DefaultMultiGetResponseWrapper implements MultiGetResponseWrapper {
 
@@ -33,7 +33,7 @@ public class DefaultMultiGetResponseWrapper implements MultiGetResponseWrapper {
 
 	private List<MultiGetItemResponseWrapper> _objects;
 
-	public DefaultMultiGetResponseWrapper(MultiGetResponse response, MultiGetItemReader reader) {
+	public DefaultMultiGetResponseWrapper(final MultiGetResponse response, final MultiGetItemReader reader) {
 		if (response == null) {
 			throw new NullPointerException("response");
 		}
@@ -47,10 +47,10 @@ public class DefaultMultiGetResponseWrapper implements MultiGetResponseWrapper {
 	@Override
 	public synchronized List<MultiGetItemResponseWrapper> getMultiGetItemResponses() {
 		if (_objects == null) {
-			MultiGetItemResponse[] reps = _response.getResponses();
+			final MultiGetItemResponse[] reps = _response.getResponses();
 			_objects = Lists.newArrayListWithCapacity(reps.length);
-			for (int i = 0; i < reps.length; i++) {
-				_objects.add(new DefaultMultiGetItemResponseWrapper(reps[i], _reader));
+			for (final MultiGetItemResponse rep : reps) {
+				_objects.add(new DefaultMultiGetItemResponseWrapper(rep, _reader));
 			}
 		}
 		return _objects;
@@ -67,11 +67,11 @@ public class DefaultMultiGetResponseWrapper implements MultiGetResponseWrapper {
 	}
 
 	@Override
-	public <T> List<T> getObjects(Class<T> type) {
-		List<MultiGetItemResponseWrapper> resps = getMultiGetItemResponses();
-		List<T> objects = Lists.newArrayListWithCapacity(resps.size());
+	public <T> List<T> getObjects(final Class<T> type) {
+		final List<MultiGetItemResponseWrapper> resps = getMultiGetItemResponses();
+		final List<T> objects = Lists.newArrayListWithCapacity(resps.size());
 
-		for (MultiGetItemResponseWrapper hit : resps) {
+		for (final MultiGetItemResponseWrapper hit : resps) {
 			objects.add(hit.getObject(type));
 		}
 

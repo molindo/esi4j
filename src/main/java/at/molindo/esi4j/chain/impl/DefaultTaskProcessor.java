@@ -34,7 +34,7 @@ public class DefaultTaskProcessor extends AbstractTaskProcessor implements Esi4J
 
 	private final ReentrantReadWriteLock _lock = new ReentrantReadWriteLock();
 
-	public DefaultTaskProcessor(Esi4JIndex index) {
+	public DefaultTaskProcessor(final Esi4JIndex index) {
 		super(index);
 	}
 
@@ -42,17 +42,16 @@ public class DefaultTaskProcessor extends AbstractTaskProcessor implements Esi4J
 	public void processTasks(final Esi4JEntityTask[] tasks) {
 		_lock.readLock().lock();
 		try {
-			BulkResponseWrapper response = getIndex().executeBulk(
-					new Esi4JOperation<ListenableActionFuture<BulkResponse>>() {
+			final BulkResponseWrapper response = getIndex()
+					.executeBulk(new Esi4JOperation<ListenableActionFuture<BulkResponse>>() {
 
 						@Override
-						public ListenableActionFuture<BulkResponse> execute(Client client, String indexName,
-								OperationContext helper) {
-							BulkRequestBuilder bulk = client.prepareBulk();
+						public ListenableActionFuture<BulkResponse> execute(final Client client, final String indexName, final OperationContext helper) {
+							final BulkRequestBuilder bulk = client.prepareBulk();
 
-							for (int i = 0; i < tasks.length; i++) {
-								if (tasks[i] != null) {
-									tasks[i].addToBulk(client, bulk, indexName, helper);
+							for (final Esi4JEntityTask task : tasks) {
+								if (task != null) {
+									task.addToBulk(client, bulk, indexName, helper);
 								}
 							}
 
@@ -69,10 +68,10 @@ public class DefaultTaskProcessor extends AbstractTaskProcessor implements Esi4J
 	}
 
 	@Override
-	public <T> T execute(SerializableEsi4JOperation<T> operation) {
+	public <T> T execute(final SerializableEsi4JOperation<T> operation) {
 		_lock.writeLock().lock();
 		try {
-			T value = getIndex().execute(operation);
+			final T value = getIndex().execute(operation);
 			if (log.isDebugEnabled()) {
 				log.debug("finished submitted operation");
 			}

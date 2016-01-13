@@ -15,11 +15,8 @@
  */
 package at.molindo.esi4j.core.impl;
 
-import static org.easymock.EasyMock.createMock;
-import static org.easymock.EasyMock.expect;
-import static org.easymock.EasyMock.replay;
-import static org.easymock.EasyMock.verify;
-import static org.elasticsearch.common.settings.ImmutableSettings.settingsBuilder;
+import static org.easymock.EasyMock.*;
+import static org.elasticsearch.common.settings.ImmutableSettings.*;
 
 import org.elasticsearch.common.settings.Settings;
 import org.junit.Test;
@@ -32,28 +29,28 @@ public class DefaultStoreTest {
 
 	@Test
 	public void testNewSetting() {
-		Settings from = settingsBuilder().build();
-		Settings to = settingsBuilder().put("index.number_of_replicas", 0).build();
+		final Settings from = settingsBuilder().build();
+		final Settings to = settingsBuilder().put("index.number_of_replicas", 0).build();
 		testUpdateSettings(from, to);
 	}
 
 	@Test
 	public void testObsoleteSetting() {
-		Settings from = settingsBuilder().put("index.number_of_replicas", 0).build();
-		Settings to = settingsBuilder().build();
+		final Settings from = settingsBuilder().put("index.number_of_replicas", 0).build();
+		final Settings to = settingsBuilder().build();
 		testUpdateSettings(from, to);
 	}
 
-	private void testUpdateSettings(Settings from, Settings to) {
+	private void testUpdateSettings(final Settings from, final Settings to) {
 
-		Esi4JClient client = TestUtils.newClient();
+		final Esi4JClient client = TestUtils.newClient();
 
-		DefaultStore store = new DefaultStore(client, DefaultStoreTest.class.getSimpleName().toLowerCase());
+		final DefaultStore store = new DefaultStore(client, DefaultStoreTest.class.getSimpleName().toLowerCase());
 
-		InternalIndex i1 = createMock(InternalIndex.class);
+		final InternalIndex i1 = createMock(InternalIndex.class);
 		expect(i1.getSettings()).andReturn(from).anyTimes();
 
-		InternalIndex i2 = createMock(InternalIndex.class);
+		final InternalIndex i2 = createMock(InternalIndex.class);
 		expect(i2.getSettings()).andReturn(to).anyTimes();
 
 		replay(i1, i2);

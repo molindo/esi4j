@@ -16,8 +16,8 @@
 package at.molindo.esi4j.chain;
 
 /**
- * turns an entity into an array of {@link Esi4JEntityTask}s. For instance, an
- * entity could cause an updated to an indexed parent rather than to itself.
+ * turns an entity into an array of {@link Esi4JEntityTask}s. For instance, an entity could cause an updated to an
+ * indexed parent rather than to itself.
  */
 public interface Esi4JTaskSource {
 	Esi4JEntityTask[] getPostInsertTasks(Object entity);

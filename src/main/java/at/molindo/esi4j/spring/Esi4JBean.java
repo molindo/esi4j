@@ -40,12 +40,12 @@ public class Esi4JBean implements FactoryBean<Esi4J>, DisposableBean {
 		this(null);
 	}
 
-	public Esi4JBean(Settings defaultSettings) {
+	public Esi4JBean(final Settings defaultSettings) {
 		_defaultSettings = defaultSettings;
 	}
 
 	private DefaultEsi4J createEsi4J() {
-		Builder settings = ImmutableSettings.settingsBuilder();
+		final Builder settings = ImmutableSettings.settingsBuilder();
 		if (_defaultSettings != null) {
 			settings.put(_defaultSettings);
 		}
@@ -63,15 +63,15 @@ public class Esi4JBean implements FactoryBean<Esi4J>, DisposableBean {
 		return _esi4j;
 	}
 
-	protected DefaultEsi4J newEsi4J(Settings settings) {
+	protected DefaultEsi4J newEsi4J(final Settings settings) {
 		return new DefaultEsi4J(settings);
 	}
 
-	protected Builder processSettings(Builder settings) {
+	protected Builder processSettings(final Builder settings) {
 		return settings;
 	}
 
-	protected void init(DefaultEsi4J esi4j) {
+	protected void init(final DefaultEsi4J esi4j) {
 	}
 
 	@Override
@@ -107,7 +107,7 @@ public class Esi4JBean implements FactoryBean<Esi4J>, DisposableBean {
 		return _properties;
 	}
 
-	public void setProperties(Properties properties) {
+	public void setProperties(final Properties properties) {
 		_properties = properties;
 	}
 
@@ -115,7 +115,7 @@ public class Esi4JBean implements FactoryBean<Esi4J>, DisposableBean {
 		return _settings;
 	}
 
-	public void setSettings(Settings settings) {
+	public void setSettings(final Settings settings) {
 		_settings = settings;
 	}
 

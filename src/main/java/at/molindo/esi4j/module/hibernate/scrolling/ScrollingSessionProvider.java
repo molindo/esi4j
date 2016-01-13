@@ -19,10 +19,9 @@ import at.molindo.esi4j.module.hibernate.HibernateIndexManager;
 import at.molindo.esi4j.module.hibernate.HibernateModule;
 
 /**
- * factory for {@link ScrollingSession} instances that are created per session.
- * There must only be one provider per type and {@link HibernateModule} (and
- * thus {@link HibernateIndexManager}). If no {@link ScrollingSessionProvider}
- * is defined for a type, a {@link DefaultQueryScrollingSession} will be used.
+ * factory for {@link ScrollingSession} instances that are created per session. There must only be one provider per type
+ * and {@link HibernateModule} (and thus {@link HibernateIndexManager}). If no {@link ScrollingSessionProvider} is
+ * defined for a type, a {@link DefaultQueryScrollingSession} will be used.
  */
 public interface ScrollingSessionProvider {
 

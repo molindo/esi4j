@@ -15,7 +15,7 @@
  */
 package at.molindo.esi4j.core.impl;
 
-import static org.elasticsearch.common.settings.ImmutableSettings.settingsBuilder;
+import static org.elasticsearch.common.settings.ImmutableSettings.*;
 
 import java.util.Arrays;
 import java.util.List;
@@ -28,6 +28,9 @@ import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.env.Environment;
 import org.elasticsearch.node.internal.InternalSettingsPreparer;
 
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+
 import at.molindo.esi4j.core.Esi4J;
 import at.molindo.esi4j.core.Esi4JClient;
 import at.molindo.esi4j.core.Esi4JClientFactory;
@@ -39,9 +42,6 @@ import at.molindo.esi4j.core.internal.InternalIndex;
 import at.molindo.esi4j.multi.impl.DefaultManagedMultiIndex;
 import at.molindo.esi4j.util.Esi4JUtils;
 import at.molindo.utils.collections.CollectionUtils;
-
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 
 public class DefaultEsi4J implements Esi4J {
 
@@ -58,12 +58,13 @@ public class DefaultEsi4J implements Esi4J {
 		this(ImmutableSettings.settingsBuilder().build(), true);
 	}
 
-	public DefaultEsi4J(Settings settings) {
+	public DefaultEsi4J(final Settings settings) {
 		this(settings, true);
 	}
 
-	public DefaultEsi4J(Settings settings, boolean loadConfigSettings) {
-		Tuple<Settings, Environment> tuple = InternalSettingsPreparer.prepareSettings(settings, loadConfigSettings);
+	public DefaultEsi4J(final Settings settings, final boolean loadConfigSettings) {
+		final Tuple<Settings, Environment> tuple = InternalSettingsPreparer
+				.prepareSettings(settings, loadConfigSettings);
 		_settings = settingsBuilder().put(tuple.v1()).put("esi4j.enabled", true).build();
 		_environment = tuple.v2();
 
@@ -76,29 +77,29 @@ public class DefaultEsi4J implements Esi4J {
 	}
 
 	private void configureClients() {
-		String[] clients = _settings.getAsArray("esi4j.clients", new String[] { Esi4J.DEFAULT_CLIENT });
-		for (String clientName : clients) {
-			Settings clientSettings = settingsBuilder().put(_settings)
+		final String[] clients = _settings.getAsArray("esi4j.clients", new String[] { Esi4J.DEFAULT_CLIENT });
+		for (final String clientName : clients) {
+			final Settings clientSettings = settingsBuilder().put(_settings)
 					.put(Esi4JUtils.getSettings(_settings, "client." + clientName + ".", "esi4j.client.")).build();
 
-			Class<? extends Esi4JClientFactory> factoryClass = clientSettings.getAsClass("esi4j.client.type",
-					TransportClientFactory.class, "at.molindo.esi4j.core.impl.", "ClientFactory");
+			final Class<? extends Esi4JClientFactory> factoryClass = clientSettings
+					.getAsClass("esi4j.client.type", TransportClientFactory.class, "at.molindo.esi4j.core.impl.", "ClientFactory");
 
-			Esi4JFactory<Esi4JClient> factory = Esi4JUtils.createObject(factoryClass, clientSettings);
+			final Esi4JFactory<Esi4JClient> factory = Esi4JUtils.createObject(factoryClass, clientSettings);
 
 			_clients.put(clientName, factory.create());
 		}
 	}
 
 	private void configureIndexes() {
-		String[] indexNames = _settings.getAsArray("esi4j.indexes", new String[] { Esi4J.DEFAULT_INDEX });
-		for (String indexName : indexNames) {
-			Settings indexSettings = settingsBuilder().put(_settings)
+		final String[] indexNames = _settings.getAsArray("esi4j.indexes", new String[] { Esi4J.DEFAULT_INDEX });
+		for (final String indexName : indexNames) {
+			final Settings indexSettings = settingsBuilder().put(_settings)
 					.put(Esi4JUtils.getSettings(_settings, "index." + indexName + ".", "index."))
 					.put(Esi4JUtils.getSettings(_settings, "esi4j.index." + indexName + ".", "esi4j.index.")).build();
 
-			String clientName = indexSettings.get("esi4j.index.client", DEFAULT_CLIENT);
-			Esi4JClient client = _clients.get(clientName);
+			final String clientName = indexSettings.get("esi4j.index.client", DEFAULT_CLIENT);
+			final Esi4JClient client = _clients.get(clientName);
 
 			if (client == null) {
 				// TODO better exception
@@ -115,8 +116,8 @@ public class DefaultEsi4J implements Esi4J {
 	}
 
 	@Override
-	public InternalIndex getIndex(String name) {
-		InternalIndex index = _indexes.get(name);
+	public InternalIndex getIndex(final String name) {
+		final InternalIndex index = _indexes.get(name);
 		if (index == null) {
 			throw new IllegalStateException("index '" + name + "' not configured");
 		}
@@ -124,29 +125,29 @@ public class DefaultEsi4J implements Esi4J {
 	}
 
 	@Override
-	public Esi4JIndex findIndex(Class<?> type) {
+	public Esi4JIndex findIndex(final Class<?> type) {
 		return (Esi4JIndex) findMultiIndex(type);
 	}
 
 	@Override
-	public Esi4JManagedIndex getMultiIndex(String... names) {
+	public Esi4JManagedIndex getMultiIndex(final String... names) {
 		return getMultiIndex(Arrays.asList(names));
 	}
 
 	@Override
-	public Esi4JManagedIndex getMultiIndex(List<String> names) {
+	public Esi4JManagedIndex getMultiIndex(final List<String> names) {
 		if (CollectionUtils.empty(names)) {
 			return new DefaultManagedMultiIndex(_indexes.values());
 		} else if (names.size() == 1) {
-			String name = names.get(0);
+			final String name = names.get(0);
 			if ("*".equals(name)) {
 				return new DefaultManagedMultiIndex(_indexes.values());
 			} else {
 				return getIndex(name);
 			}
 		} else {
-			List<InternalIndex> indices = Lists.newArrayListWithCapacity(names.size());
-			for (String name : names) {
+			final List<InternalIndex> indices = Lists.newArrayListWithCapacity(names.size());
+			for (final String name : names) {
 				indices.add(getIndex(name));
 			}
 			return new DefaultManagedMultiIndex(indices);
@@ -154,16 +155,16 @@ public class DefaultEsi4J implements Esi4J {
 	}
 
 	@Override
-	public Esi4JManagedIndex findMultiIndex(Class<?>... types) {
+	public Esi4JManagedIndex findMultiIndex(final Class<?>... types) {
 		return findMultiIndex(Arrays.asList(types));
 	}
 
 	@Override
-	public Esi4JManagedIndex findMultiIndex(List<Class<? extends Object>> types) {
-		List<String> names = Lists.newArrayListWithCapacity(_indexes.size());
+	public Esi4JManagedIndex findMultiIndex(final List<Class<? extends Object>> types) {
+		final List<String> names = Lists.newArrayListWithCapacity(_indexes.size());
 
-		for (Entry<String, InternalIndex> e : _indexes.entrySet()) {
-			for (Class<?> type : types) {
+		for (final Entry<String, InternalIndex> e : _indexes.entrySet()) {
+			for (final Class<?> type : types) {
 				if (e.getValue().isMapped(type)) {
 					names.add(e.getKey());
 					break;
@@ -176,15 +177,15 @@ public class DefaultEsi4J implements Esi4J {
 
 	@Override
 	public void close() {
-		for (Esi4JClient client : _clients.values()) {
+		for (final Esi4JClient client : _clients.values()) {
 			client.close();
 		}
 	}
 
 	@Override
-	public void registerIndexManger(Esi4JIndexManager indexManager) {
-		Esi4JManagedIndex index = indexManager.getIndex();
-		String indexName = index.getName();
+	public void registerIndexManger(final Esi4JIndexManager indexManager) {
+		final Esi4JManagedIndex index = indexManager.getIndex();
+		final String indexName = index.getName();
 
 		if (_indexManagers.putIfAbsent(indexName, indexManager) == null) {
 			index.setIndexManager(indexManager);

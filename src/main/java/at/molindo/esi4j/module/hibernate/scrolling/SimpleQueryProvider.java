@@ -26,7 +26,7 @@ public class SimpleQueryProvider implements QueryProvider {
 	private final DetachedCriteria _criteria;
 	private final boolean _ordered;
 
-	public SimpleQueryProvider(String hql, boolean ordered) {
+	public SimpleQueryProvider(final String hql, final boolean ordered) {
 		if (hql == null) {
 			throw new NullPointerException("hql");
 		}
@@ -35,7 +35,7 @@ public class SimpleQueryProvider implements QueryProvider {
 		_ordered = ordered;
 	}
 
-	public SimpleQueryProvider(DetachedCriteria criteria, boolean ordered) {
+	public SimpleQueryProvider(final DetachedCriteria criteria, final boolean ordered) {
 		if (criteria == null) {
 			throw new NullPointerException("criteria");
 		}
@@ -50,12 +50,12 @@ public class SimpleQueryProvider implements QueryProvider {
 	}
 
 	@Override
-	public final Criteria createCriteria(Class<?> type, Session session) {
+	public final Criteria createCriteria(final Class<?> type, final Session session) {
 		return _criteria == null ? null : _criteria.getExecutableCriteria(session);
 	}
 
 	@Override
-	public final Query createQuery(Class<?> type, Session session) {
+	public final Query createQuery(final Class<?> type, final Session session) {
 		return _hql == null ? null : session.createQuery(_hql);
 	}
 

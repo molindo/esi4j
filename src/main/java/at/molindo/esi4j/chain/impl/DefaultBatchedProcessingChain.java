@@ -28,11 +28,11 @@ public class DefaultBatchedProcessingChain implements Esi4JBatchedProcessingChai
 	private final DefaultTaskProcessor _taksProcessor;
 	private final DefaultBatchedEventProcessor _batchedEventProcessor;
 
-	public DefaultBatchedProcessingChain(Esi4JIndex index) {
+	public DefaultBatchedProcessingChain(final Esi4JIndex index) {
 		this(index, null);
 	}
 
-	public DefaultBatchedProcessingChain(Esi4JIndex index, Map<Class<?>, Esi4JTaskSource> taskSources) {
+	public DefaultBatchedProcessingChain(final Esi4JIndex index, final Map<Class<?>, Esi4JTaskSource> taskSources) {
 		_taksProcessor = new DefaultTaskProcessor(index);
 		_batchedEventProcessor = new DefaultBatchedEventProcessor(_taksProcessor, taskSources);
 	}

@@ -27,7 +27,7 @@ public interface MappingSource {
 
 	/**
 	 * sets source on request using appropriate setter
-	 * 
+	 *
 	 * @param request
 	 */
 	void setSource(PutMappingRequestBuilder request);
@@ -41,7 +41,7 @@ public interface MappingSource {
 			return new MappingSource() {
 
 				@Override
-				public void setSource(PutMappingRequestBuilder request) {
+				public void setSource(final PutMappingRequestBuilder request) {
 					request.setSource(source);
 				}
 			};
@@ -51,7 +51,7 @@ public interface MappingSource {
 			return new MappingSource() {
 
 				@Override
-				public void setSource(PutMappingRequestBuilder request) {
+				public void setSource(final PutMappingRequestBuilder request) {
 					request.setSource(source);
 				}
 			};
@@ -61,7 +61,7 @@ public interface MappingSource {
 			return new MappingSource() {
 
 				@Override
-				public void setSource(PutMappingRequestBuilder request) {
+				public void setSource(final PutMappingRequestBuilder request) {
 					request.setSource(source);
 				}
 			};

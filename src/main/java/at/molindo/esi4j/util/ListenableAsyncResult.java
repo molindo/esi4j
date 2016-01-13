@@ -32,16 +32,16 @@ public class ListenableAsyncResult<V> extends AsyncResult<V> implements Listenab
 
 	private final ThreadPool _threadPool;
 
-	public static <V> ListenableAsyncResult<V> create(V value) {
+	public static <V> ListenableAsyncResult<V> create(final V value) {
 		return new ListenableAsyncResult<V>(value, null);
 	}
 
-	public static <V> ListenableAsyncResult<V> create(V value, Client client, ActionRequest<?> request) {
-		return new ListenableAsyncResult<V>(value,
-				request.listenerThreaded() ? ((InternalTransportClient) client).threadPool() : null);
+	public static <V> ListenableAsyncResult<V> create(final V value, final Client client, final ActionRequest<?> request) {
+		return new ListenableAsyncResult<V>(value, request.listenerThreaded() ? ((InternalTransportClient) client)
+				.threadPool() : null);
 	}
 
-	public ListenableAsyncResult(V value, ThreadPool threadPool) {
+	public ListenableAsyncResult(final V value, final ThreadPool threadPool) {
 		super(value);
 		_threadPool = threadPool;
 	}
@@ -52,22 +52,22 @@ public class ListenableAsyncResult<V> extends AsyncResult<V> implements Listenab
 	}
 
 	@Override
-	public V actionGet(String timeout) throws ElasticsearchException {
+	public V actionGet(final String timeout) throws ElasticsearchException {
 		return get();
 	}
 
 	@Override
-	public V actionGet(long timeoutMillis) throws ElasticsearchException {
+	public V actionGet(final long timeoutMillis) throws ElasticsearchException {
 		return get();
 	}
 
 	@Override
-	public V actionGet(long timeout, TimeUnit unit) throws ElasticsearchException {
+	public V actionGet(final long timeout, final TimeUnit unit) throws ElasticsearchException {
 		return get();
 	}
 
 	@Override
-	public V actionGet(TimeValue timeout) throws ElasticsearchException {
+	public V actionGet(final TimeValue timeout) throws ElasticsearchException {
 		return get();
 	}
 

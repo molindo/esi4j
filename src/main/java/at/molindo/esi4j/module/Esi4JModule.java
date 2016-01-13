@@ -24,11 +24,10 @@ import at.molindo.esi4j.rebuild.Esi4JRebuildSession;
 public interface Esi4JModule {
 
 	/**
-	 * must be called by {@link Esi4JRebuildProcessor} implementation before any
-	 * modifications to underlying index occur. This way, a module might decide
-	 * to queue or discard write operations until
+	 * must be called by {@link Esi4JRebuildProcessor} implementation before any modifications to underlying index
+	 * occur. This way, a module might decide to queue or discard write operations until
 	 * {@link Esi4JRebuildSession#close() is called}
-	 * 
+	 *
 	 * @param type
 	 * @return an iterator over this module's data for the given type.
 	 */

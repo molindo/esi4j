@@ -20,8 +20,7 @@ import at.molindo.esi4j.core.Esi4JStore;
 public interface Esi4JMultiStore extends Esi4JStore {
 
 	/**
-	 * @return {@link Iterable} representing the latest state from the
-	 *         corresponding {@link Esi4JManagedMultiIndex}
+	 * @return {@link Iterable} representing the latest state from the corresponding {@link Esi4JManagedMultiIndex}
 	 */
 	Iterable<Esi4JStore> getStores();
 }

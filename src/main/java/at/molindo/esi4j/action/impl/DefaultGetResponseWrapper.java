@@ -24,7 +24,7 @@ public class DefaultGetResponseWrapper implements GetResponseWrapper {
 	private final GetResponse _response;
 	private final Object _object;
 
-	public DefaultGetResponseWrapper(GetResponse response, Object object) {
+	public DefaultGetResponseWrapper(final GetResponse response, final Object object) {
 		if (response == null) {
 			throw new NullPointerException("response");
 		}
@@ -37,6 +37,7 @@ public class DefaultGetResponseWrapper implements GetResponseWrapper {
 		return _response;
 	}
 
+	@Override
 	public Object getObject() {
 		return _object;
 	}

@@ -29,7 +29,7 @@ public class DefaultMultiStore implements Esi4JMultiStore {
 	private final Esi4JManagedMultiIndex _index;
 	private final Iterable<Esi4JStore> _stores;
 
-	public DefaultMultiStore(Esi4JManagedMultiIndex index) {
+	public DefaultMultiStore(final Esi4JManagedMultiIndex index) {
 		if (index == null) {
 			throw new NullPointerException("index");
 		}
@@ -45,8 +45,8 @@ public class DefaultMultiStore implements Esi4JMultiStore {
 
 	@Override
 	public String getIndexName() {
-		StringBuilder buf = new StringBuilder();
-		for (Esi4JStore store : _stores) {
+		final StringBuilder buf = new StringBuilder();
+		for (final Esi4JStore store : _stores) {
 			buf.append(store.getIndexName()).append(",");
 		}
 		buf.setLength(buf.length() - 1);
@@ -54,19 +54,19 @@ public class DefaultMultiStore implements Esi4JMultiStore {
 	}
 
 	@Override
-	public <T> T execute(StoreOperation<T> operation) {
+	public <T> T execute(final StoreOperation<T> operation) {
 		return operation.execute(getClient().getClient(), getIndexName());
 	}
 
 	@Override
-	public void setIndex(Esi4JIndex index) {
+	public void setIndex(final Esi4JIndex index) {
 		throw new IllegalStateException("store was already assigned to an index named " + index.getName());
 	}
 
 	@Override
 	public Esi4JClient getClient() {
 		Esi4JClient client = null;
-		for (Esi4JStore store : _stores) {
+		for (final Esi4JStore store : _stores) {
 			if (client == null) {
 				client = store.getClient();
 			} else if (!client.getClusterName().equals(store.getClient().getClusterName())) {

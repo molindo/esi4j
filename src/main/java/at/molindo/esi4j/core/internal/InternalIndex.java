@@ -42,10 +42,10 @@ public interface InternalIndex extends Esi4JIndex, OperationContext, SearchHitRe
 
 	/**
 	 * replaces index store and sets store's index
-	 * 
+	 *
 	 * @param store
 	 *            new store for this index
-	 * 
+	 *
 	 * @throws NullPointerException
 	 *             if store is null
 	 * @throws IllegalStateException

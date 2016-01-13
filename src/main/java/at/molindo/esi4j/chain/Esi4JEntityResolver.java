@@ -20,9 +20,8 @@ import at.molindo.esi4j.ex.EntityNotResolveableException;
 import at.molindo.esi4j.mapping.ObjectKey;
 
 /**
- * replaces objects with placeholders (e.g. for serialization or queuing) and
- * resolves them for indexing.
- * 
+ * replaces objects with placeholders (e.g. for serialization or queuing) and resolves them for indexing.
+ *
  * @see QueuedTaskExecutor
  */
 public interface Esi4JEntityResolver {
@@ -33,8 +32,7 @@ public interface Esi4JEntityResolver {
 	ObjectKey toObjectKey(Object entity);
 
 	/**
-	 * @return a resolveable placeholder for this entity. Might be a new
-	 *         {@link ObjectKey}
+	 * @return a resolveable placeholder for this entity. Might be a new {@link ObjectKey}
 	 */
 	Object replaceEntity(Object entity);
 

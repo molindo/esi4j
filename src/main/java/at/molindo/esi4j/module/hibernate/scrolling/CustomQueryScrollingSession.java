@@ -29,7 +29,7 @@ public class CustomQueryScrollingSession implements ScrollingSession {
 
 	private final Class<?> _type;
 
-	public CustomQueryScrollingSession(Class<?> type, QueryProvider queryProvider) {
+	public CustomQueryScrollingSession(final Class<?> type, final QueryProvider queryProvider) {
 		if (type == null) {
 			throw new NullPointerException("type");
 		}
@@ -46,14 +46,14 @@ public class CustomQueryScrollingSession implements ScrollingSession {
 	}
 
 	@Override
-	public List<?> fetch(Session session, int batchSize) {
+	public List<?> fetch(final Session session, final int batchSize) {
 		List<?> list;
 
-		Criteria criteria = _queryProvider.createCriteria(_type, session);
+		final Criteria criteria = _queryProvider.createCriteria(_type, session);
 		if (criteria != null) {
 			list = fetch(criteria, _next, batchSize);
 		} else {
-			Query query = _queryProvider.createQuery(_type, session);
+			final Query query = _queryProvider.createQuery(_type, session);
 			list = fetch(query, _next, batchSize);
 		}
 
@@ -62,12 +62,12 @@ public class CustomQueryScrollingSession implements ScrollingSession {
 		return list;
 	}
 
-	private List<?> fetch(Criteria criteria, int first, int max) {
+	private List<?> fetch(final Criteria criteria, final int first, final int max) {
 		// TODO there are better ways to scroll than setFirstResult(..)
 		return criteria.setFirstResult(first).setMaxResults(max).setCacheable(false).list();
 	}
 
-	private List<?> fetch(Query query, int first, int max) {
+	private List<?> fetch(final Query query, final int first, final int max) {
 		// TODO there are better ways to scroll than setFirstResult(..)
 		return query.setFirstResult(first).setMaxResults(max).setCacheable(false).list();
 	}

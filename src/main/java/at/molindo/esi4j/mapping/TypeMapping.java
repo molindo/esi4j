@@ -44,10 +44,9 @@ public abstract class TypeMapping {
 	private final String _typeAlias;
 
 	/**
-	 * creates a {@link TypeMapping} for given alias and class. Both, alias and
-	 * class must be unique per index.
+	 * creates a {@link TypeMapping} for given alias and class. Both, alias and class must be unique per index.
 	 */
-	public TypeMapping(String typeAlias) {
+	public TypeMapping(final String typeAlias) {
 		if (StringUtils.empty(typeAlias)) {
 			throw new IllegalArgumentException("typeAlias must not be empty");
 		}
@@ -55,8 +54,7 @@ public abstract class TypeMapping {
 	}
 
 	/**
-	 * @return the mapping's alias which translates directly to an elasticsearch
-	 *         type
+	 * @return the mapping's alias which translates directly to an elasticsearch type
 	 */
 	public String getTypeAlias() {
 		return _typeAlias;
@@ -67,20 +65,18 @@ public abstract class TypeMapping {
 	public abstract Class<?> getIdClass();
 
 	/**
-	 * Simple filtering of entities. esi4j core library will always respect this
-	 * filtering when working with mapped objects. Users are still free to
-	 * persist entities anyway.
-	 * 
+	 * Simple filtering of entities. esi4j core library will always respect this filtering when working with mapped
+	 * objects. Users are still free to persist entities anyway.
+	 *
 	 * @return <code>true</code> if entity must not be persisted to index
 	 */
-	public boolean isFiltered(@Nonnull Object o) {
+	public boolean isFiltered(@Nonnull final Object o) {
 		return false;
 	}
 
 	/**
-	 * @return <code>true</code> if all object's of mapped type are supposed to
-	 *         be versioned. Note that it isn't required to call this method
-	 *         before {@link #getVersion(Object)}
+	 * @return <code>true</code> if all object's of mapped type are supposed to be versioned. Note that it isn't
+	 *         required to call this method before {@link #getVersion(Object)}
 	 */
 	public abstract boolean isVersioned();
 
@@ -95,14 +91,13 @@ public abstract class TypeMapping {
 	 * @see #getId(Object)
 	 * @see #toIdString(Object)
 	 */
-	public final String getIdString(@Nonnull Object o) {
-		Object id = getId(o);
+	public final String getIdString(@Nonnull final Object o) {
+		final Object id = getId(o);
 		return id == null ? null : toIdString(id);
 	}
 
 	/**
-	 * @return convert id to a string representation suitable for elasticsearch.
-	 *         never null if id is not null
+	 * @return convert id to a string representation suitable for elasticsearch. never null if id is not null
 	 * @see #toId(String)
 	 */
 	public abstract String toIdString(@Nonnull Object id);
@@ -129,15 +124,13 @@ public abstract class TypeMapping {
 	public abstract ObjectSource getObjectSource(Object o);
 
 	/**
-	 * @return the object returned by a {@link GetResponse} or null if not
-	 *         applicable or doc doesn't exist
+	 * @return the object returned by a {@link GetResponse} or null if not applicable or doc doesn't exist
 	 */
 	@CheckForNull
 	public abstract Object read(GetResponse response);
 
 	/**
-	 * @return the object returned by a {@link SearchHit} or null if not
-	 *         applicable
+	 * @return the object returned by a {@link SearchHit} or null if not applicable
 	 */
 	@CheckForNull
 	public abstract Object read(SearchHit hit);
@@ -146,7 +139,7 @@ public abstract class TypeMapping {
 	 * @return null if object is filtered
 	 */
 	@CheckForNull
-	public final IndexRequestBuilder indexRequest(Client client, String indexName, Object o) {
+	public final IndexRequestBuilder indexRequest(final Client client, final String indexName, final Object o) {
 		return populate(client.prepareIndex(), indexName, o);
 	}
 
@@ -154,16 +147,16 @@ public abstract class TypeMapping {
 	 * @return null if object is filtered
 	 */
 	@CheckForNull
-	public final IndexRequest indexBuilderRequest(Client client, String indexName, Object o) {
-		IndexRequestBuilder builder = populate(new IndexRequestBuilder(client), indexName, o);
+	public final IndexRequest indexBuilderRequest(final Client client, final String indexName, final Object o) {
+		final IndexRequestBuilder builder = populate(new IndexRequestBuilder(client), indexName, o);
 		return builder == null ? null : builder.request();
 	}
 
-	private IndexRequestBuilder populate(IndexRequestBuilder builder, String indexName, @Nullable Object o) {
+	private IndexRequestBuilder populate(final IndexRequestBuilder builder, final String indexName, @Nullable final Object o) {
 		if (o != null && !isFiltered(o)) {
 			builder.setIndex(indexName).setType(getTypeAlias()).setId(getIdString(o));
 
-			Long version = getVersion(o);
+			final Long version = getVersion(o);
 			if (version != null) {
 				builder.setVersion(version).setVersionType(VersionType.EXTERNAL);
 			}
@@ -180,7 +173,7 @@ public abstract class TypeMapping {
 	 * @return null if object doesn't have an id
 	 */
 	@CheckForNull
-	public final DeleteRequest deleteBuilderRequest(Client client, String indexName, Object o) {
+	public final DeleteRequest deleteBuilderRequest(final Client client, final String indexName, final Object o) {
 		return deleteBuilderRequest(client, indexName, getIdString(o), getVersion(o));
 	}
 
@@ -188,8 +181,8 @@ public abstract class TypeMapping {
 	 * @return null if object doesn't have an id
 	 */
 	@CheckForNull
-	public final DeleteRequest deleteBuilderRequest(Client client, String indexName, String id, Long version) {
-		DeleteRequestBuilder builder = populate(new DeleteRequestBuilder(client), indexName, id, version);
+	public final DeleteRequest deleteBuilderRequest(final Client client, final String indexName, final String id, final Long version) {
+		final DeleteRequestBuilder builder = populate(new DeleteRequestBuilder(client), indexName, id, version);
 		return builder == null ? null : builder.request();
 	}
 
@@ -197,7 +190,7 @@ public abstract class TypeMapping {
 	 * @return null if object doesn't have an id
 	 */
 	@CheckForNull
-	public final DeleteRequestBuilder deleteRequest(Client client, String indexName, Object o) {
+	public final DeleteRequestBuilder deleteRequest(final Client client, final String indexName, final Object o) {
 		return deleteRequest(client, indexName, getIdString(o), getVersion(o));
 	}
 
@@ -205,11 +198,11 @@ public abstract class TypeMapping {
 	 * @return null if object doesn't have an id
 	 */
 	@CheckForNull
-	public final DeleteRequestBuilder deleteRequest(Client client, String indexName, String id, Long version) {
+	public final DeleteRequestBuilder deleteRequest(final Client client, final String indexName, final String id, final Long version) {
 		return populate(client.prepareDelete(), indexName, id, version);
 	}
 
-	private final DeleteRequestBuilder populate(DeleteRequestBuilder builder, String indexName, String id, Long version) {
+	private final DeleteRequestBuilder populate(final DeleteRequestBuilder builder, final String indexName, final String id, final Long version) {
 		if (id == null) {
 			return null;
 		}

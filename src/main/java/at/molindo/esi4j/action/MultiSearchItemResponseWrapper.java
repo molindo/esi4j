@@ -26,8 +26,8 @@ import org.elasticsearch.search.SearchHit;
 import at.molindo.esi4j.mapping.TypeMapping;
 
 /**
- * wraps a {@link MultiSearchResponse.Item}, allows to get returned
- * {@link SearchResponse} as a {@link SearchResponseWrapper}.
+ * wraps a {@link MultiSearchResponse.Item}, allows to get returned {@link SearchResponse} as a
+ * {@link SearchResponseWrapper}.
  */
 public interface MultiSearchItemResponseWrapper {
 
@@ -47,8 +47,7 @@ public interface MultiSearchItemResponseWrapper {
 	List<?> getObjects();
 
 	/**
-	 * @return may contain <code>null</code> if
-	 *         {@link TypeMapping#read(SearchHit)} returns <code>null</code>
+	 * @return may contain <code>null</code> if {@link TypeMapping#read(SearchHit)} returns <code>null</code>
 	 */
 	<T> List<T> getObjects(Class<T> type);
 

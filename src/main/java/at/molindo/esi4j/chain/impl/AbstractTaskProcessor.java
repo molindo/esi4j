@@ -21,13 +21,13 @@ import at.molindo.esi4j.core.Esi4JIndex;
 import at.molindo.utils.collections.ArrayUtils;
 
 /**
- * 
+ *
  */
 public abstract class AbstractTaskProcessor implements Esi4JTaskProcessor {
 
 	private final Esi4JIndex _index;
 
-	public AbstractTaskProcessor(Esi4JIndex index) {
+	public AbstractTaskProcessor(final Esi4JIndex index) {
 		if (index == null) {
 			throw new NullPointerException("index");
 		}
@@ -35,9 +35,9 @@ public abstract class AbstractTaskProcessor implements Esi4JTaskProcessor {
 	}
 
 	@Override
-	public void processTasks(Iterable<Esi4JEntityTask[]> tasks) {
+	public void processTasks(final Iterable<Esi4JEntityTask[]> tasks) {
 		if (tasks != null) {
-			for (Esi4JEntityTask[] t : tasks) {
+			for (final Esi4JEntityTask[] t : tasks) {
 				if (!ArrayUtils.empty(t)) {
 					processTasks(t);
 				}

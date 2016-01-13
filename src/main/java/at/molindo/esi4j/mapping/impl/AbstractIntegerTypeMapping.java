@@ -16,22 +16,21 @@
 package at.molindo.esi4j.mapping.impl;
 
 /**
- * {@link AbstractTypeMapping} implementation for objects with ids of type
- * {@link Integer}
+ * {@link AbstractTypeMapping} implementation for objects with ids of type {@link Integer}
  */
 public abstract class AbstractIntegerTypeMapping<T> extends AbstractTypeMapping<T, Integer> {
 
-	public AbstractIntegerTypeMapping(String typeAlias, Class<T> typeClass) {
+	public AbstractIntegerTypeMapping(final String typeAlias, final Class<T> typeClass) {
 		super(typeAlias, typeClass, Integer.class);
 	}
 
 	@Override
-	public final String toString(Integer id) {
+	public final String toString(final Integer id) {
 		return id.toString();
 	}
 
 	@Override
-	public final Integer toId(String id) {
+	public final Integer toId(final String id) {
 		// TODO parse errors
 		return Integer.parseInt(id);
 	}

@@ -53,19 +53,17 @@ public interface Esi4JStore {
 	public interface StoreOperation<T> {
 
 		/**
-		 * executes a given operation against an index. might be called multiple
-		 * times and even concurrently against different indexes or clusters. In
-		 * such cases, the result returned by the main cluster and index must be
-		 * returned while the {@link Esi4JStore} must handle different
-		 * responses.
-		 * 
+		 * executes a given operation against an index. might be called multiple times and even concurrently against
+		 * different indexes or clusters. In such cases, the result returned by the main cluster and index must be
+		 * returned while the {@link Esi4JStore} must handle different responses.
+		 *
 		 * TODO how's that supposed to work?
-		 * 
+		 *
 		 * @param client
 		 *            the elasticsearch client to use
 		 * @param indexName
 		 *            the elasticsearch index to use
-		 * 
+		 *
 		 * @return response by main index
 		 */
 		T execute(Client client, String indexName);

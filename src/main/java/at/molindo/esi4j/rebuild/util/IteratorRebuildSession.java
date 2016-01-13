@@ -18,9 +18,9 @@ package at.molindo.esi4j.rebuild.util;
 import java.util.Iterator;
 import java.util.List;
 
-import at.molindo.esi4j.rebuild.Esi4JRebuildSession;
-
 import com.google.common.collect.Lists;
+
+import at.molindo.esi4j.rebuild.Esi4JRebuildSession;
 
 /**
  * {@link Esi4JRebuildSession} implementation using a simple {@link Iterator}
@@ -31,7 +31,7 @@ public class IteratorRebuildSession implements Esi4JRebuildSession {
 	private Iterator<?> _iterator;
 	private final boolean _ordered;
 
-	public IteratorRebuildSession(Class<?> type, Iterator<?> iterator, boolean ordered) {
+	public IteratorRebuildSession(final Class<?> type, final Iterator<?> iterator, final boolean ordered) {
 		if (type == null) {
 			throw new NullPointerException("type");
 		}
@@ -54,12 +54,12 @@ public class IteratorRebuildSession implements Esi4JRebuildSession {
 	}
 
 	@Override
-	public List<?> getNext(int batchSize) {
+	public List<?> getNext(final int batchSize) {
 		if (_iterator == null) {
 			throw new IllegalStateException("already closed");
 		}
 
-		List<Object> list = Lists.newArrayListWithCapacity(batchSize);
+		final List<Object> list = Lists.newArrayListWithCapacity(batchSize);
 		while (list.size() < batchSize && _iterator.hasNext()) {
 			list.add(_iterator.next());
 		}

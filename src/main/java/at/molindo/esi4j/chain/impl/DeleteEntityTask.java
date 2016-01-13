@@ -28,7 +28,7 @@ public final class DeleteEntityTask extends AbstractEntityTask {
 
 	private static final long serialVersionUID = 1L;
 
-	public DeleteEntityTask(Object entity) {
+	public DeleteEntityTask(final Object entity) {
 		super(entity);
 	}
 
@@ -38,29 +38,29 @@ public final class DeleteEntityTask extends AbstractEntityTask {
 	}
 
 	@Override
-	protected void initClone(Esi4JEntityTask clone) {
+	protected void initClone(final Esi4JEntityTask clone) {
 	}
 
 	@Override
-	public void replaceEntity(Esi4JEntityResolver entityResolver) {
+	public void replaceEntity(final Esi4JEntityResolver entityResolver) {
 		// always use ObjectKey
 		setEntity(entityResolver.toObjectKey(getEntity()));
 	}
 
 	@Override
-	public void resolveEntity(Esi4JEntityResolver entityResolver) {
+	public void resolveEntity(final Esi4JEntityResolver entityResolver) {
 		// noop - already deleted object, ObjectKey is sufficient
 	}
 
 	@Override
-	public void addToBulk(Client client, BulkRequestBuilder bulk, String indexName, OperationContext context) {
-		Object entity = getEntity();
+	public void addToBulk(final Client client, final BulkRequestBuilder bulk, final String indexName, final OperationContext context) {
+		final Object entity = getEntity();
 
 		TypeMapping mapping;
 
 		String id;
 		if (entity instanceof ObjectKey) {
-			ObjectKey key = (ObjectKey) entity;
+			final ObjectKey key = (ObjectKey) entity;
 			mapping = context.findTypeMapping(key.getType());
 			id = mapping.toIdString(key.getId());
 		} else {

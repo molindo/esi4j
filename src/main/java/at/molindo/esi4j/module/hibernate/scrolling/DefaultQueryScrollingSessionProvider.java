@@ -19,18 +19,17 @@ import java.util.Map;
 
 import org.hibernate.FetchMode;
 
-
 import com.google.common.collect.Maps;
 
 public class DefaultQueryScrollingSessionProvider extends AbstractScrollingSessionProvider {
 
 	private final Map<String, FetchMode> _fetchModes = Maps.newHashMap();
 
-	public DefaultQueryScrollingSessionProvider(Class<?> type) {
+	public DefaultQueryScrollingSessionProvider(final Class<?> type) {
 		super(type);
 	}
 
-	public DefaultQueryScrollingSessionProvider setFetchMode(String associationPath, FetchMode fetchMode) {
+	public DefaultQueryScrollingSessionProvider setFetchMode(final String associationPath, final FetchMode fetchMode) {
 		_fetchModes.put(associationPath, fetchMode);
 		return this;
 	}

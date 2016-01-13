@@ -23,7 +23,7 @@ public class NodeClient extends TransportClient {
 
 	private final Node _node;
 
-	public NodeClient(String clusterName, Node node) {
+	public NodeClient(final String clusterName, final Node node) {
 		super(clusterName, node.client());
 		_node = node;
 		_node.start();

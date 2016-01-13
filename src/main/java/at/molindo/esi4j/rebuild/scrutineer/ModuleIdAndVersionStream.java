@@ -19,11 +19,11 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
 
-import at.molindo.esi4j.mapping.TypeMapping;
-import at.molindo.esi4j.rebuild.Esi4JRebuildSession;
-
 import com.aconex.scrutineer.IdAndVersion;
 import com.aconex.scrutineer.IdAndVersionStream;
+
+import at.molindo.esi4j.mapping.TypeMapping;
+import at.molindo.esi4j.rebuild.Esi4JRebuildSession;
 
 public final class ModuleIdAndVersionStream implements IdAndVersionStream {
 
@@ -31,7 +31,7 @@ public final class ModuleIdAndVersionStream implements IdAndVersionStream {
 	private final TypeMapping _mapping;
 	private Esi4JRebuildSession _rebuildSession;
 
-	public ModuleIdAndVersionStream(Esi4JRebuildSession rebuildSession, int batchSize, TypeMapping mapping) {
+	public ModuleIdAndVersionStream(final Esi4JRebuildSession rebuildSession, final int batchSize, final TypeMapping mapping) {
 		_rebuildSession = rebuildSession;
 		_batchSize = batchSize;
 		_mapping = mapping;
@@ -95,7 +95,7 @@ public final class ModuleIdAndVersionStream implements IdAndVersionStream {
 			verifyOpen();
 			if (_iter == null || !_lastBatchFetched && !_iter.hasNext()) {
 				// defer calling as long as possible
-				List<?> list = _rebuildSession.getNext(_batchSize);
+				final List<?> list = _rebuildSession.getNext(_batchSize);
 				if (list.size() < _batchSize) {
 					_lastBatchFetched = true;
 				}
@@ -117,7 +117,7 @@ public final class ModuleIdAndVersionStream implements IdAndVersionStream {
 				throw new NoSuchElementException();
 			}
 
-			Object next = _next;
+			final Object next = _next;
 			_next = null;
 
 			Object id = _mapping.getId(next);

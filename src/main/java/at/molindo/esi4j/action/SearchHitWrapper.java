@@ -29,8 +29,7 @@ public interface SearchHitWrapper {
 	SearchHit getSearchHit();
 
 	/**
-	 * @return may be <code>null</code> if {@link TypeMapping#read(SearchHit)}
-	 *         returns null
+	 * @return may be <code>null</code> if {@link TypeMapping#read(SearchHit)} returns null
 	 */
 	@CheckForNull
 	Object getObject();

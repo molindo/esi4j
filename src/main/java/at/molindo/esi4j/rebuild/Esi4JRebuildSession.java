@@ -20,14 +20,12 @@ import java.util.List;
 import at.molindo.esi4j.rebuild.scrutineer.ScrutineerRebuildProcessor;
 
 /**
- * Session management for rebuilds. Sessions must always be started before any
- * change to the index.
+ * Session management for rebuilds. Sessions must always be started before any change to the index.
  */
 public interface Esi4JRebuildSession {
 
 	/**
-	 * @return true if session is ordered by id (and thus suited for
-	 *         {@link ScrutineerRebuildProcessor})
+	 * @return true if session is ordered by id (and thus suited for {@link ScrutineerRebuildProcessor})
 	 */
 	boolean isOrdered();
 
@@ -37,20 +35,17 @@ public interface Esi4JRebuildSession {
 	Class<?> getType();
 
 	/**
-	 * Must only be called after all elements of previous batch haven been
-	 * processed. Therefore, previous state may be cleared during any
-	 * invocation.
-	 * 
+	 * Must only be called after all elements of previous batch haven been processed. Therefore, previous state may be
+	 * cleared during any invocation.
+	 *
 	 * @param batchSize
-	 * @return up to the given number of elements. empty list if no more data
-	 *         available
+	 * @return up to the given number of elements. empty list if no more data available
 	 */
 	List<?> getNext(int batchSize);
 
 	/**
-	 * @return an optional metadata object that will be written to index after
-	 *         successful rebuild. May be <code>null</code>. Metadata type must
-	 *         be mapped.
+	 * @return an optional metadata object that will be written to index after successful rebuild. May be
+	 *         <code>null</code>. Metadata type must be mapped.
 	 */
 	Object getMetadata();
 

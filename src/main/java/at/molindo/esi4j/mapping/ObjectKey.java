@@ -18,8 +18,7 @@ package at.molindo.esi4j.mapping;
 import java.io.Serializable;
 
 /**
- * an identifier consisting of a type, a {@link Serializable} id and optionally
- * a version
+ * an identifier consisting of a type, a {@link Serializable} id and optionally a version
  */
 public final class ObjectKey implements Serializable {
 
@@ -29,11 +28,11 @@ public final class ObjectKey implements Serializable {
 	private final Serializable _id;
 	private final Long _version;
 
-	public ObjectKey(Class<?> type, Serializable id) {
+	public ObjectKey(final Class<?> type, final Serializable id) {
 		this(type, id, null);
 	}
 
-	public ObjectKey(Class<?> type, Serializable id, Long version) {
+	public ObjectKey(final Class<?> type, final Serializable id, final Long version) {
 		if (type == null) {
 			throw new NullPointerException("type");
 		}
@@ -76,7 +75,7 @@ public final class ObjectKey implements Serializable {
 	}
 
 	@Override
-	public boolean equals(Object obj) {
+	public boolean equals(final Object obj) {
 		if (this == obj) {
 			return true;
 		}
@@ -86,7 +85,7 @@ public final class ObjectKey implements Serializable {
 		if (getClass() != obj.getClass()) {
 			return false;
 		}
-		ObjectKey other = (ObjectKey) obj;
+		final ObjectKey other = (ObjectKey) obj;
 		if (_id == null) {
 			if (other._id != null) {
 				return false;
@@ -106,7 +105,7 @@ public final class ObjectKey implements Serializable {
 
 	@Override
 	public String toString() {
-		StringBuilder buf = new StringBuilder(_type.getSimpleName()).append("#").append(_id);
+		final StringBuilder buf = new StringBuilder(_type.getSimpleName()).append("#").append(_id);
 		if (_version != null) {
 			buf.append(" (").append(_version).append(")");
 		}

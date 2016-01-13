@@ -24,7 +24,7 @@ public class DefaultIndexResponseWrapper implements IndexResponseWrapper {
 	private final IndexResponse _response;
 	private final Object _id;
 
-	public DefaultIndexResponseWrapper(IndexResponse response, Object id) {
+	public DefaultIndexResponseWrapper(final IndexResponse response, final Object id) {
 		if (response == null) {
 			throw new NullPointerException("response");
 		}
@@ -40,6 +40,7 @@ public class DefaultIndexResponseWrapper implements IndexResponseWrapper {
 		return _response;
 	}
 
+	@Override
 	public Object getId() {
 		return _id;
 	}

@@ -30,11 +30,11 @@ public class DefaultEventProcessor extends AbstractEventListener implements Esi4
 	private volatile ClassMap<Esi4JTaskSource> _taskSources;
 	private final Esi4JTaskProcessor _taskProcessor;
 
-	public DefaultEventProcessor(Esi4JTaskProcessor taskProcessor) {
+	public DefaultEventProcessor(final Esi4JTaskProcessor taskProcessor) {
 		this(taskProcessor, null);
 	}
 
-	public DefaultEventProcessor(Esi4JTaskProcessor taskProcessor, Map<Class<?>, Esi4JTaskSource> taskSources) {
+	public DefaultEventProcessor(final Esi4JTaskProcessor taskProcessor, final Map<Class<?>, Esi4JTaskSource> taskSources) {
 		if (taskProcessor == null) {
 			throw new NullPointerException("taskProcessor");
 		}
@@ -47,22 +47,22 @@ public class DefaultEventProcessor extends AbstractEventListener implements Esi4
 	}
 
 	@Override
-	public boolean isProcessing(Class<?> type) {
+	public boolean isProcessing(final Class<?> type) {
 		return _taskSources.find(type) != null;
 	}
 
 	@Override
-	public void putTaskSource(Class<?> type, Esi4JTaskSource taskSource) {
+	public void putTaskSource(final Class<?> type, final Esi4JTaskSource taskSource) {
 		// copy on write
-		ClassMap<Esi4JTaskSource> temp = copyTaskSources();
+		final ClassMap<Esi4JTaskSource> temp = copyTaskSources();
 		temp.put(type, taskSource);
 		_taskSources = temp;
 	}
 
 	@Override
-	public void removeTaskSource(Class<?> type) {
+	public void removeTaskSource(final Class<?> type) {
 		// copy on write
-		ClassMap<Esi4JTaskSource> temp = copyTaskSources();
+		final ClassMap<Esi4JTaskSource> temp = copyTaskSources();
 		temp.remove(type);
 		_taskSources = temp;
 	}
@@ -71,43 +71,43 @@ public class DefaultEventProcessor extends AbstractEventListener implements Esi4
 		return new ClassMap<Esi4JTaskSource>(_taskSources);
 	}
 
-	protected void processTasks(Esi4JEntityTask[] tasks) {
+	protected void processTasks(final Esi4JEntityTask[] tasks) {
 		if (!ArrayUtils.empty(tasks)) {
 			_taskProcessor.processTasks(tasks);
 		}
 	}
 
-	protected Esi4JTaskSource findTaskSource(Object o) {
+	protected Esi4JTaskSource findTaskSource(final Object o) {
 		return o == null ? null : _taskSources.find(o.getClass());
 	}
 
 	@Override
-	public void onPostInsert(Object o) {
+	public void onPostInsert(final Object o) {
 		processTasks(getPostInsertTasks(o));
 	}
 
 	@Override
-	public void onPostUpdate(Object o) {
+	public void onPostUpdate(final Object o) {
 		processTasks(getPostUpdateTasks(o));
 	}
 
 	@Override
-	public void onPostDelete(Object o) {
+	public void onPostDelete(final Object o) {
 		processTasks(getPostDeleteTasks(o));
 	}
 
-	protected Esi4JEntityTask[] getPostInsertTasks(Object o) {
-		Esi4JTaskSource src = findTaskSource(o);
+	protected Esi4JEntityTask[] getPostInsertTasks(final Object o) {
+		final Esi4JTaskSource src = findTaskSource(o);
 		return src == null ? null : src.getPostInsertTasks(o);
 	}
 
-	protected Esi4JEntityTask[] getPostUpdateTasks(Object o) {
-		Esi4JTaskSource src = findTaskSource(o);
+	protected Esi4JEntityTask[] getPostUpdateTasks(final Object o) {
+		final Esi4JTaskSource src = findTaskSource(o);
 		return src == null ? null : src.getPostUpdateTasks(o);
 	}
 
-	protected Esi4JEntityTask[] getPostDeleteTasks(Object o) {
-		Esi4JTaskSource src = findTaskSource(o);
+	protected Esi4JEntityTask[] getPostDeleteTasks(final Object o) {
+		final Esi4JTaskSource src = findTaskSource(o);
 		return src == null ? null : src.getPostDeleteTasks(o);
 	}
 

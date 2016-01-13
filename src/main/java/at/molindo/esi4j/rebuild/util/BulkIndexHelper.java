@@ -28,12 +28,12 @@ import org.elasticsearch.action.delete.DeleteRequestBuilder;
 import org.elasticsearch.action.index.IndexRequestBuilder;
 import org.elasticsearch.client.Client;
 
+import com.google.common.collect.Lists;
+
 import at.molindo.esi4j.core.Esi4JIndex;
 import at.molindo.esi4j.core.Esi4JOperation;
 import at.molindo.esi4j.core.Esi4JOperation.OperationContext;
 import at.molindo.esi4j.mapping.TypeMapping;
-
-import com.google.common.collect.Lists;
 
 /**
  * helper class that helps awaiting completion of submitted bulk index tasks
@@ -59,11 +59,11 @@ public class BulkIndexHelper {
 	public BulkIndexHelper() {
 	}
 
-	public Session newSession(Esi4JIndex index, final int batchSize) {
+	public Session newSession(final Esi4JIndex index, final int batchSize) {
 		return index.execute(new Esi4JOperation<Session>() {
 
 			@Override
-			public Session execute(Client client, String indexName, OperationContext helper) {
+			public Session execute(final Client client, final String indexName, final OperationContext helper) {
 
 				return newSession(client, indexName, helper, batchSize);
 			}
@@ -71,19 +71,19 @@ public class BulkIndexHelper {
 		});
 	}
 
-	public Session newSession(Client client, String indexName, OperationContext context, int batchSize) {
+	public Session newSession(final Client client, final String indexName, final OperationContext context, final int batchSize) {
 		return new Session(client, indexName, context, batchSize);
 	}
 
-	public void bulkIndex(Esi4JIndex index, final List<?> list) {
-		Session session = newSession(index, list.size());
-		for (Object o : list) {
+	public void bulkIndex(final Esi4JIndex index, final List<?> list) {
+		final Session session = newSession(index, list.size());
+		for (final Object o : list) {
 			session.index(o);
 		}
 		session.submit();
 	}
 
-	public void bulkIndex(BulkRequestBuilder request) {
+	public void bulkIndex(final BulkRequestBuilder request) {
 		final int items = request.numberOfActions();
 		if (items == 0) {
 			// nothing to do
@@ -95,7 +95,7 @@ public class BulkIndexHelper {
 			while (_running >= _maxRunning) {
 				try {
 					_nextCompleted.await();
-				} catch (InterruptedException e) {
+				} catch (final InterruptedException e) {
 					throw new RuntimeException("waiting interrupted", e);
 				}
 			}
@@ -107,14 +107,12 @@ public class BulkIndexHelper {
 		request.execute(new ActionListener<BulkResponse>() {
 
 			@Override
-			public void onResponse(BulkResponse response) {
+			public void onResponse(final BulkResponse response) {
 				int succeeded = 0;
 				int failed = 0;
 
-				BulkItemResponse[] items = response.getItems();
-				for (int i = 0; i < items.length; i++) {
-
-					BulkItemResponse item = items[i];
+				final BulkItemResponse[] items = response.getItems();
+				for (final BulkItemResponse item : items) {
 
 					if (item.isFailed()) {
 						failed++;
@@ -131,12 +129,12 @@ public class BulkIndexHelper {
 			}
 
 			@Override
-			public void onFailure(Throwable e) {
+			public void onFailure(final Throwable e) {
 				log.warn("failed to bulk index", e);
 				end(0, items);
 			}
 
-			private void end(int succeeded, int failed) {
+			private void end(final int succeeded, final int failed) {
 				_lock.lock();
 				try {
 					_failed += failed;
@@ -194,7 +192,7 @@ public class BulkIndexHelper {
 		return _maxRunning;
 	}
 
-	public BulkIndexHelper setMaxRunning(int maxRunning) {
+	public BulkIndexHelper setMaxRunning(final int maxRunning) {
 		if (maxRunning <= 0) {
 			throw new IllegalArgumentException("maxRunning must be > 0, was " + maxRunning);
 		}
@@ -203,7 +201,7 @@ public class BulkIndexHelper {
 		return this;
 	}
 
-	public BulkIndexHelper setResponseHandler(IResponseHandler responseHandler) {
+	public BulkIndexHelper setResponseHandler(final IResponseHandler responseHandler) {
 		_responseHandler = responseHandler;
 		return this;
 	}
@@ -221,7 +219,7 @@ public class BulkIndexHelper {
 
 		private final List<ActionRequestBuilder<?, ?, ?, ?>> _requests;
 
-		public Session(Client client, String indexName, OperationContext context, int batchSize) {
+		public Session(final Client client, final String indexName, final OperationContext context, final int batchSize) {
 			_client = client;
 			_indexName = indexName;
 			_context = context;
@@ -229,33 +227,33 @@ public class BulkIndexHelper {
 			_requests = Lists.newArrayListWithCapacity(_batchSize);
 		}
 
-		public Session index(Object o) {
+		public Session index(final Object o) {
 			add(toIndexRequest(o));
 			return this;
 		}
 
-		public IndexRequestBuilder toIndexRequest(Object object) {
-			TypeMapping mapping = _context.findTypeMapping(object);
+		public IndexRequestBuilder toIndexRequest(final Object object) {
+			final TypeMapping mapping = _context.findTypeMapping(object);
 			return mapping.indexRequest(_client, _indexName, object);
 		}
 
-		public Session delete(Object o) {
-			TypeMapping mapping = _context.findTypeMapping(o);
+		public Session delete(final Object o) {
+			final TypeMapping mapping = _context.findTypeMapping(o);
 			delete(mapping.getTypeClass(), mapping.getId(o), mapping.getVersion(o));
 			return this;
 		}
 
-		public Session delete(Class<?> type, Object id, Long version) {
+		public Session delete(final Class<?> type, final Object id, final Long version) {
 			add(toDeleteRequest(type, id, version));
 			return this;
 		}
 
-		private DeleteRequestBuilder toDeleteRequest(Class<?> type, Object id, Long version) {
-			TypeMapping mapping = _context.findTypeMapping(type);
+		private DeleteRequestBuilder toDeleteRequest(final Class<?> type, final Object id, final Long version) {
+			final TypeMapping mapping = _context.findTypeMapping(type);
 			return mapping.deleteRequest(_client, _indexName, mapping.toIdString(id), version);
 		}
 
-		private void add(ActionRequestBuilder<?, ?, ?, ?> request) {
+		private void add(final ActionRequestBuilder<?, ?, ?, ?> request) {
 			_requests.add(request);
 			if (_requests.size() == _batchSize) {
 				submit();
@@ -268,10 +266,9 @@ public class BulkIndexHelper {
 				bulkIndex(new Esi4JOperation<BulkRequestBuilder>() {
 
 					@Override
-					public BulkRequestBuilder execute(Client client, String indexName,
-							Esi4JOperation.OperationContext helper) {
-						BulkRequestBuilder bulk = client.prepareBulk();
-						for (ActionRequestBuilder<?, ?, ?, ?> request : _requests) {
+					public BulkRequestBuilder execute(final Client client, final String indexName, final Esi4JOperation.OperationContext helper) {
+						final BulkRequestBuilder bulk = client.prepareBulk();
+						for (final ActionRequestBuilder<?, ?, ?, ?> request : _requests) {
 							if (request instanceof IndexRequestBuilder) {
 								bulk.add((IndexRequestBuilder) request);
 							} else if (request instanceof DeleteRequestBuilder) {

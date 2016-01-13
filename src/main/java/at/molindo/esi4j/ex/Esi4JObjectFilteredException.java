@@ -24,7 +24,7 @@ public class Esi4JObjectFilteredException extends Esi4JRuntimeException {
 	private final TypeMapping _mapping;
 	private final Object _object;
 
-	public Esi4JObjectFilteredException(TypeMapping mapping, Object object) {
+	public Esi4JObjectFilteredException(final TypeMapping mapping, final Object object) {
 		super("object filtered by mapping");
 
 		if (mapping == null) {

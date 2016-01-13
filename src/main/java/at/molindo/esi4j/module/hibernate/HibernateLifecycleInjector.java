@@ -21,20 +21,17 @@ import org.hibernate.SessionFactory;
 import at.molindo.esi4j.chain.Esi4JBatchedEventProcessor;
 
 /**
- * The lifecycle injector is responsible injected and removing lifecycle event
- * listneres.
+ * The lifecycle injector is responsible injected and removing lifecycle event listneres.
  */
 public interface HibernateLifecycleInjector {
 
 	/**
-	 * Injects a global lifecycle listener into the concrete
-	 * <code>SessionFactory<code> implementation.
+	 * Injects a global lifecycle listener into the concrete <code>SessionFactory<code> implementation.
 	 */
 	void injectLifecycle(SessionFactory sessionFactory, Esi4JBatchedEventProcessor batchedEventProcessor);
 
 	/**
-	 * Removes (if possible) lifecycle listeners injected using the inject
-	 * method.
+	 * Removes (if possible) lifecycle listeners injected using the inject method.
 	 */
 	void removeLifecycle(SessionFactory sessionFactory);
 }

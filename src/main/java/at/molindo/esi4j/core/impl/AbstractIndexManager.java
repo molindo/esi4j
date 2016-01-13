@@ -19,6 +19,8 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
+import com.google.common.collect.Sets;
+
 import at.molindo.esi4j.chain.Esi4JProcessingChain;
 import at.molindo.esi4j.chain.impl.DefaultTaskSource;
 import at.molindo.esi4j.core.Esi4JIndex;
@@ -30,8 +32,6 @@ import at.molindo.esi4j.rebuild.Esi4JRebuildManager;
 import at.molindo.esi4j.rebuild.impl.DefaultRebuildManager;
 import at.molindo.utils.collections.ArrayUtils;
 
-import com.google.common.collect.Sets;
-
 public class AbstractIndexManager implements Esi4JIndexManager {
 
 	private final InternalIndex _index;
@@ -41,12 +41,11 @@ public class AbstractIndexManager implements Esi4JIndexManager {
 	private final Esi4JProcessingChain _processingChain;
 	private final Esi4JRebuildManager _rebuildManager;
 
-	public AbstractIndexManager(Esi4JModule module, InternalIndex index, Esi4JProcessingChain processingChain) {
+	public AbstractIndexManager(final Esi4JModule module, final InternalIndex index, final Esi4JProcessingChain processingChain) {
 		this(module, index, processingChain, new DefaultRebuildManager());
 	}
 
-	public AbstractIndexManager(Esi4JModule module, InternalIndex index, Esi4JProcessingChain processingChain,
-			Esi4JRebuildManager rebuildManager) {
+	public AbstractIndexManager(final Esi4JModule module, final InternalIndex index, final Esi4JProcessingChain processingChain, final Esi4JRebuildManager rebuildManager) {
 		if (index == null) {
 			throw new NullPointerException("index");
 		}
@@ -64,12 +63,12 @@ public class AbstractIndexManager implements Esi4JIndexManager {
 		_processingChain = processingChain;
 		_rebuildManager = rebuildManager;
 
-		Set<Class<?>> types = Sets.newHashSet(_module.getTypes());
+		final Set<Class<?>> types = Sets.newHashSet(_module.getTypes());
 		types.retainAll(Arrays.asList(_index.getMappedTypes()));
 
 		_types = types.toArray(new Class<?>[types.size()]);
 
-		for (Class<?> type : _types) {
+		for (final Class<?> type : _types) {
 			if (!processingChain.getEventProcessor().isProcessing(type)) {
 				processingChain.getEventProcessor().putTaskSource(type, new DefaultTaskSource());
 			}
@@ -88,7 +87,7 @@ public class AbstractIndexManager implements Esi4JIndexManager {
 			types = new Class<?>[_types.length];
 			System.arraycopy(_types, 0, types, 0, _types.length);
 		} else if (!Arrays.asList(_types).containsAll(Arrays.asList(types))) {
-			HashSet<Class<?>> set = Sets.newHashSet(types);
+			final HashSet<Class<?>> set = Sets.newHashSet(types);
 			set.removeAll(Arrays.asList(_types));
 			throw new IllegalArgumentException("can't rebuild unmanaged types: " + set);
 		}
@@ -119,7 +118,7 @@ public class AbstractIndexManager implements Esi4JIndexManager {
 
 	@Override
 	public Class<?>[] getTypes() {
-		Class<?>[] types = new Class<?>[_types.length];
+		final Class<?>[] types = new Class<?>[_types.length];
 		System.arraycopy(_types, 0, types, 0, _types.length);
 		return types;
 	}

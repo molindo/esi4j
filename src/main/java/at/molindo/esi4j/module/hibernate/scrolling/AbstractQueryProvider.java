@@ -19,20 +19,18 @@ import org.hibernate.Criteria;
 import org.hibernate.Query;
 import org.hibernate.Session;
 
-
 /**
- * simple helper to simplify {@link QueryProvider} (normally one method
- * less to override)
+ * simple helper to simplify {@link QueryProvider} (normally one method less to override)
  */
 public abstract class AbstractQueryProvider implements QueryProvider {
 
 	@Override
-	public Criteria createCriteria(Class<?> type, Session session) {
+	public Criteria createCriteria(final Class<?> type, final Session session) {
 		return null;
 	}
 
 	@Override
-	public Query createQuery(Class<?> type, Session session) {
+	public Query createQuery(final Class<?> type, final Session session) {
 		return null;
 	}
 

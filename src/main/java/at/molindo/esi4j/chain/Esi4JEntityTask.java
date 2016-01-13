@@ -25,17 +25,16 @@ import at.molindo.esi4j.ex.EntityNotResolveableException;
 import at.molindo.esi4j.mapping.ObjectKey;
 
 /**
- * A task is a single operation (index, update, delete) on a single entity to be
- * processed by an {@link Esi4JTaskProcessor}.
- * 
- * A task needs to be {@link Serializable} after
- * {@link #replaceEntity(Esi4JEntityResolver)} was called.
+ * A task is a single operation (index, update, delete) on a single entity to be processed by an
+ * {@link Esi4JTaskProcessor}.
+ *
+ * A task needs to be {@link Serializable} after {@link #replaceEntity(Esi4JEntityResolver)} was called.
  */
 public interface Esi4JEntityTask extends Serializable, Cloneable {
 
 	/**
-	 * @return <code>true</code> if this updates an existing state,
-	 *         <code>false</code> if it overwrites the previous state
+	 * @return <code>true</code> if this updates an existing state, <code>false</code> if it overwrites the previous
+	 *         state
 	 */
 	boolean isUpdate();
 
@@ -45,8 +44,7 @@ public interface Esi4JEntityTask extends Serializable, Cloneable {
 	void replaceEntity(Esi4JEntityResolver entityResolver);
 
 	/**
-	 * optional, might be implemented as noop if
-	 * {@link #replaceEntity(Esi4JEntityResolver)} is a noop or entity is a
+	 * optional, might be implemented as noop if {@link #replaceEntity(Esi4JEntityResolver)} is a noop or entity is a
 	 * {@link ObjectKey}
 	 */
 	void resolveEntity(Esi4JEntityResolver entityResolver) throws EntityNotResolveableException;

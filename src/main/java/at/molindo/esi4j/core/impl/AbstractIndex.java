@@ -48,88 +48,83 @@ import at.molindo.esi4j.mapping.TypeMapping;
 import at.molindo.esi4j.util.ListenableActionFutureWrapper;
 import at.molindo.utils.data.Function;
 
-public abstract class AbstractIndex implements Esi4JSearchIndex, Esi4JManagedIndex, OperationContext, SearchHitReader,
-		MultiGetItemReader {
+public abstract class AbstractIndex implements Esi4JSearchIndex, Esi4JManagedIndex, OperationContext, SearchHitReader, MultiGetItemReader {
 
 	@Override
 	public <T> T execute(final Esi4JOperation<T> operation) {
 		return getStore().execute(new StoreOperation<T>() {
 
 			@Override
-			public T execute(Client client, String indexName) {
+			public T execute(final Client client, final String indexName) {
 				return operation.execute(client, indexName, AbstractIndex.this);
 			}
 		});
 	}
 
 	@Override
-	public ListenableActionFuture<SearchResponseWrapper> search(QueryBuilder query, Class<?> type) {
+	public ListenableActionFuture<SearchResponseWrapper> search(final QueryBuilder query, final Class<?> type) {
 		return executeSearch(new Search(query, type));
 	}
 
 	@Override
-	public ListenableActionFuture<SearchResponseWrapper> search(QueryBuilder query, Class<?> type, int from, int size) {
+	public ListenableActionFuture<SearchResponseWrapper> search(final QueryBuilder query, final Class<?> type, final int from, final int size) {
 		return executeSearch(new Search(query, type, from, size));
 	}
 
 	@Override
-	public ListenableActionFuture<SearchResponseWrapper> executeSearch(
-			Esi4JOperation<ListenableActionFuture<SearchResponse>> searchOperation) {
-		return ListenableActionFutureWrapper.wrap(execute(searchOperation),
-				new Function<SearchResponse, SearchResponseWrapper>() {
+	public ListenableActionFuture<SearchResponseWrapper> executeSearch(final Esi4JOperation<ListenableActionFuture<SearchResponse>> searchOperation) {
+		return ListenableActionFutureWrapper
+				.wrap(execute(searchOperation), new Function<SearchResponse, SearchResponseWrapper>() {
 
 					@Override
-					public SearchResponseWrapper apply(SearchResponse response) {
+					public SearchResponseWrapper apply(final SearchResponse response) {
 						return new DefaultSearchResponseWrapper(response, AbstractIndex.this);
 					}
 				});
 	}
 
 	@Override
-	public ListenableActionFuture<MultiSearchResponseWrapper> executeMultiSearch(
-			Esi4JOperation<ListenableActionFuture<MultiSearchResponse>> multiSearchOperation) {
-		return ListenableActionFutureWrapper.wrap(execute(multiSearchOperation),
-				new Function<MultiSearchResponse, MultiSearchResponseWrapper>() {
+	public ListenableActionFuture<MultiSearchResponseWrapper> executeMultiSearch(final Esi4JOperation<ListenableActionFuture<MultiSearchResponse>> multiSearchOperation) {
+		return ListenableActionFutureWrapper
+				.wrap(execute(multiSearchOperation), new Function<MultiSearchResponse, MultiSearchResponseWrapper>() {
 
 					@Override
-					public MultiSearchResponseWrapper apply(MultiSearchResponse response) {
+					public MultiSearchResponseWrapper apply(final MultiSearchResponse response) {
 						return new DefaultMultiSearchResponseWrapper(response, AbstractIndex.this);
 					}
 				});
 	}
 
 	@Override
-	public ListenableActionFuture<CountResponseWrapper> count(QueryBuilder query, Class<?> type) {
+	public ListenableActionFuture<CountResponseWrapper> count(final QueryBuilder query, final Class<?> type) {
 		return executeCount(new Count(query, type));
 	}
 
 	@Override
-	public ListenableActionFuture<CountResponseWrapper> executeCount(
-			Esi4JOperation<ListenableActionFuture<CountResponse>> countOperation) {
+	public ListenableActionFuture<CountResponseWrapper> executeCount(final Esi4JOperation<ListenableActionFuture<CountResponse>> countOperation) {
 
-		return ListenableActionFutureWrapper.wrap(execute(countOperation),
-				new Function<CountResponse, CountResponseWrapper>() {
+		return ListenableActionFutureWrapper
+				.wrap(execute(countOperation), new Function<CountResponse, CountResponseWrapper>() {
 
 					@Override
-					public CountResponseWrapper apply(CountResponse response) {
+					public CountResponseWrapper apply(final CountResponse response) {
 						return new DefaultCountResponseWrapper(response);
 					}
 				});
 	}
 
 	@Override
-	public ListenableActionFuture<MultiGetResponseWrapper> multiGet(Class<?> type, Iterable<?> ids) {
+	public ListenableActionFuture<MultiGetResponseWrapper> multiGet(final Class<?> type, final Iterable<?> ids) {
 		return executeMultiGet(new MultiGet(type, ids));
 	}
 
 	@Override
-	public ListenableActionFuture<MultiGetResponseWrapper> executeMultiGet(
-			Esi4JOperation<ListenableActionFuture<MultiGetResponse>> multiGetOperation) {
-		return ListenableActionFutureWrapper.wrap(execute(multiGetOperation),
-				new Function<MultiGetResponse, MultiGetResponseWrapper>() {
+	public ListenableActionFuture<MultiGetResponseWrapper> executeMultiGet(final Esi4JOperation<ListenableActionFuture<MultiGetResponse>> multiGetOperation) {
+		return ListenableActionFutureWrapper
+				.wrap(execute(multiGetOperation), new Function<MultiGetResponse, MultiGetResponseWrapper>() {
 
 					@Override
-					public MultiGetResponseWrapper apply(MultiGetResponse input) {
+					public MultiGetResponseWrapper apply(final MultiGetResponse input) {
 						return new DefaultMultiGetResponseWrapper(input, AbstractIndex.this);
 					}
 
@@ -137,12 +132,12 @@ public abstract class AbstractIndex implements Esi4JSearchIndex, Esi4JManagedInd
 	}
 
 	@Override
-	public final Object read(SearchHit hit) {
+	public final Object read(final SearchHit hit) {
 		return findTypeMapping(hit.index(), hit.type()).read(hit);
 	}
 
 	@Override
-	public Object read(MultiGetItemResponse response) {
+	public Object read(final MultiGetItemResponse response) {
 		return findTypeMapping(response.getIndex(), response.getType()).read(response.getResponse());
 	}
 
@@ -156,11 +151,11 @@ public abstract class AbstractIndex implements Esi4JSearchIndex, Esi4JManagedInd
 		private final int _from;
 		private final int _size;
 
-		private Search(QueryBuilder query, Class<?> type) {
+		private Search(final QueryBuilder query, final Class<?> type) {
 			this(query, type, 0, 10);
 		}
 
-		private Search(QueryBuilder query, Class<?> type, int from, int size) {
+		private Search(final QueryBuilder query, final Class<?> type, final int from, final int size) {
 			if (type == null) {
 				throw new NullPointerException("type");
 			}
@@ -174,12 +169,12 @@ public abstract class AbstractIndex implements Esi4JSearchIndex, Esi4JManagedInd
 		}
 
 		@Override
-		public ListenableActionFuture<SearchResponse> execute(Client client, String indexName, OperationContext helper) {
+		public ListenableActionFuture<SearchResponse> execute(final Client client, final String indexName, final OperationContext helper) {
 			final TypeMapping typeMapping = helper.findTypeMapping(_type);
 
 			final String type = typeMapping.getTypeAlias();
 
-			SearchRequestBuilder builder = client.prepareSearch(indexName).setTypes(type).setQuery(_query)
+			final SearchRequestBuilder builder = client.prepareSearch(indexName).setTypes(type).setQuery(_query)
 					.setFrom(_from).setSize(_size);
 
 			return builder.execute();
@@ -192,7 +187,7 @@ public abstract class AbstractIndex implements Esi4JSearchIndex, Esi4JManagedInd
 		private final QueryBuilder _query;
 		private final Class<?> _type;
 
-		private Count(QueryBuilder query, Class<?> type) {
+		private Count(final QueryBuilder query, final Class<?> type) {
 			if (type == null) {
 				throw new NullPointerException("type");
 			}
@@ -204,12 +199,12 @@ public abstract class AbstractIndex implements Esi4JSearchIndex, Esi4JManagedInd
 		}
 
 		@Override
-		public ListenableActionFuture<CountResponse> execute(Client client, String indexName, OperationContext helper) {
+		public ListenableActionFuture<CountResponse> execute(final Client client, final String indexName, final OperationContext helper) {
 			final TypeMapping typeMapping = helper.findTypeMapping(_type);
 
 			final String type = typeMapping.getTypeAlias();
 
-			CountRequestBuilder builder = client.prepareCount(indexName).setTypes(type).setQuery(_query);
+			final CountRequestBuilder builder = client.prepareCount(indexName).setTypes(type).setQuery(_query);
 
 			return builder.execute();
 		}
@@ -221,7 +216,7 @@ public abstract class AbstractIndex implements Esi4JSearchIndex, Esi4JManagedInd
 		private final Class<?> _type;
 		private final Iterable<?> _ids;
 
-		private MultiGet(Class<?> type, Iterable<?> ids) {
+		private MultiGet(final Class<?> type, final Iterable<?> ids) {
 			if (type == null) {
 				throw new NullPointerException("type");
 			}
@@ -233,12 +228,12 @@ public abstract class AbstractIndex implements Esi4JSearchIndex, Esi4JManagedInd
 		}
 
 		@Override
-		public ListenableActionFuture<MultiGetResponse> execute(Client client, String indexName, OperationContext helper) {
+		public ListenableActionFuture<MultiGetResponse> execute(final Client client, final String indexName, final OperationContext helper) {
 			final TypeMapping typeMapping = helper.findTypeMapping(_type);
 			final String type = typeMapping.getTypeAlias();
 
-			MultiGetRequestBuilder builder = client.prepareMultiGet();
-			for (Object id : _ids) {
+			final MultiGetRequestBuilder builder = client.prepareMultiGet();
+			for (final Object id : _ids) {
 				// ignore indexName as it may be a multi-index
 				builder.add(helper.findIndexName(_type), type, typeMapping.toIdString(id));
 			}

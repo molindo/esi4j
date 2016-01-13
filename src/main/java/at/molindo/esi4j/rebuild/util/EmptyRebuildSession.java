@@ -25,7 +25,7 @@ public final class EmptyRebuildSession implements Esi4JRebuildSession {
 	private boolean _closed = false;
 	private final Class<?> _type;
 
-	public EmptyRebuildSession(Class<?> type) {
+	public EmptyRebuildSession(final Class<?> type) {
 		if (type == null) {
 			throw new NullPointerException("type");
 		}
@@ -43,7 +43,7 @@ public final class EmptyRebuildSession implements Esi4JRebuildSession {
 	}
 
 	@Override
-	public List<?> getNext(int batchSize) {
+	public List<?> getNext(final int batchSize) {
 		if (_closed) {
 			throw new IllegalStateException("already closed");
 		} else {

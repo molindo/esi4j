@@ -15,9 +15,8 @@
  */
 package at.molindo.esi4j.chain.impl;
 
-import static org.easymock.EasyMock.createMock;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.easymock.EasyMock.*;
+import static org.junit.Assert.*;
 
 import java.util.Map.Entry;
 
@@ -32,7 +31,7 @@ public class DefaultEventProcessorTest {
 
 	@Test
 	public void processing() {
-		DefaultEventProcessor processor = newProcessor();
+		final DefaultEventProcessor processor = newProcessor();
 
 		assertFalse(processor.isProcessing(Integer.class));
 
@@ -55,7 +54,7 @@ public class DefaultEventProcessorTest {
 
 	@Test
 	public void ignoredEvent() {
-		DefaultEventProcessor processor = newProcessor();
+		final DefaultEventProcessor processor = newProcessor();
 
 		// no source, nothing happens
 
@@ -69,12 +68,12 @@ public class DefaultEventProcessorTest {
 	@Test
 	public void event() {
 
-		DefaultEventProcessor processor = newProcessor();
+		final DefaultEventProcessor processor = newProcessor();
 
-		Esi4JTaskSource src = newSource();
+		final Esi4JTaskSource src = newSource();
 		processor.putTaskSource(Number.class, src);
 
-		Esi4JEntityTask[] tasks = new Esi4JEntityTask[] { newTask() };
+		final Esi4JEntityTask[] tasks = new Esi4JEntityTask[] { newTask() };
 		EasyMock.expect(src.getPostInsertTasks(4711)).andReturn(tasks);
 		processor.getTaskProcessor().processTasks(tasks);
 
@@ -86,16 +85,16 @@ public class DefaultEventProcessorTest {
 		verify(processor);
 	}
 
-	private void replay(DefaultEventProcessor processor) {
+	private void replay(final DefaultEventProcessor processor) {
 		EasyMock.replay(processor.getTaskProcessor());
-		for (Entry<Class<?>, Esi4JTaskSource> e : processor.copyTaskSources().entrySet()) {
+		for (final Entry<Class<?>, Esi4JTaskSource> e : processor.copyTaskSources().entrySet()) {
 			EasyMock.replay(e.getValue());
 		}
 	}
 
-	private void verify(DefaultEventProcessor processor) {
+	private void verify(final DefaultEventProcessor processor) {
 		EasyMock.verify(processor.getTaskProcessor());
-		for (Entry<Class<?>, Esi4JTaskSource> e : processor.copyTaskSources().entrySet()) {
+		for (final Entry<Class<?>, Esi4JTaskSource> e : processor.copyTaskSources().entrySet()) {
 			EasyMock.verify(e.getValue());
 		}
 	}

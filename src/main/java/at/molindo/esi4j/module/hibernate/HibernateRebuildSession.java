@@ -34,8 +34,7 @@ public final class HibernateRebuildSession implements Esi4JRebuildSession {
 	private final HibernateModule _module;
 	private final ScrollingSession _scrollingSession;
 
-	public HibernateRebuildSession(Class<?> type, SessionFactory sessionFactory, HibernateModule module,
-			ScrollingSession scrollingSession) {
+	public HibernateRebuildSession(final Class<?> type, final SessionFactory sessionFactory, final HibernateModule module, final ScrollingSession scrollingSession) {
 		if (type == null) {
 			throw new NullPointerException("type");
 		}
@@ -68,7 +67,7 @@ public final class HibernateRebuildSession implements Esi4JRebuildSession {
 	}
 
 	@Override
-	public List<?> getNext(int batchSize) {
+	public List<?> getNext(final int batchSize) {
 		// clear previous batch
 		_session.clear();
 		return _scrollingSession.fetch(_session, batchSize);

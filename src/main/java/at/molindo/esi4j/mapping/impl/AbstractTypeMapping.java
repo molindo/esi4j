@@ -21,13 +21,12 @@ import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
 
 /**
- * basic extension of {@link GenericTypeMapping} that adds setters for ID and
- * version and a read method implementation that takes care of ID and version
- * setting
+ * basic extension of {@link GenericTypeMapping} that adds setters for ID and version and a read method implementation
+ * that takes care of ID and version setting
  */
 public abstract class AbstractTypeMapping<Type, Id> extends GenericTypeMapping<Type, Id> {
 
-	public AbstractTypeMapping(String typeAlias, Class<Type> typeClass, Class<Id> idClass) {
+	public AbstractTypeMapping(final String typeAlias, final Class<Type> typeClass, final Class<Id> idClass) {
 		super(typeAlias, typeClass, idClass);
 	}
 
@@ -36,17 +35,17 @@ public abstract class AbstractTypeMapping<Type, Id> extends GenericTypeMapping<T
 	 */
 	@Override
 	@CheckForNull
-	public final Type read(Map<String, Object> source) {
-		Type object = readObject(source);
+	public final Type read(final Map<String, Object> source) {
+		final Type object = readObject(source);
 
 		if (object != null) {
 
-			String id = (String) source.get(FIELD_ID);
+			final String id = (String) source.get(FIELD_ID);
 			if (id != null) {
 				setId(object, toId(id));
 			}
 
-			Long version = (Long) source.get(FIELD_VERSION);
+			final Long version = (Long) source.get(FIELD_VERSION);
 			if (version != null && version != -1) {
 				setVersion(object, version);
 			}
@@ -57,12 +56,12 @@ public abstract class AbstractTypeMapping<Type, Id> extends GenericTypeMapping<T
 
 	/**
 	 * sets id on object after converting elasticsearch id to suitable type
-	 * 
+	 *
 	 * @see #toId(String)
 	 * @see #setId(Object, Object)
 	 */
-	public final Id setIdString(@Nonnull Type o, @Nonnull String idString) {
-		Id id = toId(idString);
+	public final Id setIdString(@Nonnull final Type o, @Nonnull final String idString) {
+		final Id id = toId(idString);
 		setId(o, id);
 		return id;
 	}

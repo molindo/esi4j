@@ -20,11 +20,11 @@ import java.util.List;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.search.SearchHit;
 
+import com.google.common.collect.Lists;
+
 import at.molindo.esi4j.action.SearchHitWrapper;
 import at.molindo.esi4j.action.SearchHitWrapper.SearchHitReader;
 import at.molindo.esi4j.action.SearchResponseWrapper;
-
-import com.google.common.collect.Lists;
 
 public class DefaultSearchResponseWrapper implements SearchResponseWrapper {
 
@@ -33,7 +33,7 @@ public class DefaultSearchResponseWrapper implements SearchResponseWrapper {
 
 	private List<SearchHitWrapper> _objects;
 
-	public DefaultSearchResponseWrapper(SearchResponse response, SearchHitReader reader) {
+	public DefaultSearchResponseWrapper(final SearchResponse response, final SearchHitReader reader) {
 		if (response == null) {
 			throw new NullPointerException("response");
 		}
@@ -47,10 +47,10 @@ public class DefaultSearchResponseWrapper implements SearchResponseWrapper {
 	@Override
 	public synchronized List<SearchHitWrapper> getSearchHits() {
 		if (_objects == null) {
-			SearchHit[] hits = _response.getHits().hits();
+			final SearchHit[] hits = _response.getHits().hits();
 			_objects = Lists.newArrayListWithCapacity(hits.length);
-			for (int i = 0; i < hits.length; i++) {
-				_objects.add(new DefaultSearchHitWrapper(hits[i], _reader));
+			for (final SearchHit hit : hits) {
+				_objects.add(new DefaultSearchHitWrapper(hit, _reader));
 			}
 		}
 		return _objects;
@@ -67,11 +67,11 @@ public class DefaultSearchResponseWrapper implements SearchResponseWrapper {
 	}
 
 	@Override
-	public <T> List<T> getObjects(Class<T> type) {
-		List<SearchHitWrapper> hits = getSearchHits();
-		List<T> objects = Lists.newArrayListWithCapacity(hits.size());
+	public <T> List<T> getObjects(final Class<T> type) {
+		final List<SearchHitWrapper> hits = getSearchHits();
+		final List<T> objects = Lists.newArrayListWithCapacity(hits.size());
 
-		for (SearchHitWrapper hit : hits) {
+		for (final SearchHitWrapper hit : hits) {
 			objects.add(hit.getObject(type));
 		}
 

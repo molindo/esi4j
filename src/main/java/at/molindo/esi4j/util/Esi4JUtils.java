@@ -27,69 +27,67 @@ import org.elasticsearch.common.settings.Settings;
 public class Esi4JUtils {
 
 	/**
-	 * tries to construct an object of given class by either invoking a
-	 * constructor that takes {@link Settings} as sole argument or the default
-	 * constructor.
+	 * tries to construct an object of given class by either invoking a constructor that takes {@link Settings} as sole
+	 * argument or the default constructor.
 	 */
-	public static <T> T createObject(Class<T> cls, @Nullable Settings settings) {
+	public static <T> T createObject(final Class<T> cls, @Nullable final Settings settings) {
 		Constructor<T> constructor;
 		try {
 			constructor = cls.getConstructor(Settings.class);
 			try {
 				return constructor.newInstance(settings);
-			} catch (Exception e) {
+			} catch (final Exception e) {
 				throw new ElasticsearchException("Failed to create instance [" + cls + "]", e);
 			}
-		} catch (NoSuchMethodException e) {
+		} catch (final NoSuchMethodException e) {
 			try {
 				constructor = cls.getConstructor();
 				try {
 					return constructor.newInstance();
-				} catch (Exception e1) {
+				} catch (final Exception e1) {
 					throw new ElasticsearchException("Failed to create instance [" + cls + "]", e);
 				}
-			} catch (NoSuchMethodException e1) {
+			} catch (final NoSuchMethodException e1) {
 				throw new ElasticsearchException("No constructor for [" + cls + "]");
 			}
 		}
 	}
 
 	/**
-	 * tries to construct an object of given class by either invoking a
-	 * constructor that takes object and {@link Settings} as arguments object
-	 * only.
+	 * tries to construct an object of given class by either invoking a constructor that takes object and
+	 * {@link Settings} as arguments object only.
 	 */
-	public static <T> T createObject(Class<T> cls, Object arg, @Nullable Settings settings) {
+	public static <T> T createObject(final Class<T> cls, final Object arg, @Nullable final Settings settings) {
 		Constructor<T> constructor;
 		try {
 			constructor = cls.getConstructor(arg.getClass(), Settings.class);
 			try {
 				return constructor.newInstance(arg, settings);
-			} catch (Exception e) {
+			} catch (final Exception e) {
 				throw new ElasticsearchException("Failed to create instance [" + cls + "]", e);
 			}
-		} catch (NoSuchMethodException e) {
+		} catch (final NoSuchMethodException e) {
 			try {
 				constructor = cls.getConstructor(arg.getClass());
 				try {
 					return constructor.newInstance(arg);
-				} catch (Exception e1) {
+				} catch (final Exception e1) {
 					throw new ElasticsearchException("Failed to create instance [" + cls + "]", e);
 				}
-			} catch (NoSuchMethodException e1) {
+			} catch (final NoSuchMethodException e1) {
 				throw new ElasticsearchException("No constructor for [" + cls + "] and argument " + arg.getClass());
 			}
 		}
 	}
 
 	/**
-	 * @return a new settings object containing all keys starting with oldPrefix
-	 *         whereas oldPrefix is replaced by newPrefix
+	 * @return a new settings object containing all keys starting with oldPrefix whereas oldPrefix is replaced by
+	 *         newPrefix
 	 */
-	public static Settings getSettings(Settings settings, String oldPrefix, String newPrefix) {
-		Builder builder = ImmutableSettings.settingsBuilder();
+	public static Settings getSettings(final Settings settings, final String oldPrefix, final String newPrefix) {
+		final Builder builder = ImmutableSettings.settingsBuilder();
 
-		for (Entry<String, String> e : settings.getByPrefix(oldPrefix).getAsMap().entrySet()) {
+		for (final Entry<String, String> e : settings.getByPrefix(oldPrefix).getAsMap().entrySet()) {
 			builder.put(newPrefix + e.getKey(), e.getValue());
 		}
 

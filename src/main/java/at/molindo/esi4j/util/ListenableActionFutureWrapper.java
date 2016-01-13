@@ -27,8 +27,7 @@ import org.elasticsearch.common.unit.TimeValue;
 import at.molindo.utils.data.Function;
 
 /**
- * a {@link ListenableActionFuture} that wraps another and transforms its result
- * using a {@link Function}
+ * a {@link ListenableActionFuture} that wraps another and transforms its result using a {@link Function}
  */
 public final class ListenableActionFutureWrapper<F, T> implements ListenableActionFuture<T> {
 
@@ -38,12 +37,11 @@ public final class ListenableActionFutureWrapper<F, T> implements ListenableActi
 	private F _raw;
 	private T _result;
 
-	public static <F, T> ListenableActionFutureWrapper<F, T> wrap(ListenableActionFuture<F> future,
-			Function<F, T> function) {
+	public static <F, T> ListenableActionFutureWrapper<F, T> wrap(final ListenableActionFuture<F> future, final Function<F, T> function) {
 		return new ListenableActionFutureWrapper<F, T>(future, function);
 	}
 
-	public ListenableActionFutureWrapper(ListenableActionFuture<F> future, Function<F, T> function) {
+	public ListenableActionFutureWrapper(final ListenableActionFuture<F> future, final Function<F, T> function) {
 		if (future == null) {
 			throw new NullPointerException("future");
 		}
@@ -55,7 +53,7 @@ public final class ListenableActionFutureWrapper<F, T> implements ListenableActi
 	}
 
 	@Override
-	public boolean cancel(boolean mayInterruptIfRunning) {
+	public boolean cancel(final boolean mayInterruptIfRunning) {
 		return _future.cancel(mayInterruptIfRunning);
 	}
 
@@ -75,7 +73,7 @@ public final class ListenableActionFutureWrapper<F, T> implements ListenableActi
 	}
 
 	@Override
-	public T get(long timeout, TimeUnit unit) throws InterruptedException, ExecutionException, TimeoutException {
+	public T get(final long timeout, final TimeUnit unit) throws InterruptedException, ExecutionException, TimeoutException {
 		return applyFunction(_future.get(timeout, unit));
 	}
 
@@ -85,22 +83,22 @@ public final class ListenableActionFutureWrapper<F, T> implements ListenableActi
 	}
 
 	@Override
-	public T actionGet(String timeout) throws ElasticsearchException {
+	public T actionGet(final String timeout) throws ElasticsearchException {
 		return applyFunction(_future.actionGet(timeout));
 	}
 
 	@Override
-	public T actionGet(long timeoutMillis) throws ElasticsearchException {
+	public T actionGet(final long timeoutMillis) throws ElasticsearchException {
 		return applyFunction(_future.actionGet(timeoutMillis));
 	}
 
 	@Override
-	public T actionGet(long timeout, TimeUnit unit) throws ElasticsearchException {
+	public T actionGet(final long timeout, final TimeUnit unit) throws ElasticsearchException {
 		return applyFunction(_future.actionGet(timeout, unit));
 	}
 
 	@Override
-	public T actionGet(TimeValue timeout) throws ElasticsearchException {
+	public T actionGet(final TimeValue timeout) throws ElasticsearchException {
 		return applyFunction(_future.actionGet(timeout));
 	}
 
@@ -114,18 +112,18 @@ public final class ListenableActionFutureWrapper<F, T> implements ListenableActi
 		_future.addListener(new ActionListener<F>() {
 
 			@Override
-			public void onResponse(F response) {
+			public void onResponse(final F response) {
 				listener.onResponse(applyFunction(response));
 			}
 
 			@Override
-			public void onFailure(Throwable e) {
+			public void onFailure(final Throwable e) {
 				listener.onFailure(e);
 			}
 		});
 	}
 
-	private T applyFunction(F raw) {
+	private T applyFunction(final F raw) {
 		if (_result == null) {
 			_raw = raw;
 			_result = _function.apply(raw);

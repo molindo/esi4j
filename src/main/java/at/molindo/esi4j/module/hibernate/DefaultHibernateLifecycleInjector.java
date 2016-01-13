@@ -15,15 +15,7 @@
  */
 package at.molindo.esi4j.module.hibernate;
 
-import static org.hibernate.event.spi.EventType.POST_COLLECTION_RECREATE;
-import static org.hibernate.event.spi.EventType.POST_COLLECTION_REMOVE;
-import static org.hibernate.event.spi.EventType.POST_COLLECTION_UPDATE;
-import static org.hibernate.event.spi.EventType.POST_COMMIT_DELETE;
-import static org.hibernate.event.spi.EventType.POST_COMMIT_INSERT;
-import static org.hibernate.event.spi.EventType.POST_COMMIT_UPDATE;
-import static org.hibernate.event.spi.EventType.POST_DELETE;
-import static org.hibernate.event.spi.EventType.POST_INSERT;
-import static org.hibernate.event.spi.EventType.POST_UPDATE;
+import static org.hibernate.event.spi.EventType.*;
 
 import java.util.Iterator;
 
@@ -53,29 +45,26 @@ public class DefaultHibernateLifecycleInjector implements HibernateLifecycleInje
 	}
 
 	/**
-	 * Creates a new lifecycle injector. Allows to control if the
-	 * insert/update/delete even listeners will be registered with post commit
-	 * listeres (flag it <code>true</code>) or with plain post events (triggered
-	 * based on Hibrenate flushing logic).
-	 * 
+	 * Creates a new lifecycle injector. Allows to control if the insert/update/delete even listeners will be registered
+	 * with post commit listeres (flag it <code>true</code>) or with plain post events (triggered based on Hibrenate
+	 * flushing logic).
+	 *
 	 * @param registerPostCommitListeneres
-	 *            <code>true</code> if post commit listeners will be registered.
-	 *            <code>false</code> for plain listeners.
+	 *            <code>true</code> if post commit listeners will be registered. <code>false</code> for plain listeners.
 	 */
-	public DefaultHibernateLifecycleInjector(boolean registerPostCommitListeneres) {
+	public DefaultHibernateLifecycleInjector(final boolean registerPostCommitListeneres) {
 		this.registerPostCommitListeneres = registerPostCommitListeneres;
 	}
 
 	@Override
-	public synchronized void injectLifecycle(SessionFactory sessionFactory,
-			Esi4JBatchedEventProcessor batchedEventProcessor) {
+	public synchronized void injectLifecycle(final SessionFactory sessionFactory, final Esi4JBatchedEventProcessor batchedEventProcessor) {
 		if (_listener != null) {
 			throw new IllegalStateException("already injected");
 		}
 
-		SessionFactoryImpl sessionFactoryImpl = (SessionFactoryImpl) sessionFactory;
+		final SessionFactoryImpl sessionFactoryImpl = (SessionFactoryImpl) sessionFactory;
 
-		EventListenerRegistry registry = sessionFactoryImpl.getServiceRegistry()
+		final EventListenerRegistry registry = sessionFactoryImpl.getServiceRegistry()
 				.getService(EventListenerRegistry.class);
 
 		_listener = doCreateListener(sessionFactoryImpl, batchedEventProcessor);
@@ -107,46 +96,42 @@ public class DefaultHibernateLifecycleInjector implements HibernateLifecycleInje
 		// collections
 		if (!registerPostCommitListeneres) {
 			if (_listener instanceof PostCollectionRecreateEventListener) {
-				registry.appendListeners(EventType.POST_COLLECTION_RECREATE,
-						(PostCollectionRecreateEventListener) _listener);
+				registry.appendListeners(EventType.POST_COLLECTION_RECREATE, (PostCollectionRecreateEventListener) _listener);
 			}
 
 			if (_listener instanceof PostCollectionRemoveEventListener) {
-				registry.appendListeners(EventType.POST_COLLECTION_REMOVE,
-						(PostCollectionRemoveEventListener) _listener);
+				registry.appendListeners(EventType.POST_COLLECTION_REMOVE, (PostCollectionRemoveEventListener) _listener);
 			}
 
 			if (_listener instanceof PostCollectionUpdateEventListener) {
-				registry.appendListeners(EventType.POST_COLLECTION_UPDATE,
-						(PostCollectionUpdateEventListener) _listener);
+				registry.appendListeners(EventType.POST_COLLECTION_UPDATE, (PostCollectionUpdateEventListener) _listener);
 			}
 		}
 	}
 
 	@Override
-	public synchronized void removeLifecycle(SessionFactory sessionFactory) {
+	public synchronized void removeLifecycle(final SessionFactory sessionFactory) {
 		if (_listener == null) {
 			return;
 		}
 
-		SessionFactoryImpl sessionFactoryImpl = (SessionFactoryImpl) sessionFactory;
+		final SessionFactoryImpl sessionFactoryImpl = (SessionFactoryImpl) sessionFactory;
 
-		EventListenerRegistry registry = sessionFactoryImpl.getServiceRegistry()
+		final EventListenerRegistry registry = sessionFactoryImpl.getServiceRegistry()
 				.getService(EventListenerRegistry.class);
 
 		if (registerPostCommitListeneres) {
 			removeListeners(registry, _listener, POST_COMMIT_INSERT, POST_COMMIT_UPDATE, POST_COMMIT_DELETE);
 		} else {
-			removeListeners(registry, _listener, POST_INSERT, POST_UPDATE, POST_DELETE, POST_COLLECTION_RECREATE,
-					POST_COLLECTION_UPDATE, POST_COLLECTION_REMOVE);
+			removeListeners(registry, _listener, POST_INSERT, POST_UPDATE, POST_DELETE, POST_COLLECTION_RECREATE, POST_COLLECTION_UPDATE, POST_COLLECTION_REMOVE);
 		}
 
 		_listener = null;
 	}
 
-	private void removeListeners(EventListenerRegistry registry, Object listener, EventType<?>... eventTypes) {
-		for (EventType<?> eventType : eventTypes) {
-			Iterator<?> iter = registry.getEventListenerGroup(eventType).listeners().iterator();
+	private void removeListeners(final EventListenerRegistry registry, final Object listener, final EventType<?>... eventTypes) {
+		for (final EventType<?> eventType : eventTypes) {
+			final Iterator<?> iter = registry.getEventListenerGroup(eventType).listeners().iterator();
 			while (iter.hasNext()) {
 				if (iter.next() == listener) {
 					iter.remove();
@@ -155,8 +140,7 @@ public class DefaultHibernateLifecycleInjector implements HibernateLifecycleInje
 		}
 	}
 
-	protected Object doCreateListener(SessionFactoryImpl sessionFactory,
-			Esi4JBatchedEventProcessor batchedEventProcessor) {
+	protected Object doCreateListener(final SessionFactoryImpl sessionFactory, final Esi4JBatchedEventProcessor batchedEventProcessor) {
 		return new HibernateEventListener(batchedEventProcessor);
 	}
 }

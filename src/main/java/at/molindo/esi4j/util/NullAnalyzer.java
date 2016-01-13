@@ -24,15 +24,14 @@ import org.elasticsearch.index.mapper.core.AbstractFieldMapper;
 
 /**
  * use this class for a {@link NamedAnalyzer} passed to
- * {@link AbstractFieldMapper.OpenBuilder#indexAnalyzer(NamedAnalyzer)} as it's
- * really about the name only.
+ * {@link AbstractFieldMapper.OpenBuilder#indexAnalyzer(NamedAnalyzer)} as it's really about the name only.
  */
 public class NullAnalyzer extends Analyzer {
 
 	public static final NullAnalyzer NULL_ANALYZER = new NullAnalyzer();
 
 	@Override
-	protected TokenStreamComponents createComponents(String fieldName, Reader reader) {
+	protected TokenStreamComponents createComponents(final String fieldName, final Reader reader) {
 		return new TokenStreamComponents(new KeywordTokenizer(reader));
 	}
 

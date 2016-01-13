@@ -23,7 +23,7 @@ public class DefaultBulkResponseWrapper implements BulkResponseWrapper {
 
 	private final BulkResponse _response;
 
-	public DefaultBulkResponseWrapper(BulkResponse response) {
+	public DefaultBulkResponseWrapper(final BulkResponse response) {
 		if (response == null) {
 			throw new NullPointerException("response");
 		}

@@ -20,12 +20,11 @@ import org.elasticsearch.common.settings.Settings;
 import at.molindo.esi4j.util.Esi4JUtils;
 
 /**
- * a generic factory that allows to create instances. Implementors must either
- * have a default constructor or a constructor accepting {@link Settings}
- * 
- * @see Esi4JUtils#createObject(Class,
- *      org.elasticsearch.common.settings.Settings)
- * 
+ * a generic factory that allows to create instances. Implementors must either have a default constructor or a
+ * constructor accepting {@link Settings}
+ *
+ * @see Esi4JUtils#createObject(Class, org.elasticsearch.common.settings.Settings)
+ *
  * @param <T>
  *            type of returned objects
  */

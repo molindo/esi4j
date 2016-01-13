@@ -19,8 +19,8 @@ import at.molindo.esi4j.chain.impl.SerializableEsi4JOperation;
 import at.molindo.esi4j.core.Esi4JIndex;
 
 /**
- * processes {@link Esi4JEntityTask}s against an {@link Esi4JIndex}. For
- * instance, a processor might be synchronous or asynchronous.
+ * processes {@link Esi4JEntityTask}s against an {@link Esi4JIndex}. For instance, a processor might be synchronous or
+ * asynchronous.
  */
 public interface Esi4JTaskProcessor {
 
@@ -31,20 +31,18 @@ public interface Esi4JTaskProcessor {
 
 	/**
 	 * @param tasks
-	 *            an array of {@link Esi4JEntityTask}, may contain multiple
-	 *            tasks for the same entity or <code>null</code>
+	 *            an array of {@link Esi4JEntityTask}, may contain multiple tasks for the same entity or
+	 *            <code>null</code>
 	 */
 	void processTasks(Esi4JEntityTask[] tasks);
 
 	/**
-	 * same as calling {@link #processTasks(Esi4JEntityTask[])} multiple times,
-	 * but might have better performance
+	 * same as calling {@link #processTasks(Esi4JEntityTask[])} multiple times, but might have better performance
 	 */
 	void processTasks(Iterable<Esi4JEntityTask[]> tasks);
 
 	/**
-	 * executes operation after currently submitted tasks and before newly
-	 * submitted tasks
+	 * executes operation after currently submitted tasks and before newly submitted tasks
 	 */
 	<T> T execute(SerializableEsi4JOperation<T> operation);
 

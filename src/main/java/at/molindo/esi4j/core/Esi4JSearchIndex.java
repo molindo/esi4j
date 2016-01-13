@@ -46,19 +46,15 @@ public interface Esi4JSearchIndex {
 
 	ListenableActionFuture<SearchResponseWrapper> search(QueryBuilder query, Class<?> type, int from, int size);
 
-	ListenableActionFuture<SearchResponseWrapper> executeSearch(
-			Esi4JOperation<ListenableActionFuture<SearchResponse>> searchOperation);
+	ListenableActionFuture<SearchResponseWrapper> executeSearch(Esi4JOperation<ListenableActionFuture<SearchResponse>> searchOperation);
 
-	ListenableActionFuture<MultiSearchResponseWrapper> executeMultiSearch(
-			Esi4JOperation<ListenableActionFuture<MultiSearchResponse>> multiSearchOperation);
+	ListenableActionFuture<MultiSearchResponseWrapper> executeMultiSearch(Esi4JOperation<ListenableActionFuture<MultiSearchResponse>> multiSearchOperation);
 
 	ListenableActionFuture<CountResponseWrapper> count(QueryBuilder query, Class<?> type);
 
-	ListenableActionFuture<CountResponseWrapper> executeCount(
-			Esi4JOperation<ListenableActionFuture<CountResponse>> countOperation);
+	ListenableActionFuture<CountResponseWrapper> executeCount(Esi4JOperation<ListenableActionFuture<CountResponse>> countOperation);
 
 	ListenableActionFuture<MultiGetResponseWrapper> multiGet(Class<?> type, Iterable<?> ids);
 
-	ListenableActionFuture<MultiGetResponseWrapper> executeMultiGet(
-			Esi4JOperation<ListenableActionFuture<MultiGetResponse>> multiGetOperation);
+	ListenableActionFuture<MultiGetResponseWrapper> executeMultiGet(Esi4JOperation<ListenableActionFuture<MultiGetResponse>> multiGetOperation);
 }

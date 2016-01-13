@@ -18,21 +18,21 @@ package at.molindo.esi4j.chain.impl;
 import java.util.List;
 import java.util.Map;
 
+import com.google.common.collect.Lists;
+
 import at.molindo.esi4j.chain.Esi4JBatchedEventProcessor;
 import at.molindo.esi4j.chain.Esi4JEntityTask;
 import at.molindo.esi4j.chain.Esi4JTaskProcessor;
 import at.molindo.esi4j.chain.Esi4JTaskSource;
 import at.molindo.utils.collections.ArrayUtils;
 
-import com.google.common.collect.Lists;
-
 public class DefaultBatchedEventProcessor extends DefaultEventProcessor implements Esi4JBatchedEventProcessor {
 
-	public DefaultBatchedEventProcessor(Esi4JTaskProcessor taskProcessor) {
+	public DefaultBatchedEventProcessor(final Esi4JTaskProcessor taskProcessor) {
 		super(taskProcessor);
 	}
 
-	public DefaultBatchedEventProcessor(Esi4JTaskProcessor taskProcessor, Map<Class<?>, Esi4JTaskSource> taskSources) {
+	public DefaultBatchedEventProcessor(final Esi4JTaskProcessor taskProcessor, final Map<Class<?>, Esi4JTaskSource> taskSources) {
 		super(taskProcessor, taskSources);
 	}
 
@@ -47,21 +47,21 @@ public class DefaultBatchedEventProcessor extends DefaultEventProcessor implemen
 		private int _taskCount = 0;
 
 		@Override
-		public void onPostInsert(Object o) {
+		public void onPostInsert(final Object o) {
 			addTasks(getPostInsertTasks(o));
 		}
 
 		@Override
-		public void onPostUpdate(Object o) {
+		public void onPostUpdate(final Object o) {
 			addTasks(getPostUpdateTasks(o));
 		}
 
 		@Override
-		public void onPostDelete(Object o) {
+		public void onPostDelete(final Object o) {
 			addTasks(getPostDeleteTasks(o));
 		}
 
-		private void addTasks(Esi4JEntityTask[] tasks) {
+		private void addTasks(final Esi4JEntityTask[] tasks) {
 			if (!ArrayUtils.empty(tasks)) {
 				_tasks.add(tasks);
 				_taskCount += tasks.length;
@@ -70,9 +70,9 @@ public class DefaultBatchedEventProcessor extends DefaultEventProcessor implemen
 
 		@Override
 		public void flush() {
-			Esi4JEntityTask[] allTasks = new Esi4JEntityTask[_taskCount];
+			final Esi4JEntityTask[] allTasks = new Esi4JEntityTask[_taskCount];
 			int from = 0;
-			for (Esi4JEntityTask[] tasks : _tasks) {
+			for (final Esi4JEntityTask[] tasks : _tasks) {
 				System.arraycopy(tasks, 0, allTasks, from, tasks.length);
 				from += tasks.length;
 			}
@@ -81,8 +81,7 @@ public class DefaultBatchedEventProcessor extends DefaultEventProcessor implemen
 			_taskCount = 0;
 
 			/*
-			 * important: process all tasks in a single batch so we can later
-			 * identify duplicates
+			 * important: process all tasks in a single batch so we can later identify duplicates
 			 */
 			processTasks(allTasks);
 		}

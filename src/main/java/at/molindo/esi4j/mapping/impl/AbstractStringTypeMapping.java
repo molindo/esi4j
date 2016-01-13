@@ -16,22 +16,21 @@
 package at.molindo.esi4j.mapping.impl;
 
 /**
- * {@link AbstractTypeMapping} implementation for objects with ids of type
- * {@link String}
+ * {@link AbstractTypeMapping} implementation for objects with ids of type {@link String}
  */
 public abstract class AbstractStringTypeMapping<T> extends AbstractTypeMapping<T, String> {
 
-	public AbstractStringTypeMapping(String typeAlias, Class<T> typeClass) {
+	public AbstractStringTypeMapping(final String typeAlias, final Class<T> typeClass) {
 		super(typeAlias, typeClass, String.class);
 	}
 
 	@Override
-	public final String toString(String id) {
+	public final String toString(final String id) {
 		return id;
 	}
 
 	@Override
-	public final String toId(String id) {
+	public final String toId(final String id) {
 		return id;
 	}
 

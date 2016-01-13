@@ -21,9 +21,8 @@ package at.molindo.esi4j.chain;
 public interface Esi4JBatchedEntityResolver extends Esi4JEntityResolver {
 
 	/**
-	 * calls {@link Esi4JEntityTask#resolveEntity(Esi4JEntityResolver)} for all
-	 * tasks
-	 * 
+	 * calls {@link Esi4JEntityTask#resolveEntity(Esi4JEntityResolver)} for all tasks
+	 *
 	 * @param tasks
 	 *            may contain <code>null</code>
 	 */

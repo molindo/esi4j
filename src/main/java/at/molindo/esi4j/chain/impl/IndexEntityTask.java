@@ -30,7 +30,7 @@ public final class IndexEntityTask extends AbstractEntityTask {
 
 	private static final long serialVersionUID = 1L;
 
-	public IndexEntityTask(Object entity) {
+	public IndexEntityTask(final Object entity) {
 		super(entity);
 	}
 
@@ -40,30 +40,30 @@ public final class IndexEntityTask extends AbstractEntityTask {
 	}
 
 	@Override
-	protected void initClone(Esi4JEntityTask clone) {
+	protected void initClone(final Esi4JEntityTask clone) {
 	}
 
 	@Override
-	public void replaceEntity(Esi4JEntityResolver entityResolver) {
+	public void replaceEntity(final Esi4JEntityResolver entityResolver) {
 		setEntity(entityResolver.replaceEntity(getEntity()));
 	}
 
 	@Override
-	public void resolveEntity(Esi4JEntityResolver entityResolver) throws EntityNotResolveableException {
+	public void resolveEntity(final Esi4JEntityResolver entityResolver) throws EntityNotResolveableException {
 		setEntity(entityResolver.resolveEntity(getEntity()));
 	}
 
 	@Override
-	public void addToBulk(Client client, BulkRequestBuilder bulk, String indexName, OperationContext context) {
-		Object entity = getEntity();
+	public void addToBulk(final Client client, final BulkRequestBuilder bulk, final String indexName, final OperationContext context) {
+		final Object entity = getEntity();
 		if (entity != null) {
-			TypeMapping mapping = context.findTypeMapping(entity);
-			IndexRequest index = mapping.indexBuilderRequest(client, indexName, entity);
+			final TypeMapping mapping = context.findTypeMapping(entity);
+			final IndexRequest index = mapping.indexBuilderRequest(client, indexName, entity);
 
 			if (index != null) {
 				bulk.add(index);
 			} else {
-				DeleteRequest delete = mapping.deleteBuilderRequest(client, indexName, entity);
+				final DeleteRequest delete = mapping.deleteBuilderRequest(client, indexName, entity);
 				if (delete != null) {
 					bulk.add(delete);
 				}

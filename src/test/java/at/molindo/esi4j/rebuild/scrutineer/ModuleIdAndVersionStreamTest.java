@@ -15,8 +15,7 @@
  */
 package at.molindo.esi4j.rebuild.scrutineer;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.*;
 
 import java.util.List;
 
@@ -33,21 +32,21 @@ public class ModuleIdAndVersionStreamTest {
 	@Test
 	public void testIterator() {
 
-		TweetTypeMapping mapping = new TweetTypeMapping("tweet");
+		final TweetTypeMapping mapping = new TweetTypeMapping("tweet");
 
-		Tweet t1 = new Tweet(1, 1, "dummy", "Tweet #1");
-		Tweet t2 = new Tweet(2, 1, "dummy", "Tweet #2");
-		Tweet t3 = new Tweet(3, 1, "dummy", "Tweet #3");
-		Tweet t4 = new Tweet(4, 1, "dummy", "Tweet #4");
-		Tweet t5 = new Tweet(5, 1, "dummy", "Tweet #5");
+		final Tweet t1 = new Tweet(1, 1, "dummy", "Tweet #1");
+		final Tweet t2 = new Tweet(2, 1, "dummy", "Tweet #2");
+		final Tweet t3 = new Tweet(3, 1, "dummy", "Tweet #3");
+		final Tweet t4 = new Tweet(4, 1, "dummy", "Tweet #4");
+		final Tweet t5 = new Tweet(5, 1, "dummy", "Tweet #5");
 
 		final int[] fetched = new int[1];
 		final int[] processed = new int[1];
 
-		Esi4JDummyModule module = new Esi4JDummyModule() {
+		final Esi4JDummyModule module = new Esi4JDummyModule() {
 
 			@Override
-			public Esi4JRebuildSession startRebuildSession(Class<?> type) {
+			public Esi4JRebuildSession startRebuildSession(final Class<?> type) {
 				final Esi4JRebuildSession session = super.startRebuildSession(type);
 
 				return new Esi4JRebuildSession() {
@@ -63,20 +62,20 @@ public class ModuleIdAndVersionStreamTest {
 					}
 
 					@Override
-					public List<?> getNext(int batchSize) {
+					public List<?> getNext(final int batchSize) {
 						/*
-						 * all must have been processed before fetching new as
-						 * underlying session might clear previous state
+						 * all must have been processed before fetching new as underlying session might clear previous
+						 * state
 						 */
 						assertEquals(fetched[0], processed[0]);
 
-						List<?> list = session.getNext(batchSize);
+						final List<?> list = session.getNext(batchSize);
 						fetched[0] += list.size();
 
 						return list;
 					}
 
-					private void assertEquals(int i, int j) {
+					private void assertEquals(final int i, final int j) {
 						// TODO Auto-generated method stub
 
 					}
@@ -97,14 +96,14 @@ public class ModuleIdAndVersionStreamTest {
 
 		}.setData(Tweet.class, t1, t2, t3, t4, t5);
 
-		ModuleIdAndVersionStream stream = new ModuleIdAndVersionStream(module.startRebuildSession(Tweet.class), 2,
-				mapping);
+		final ModuleIdAndVersionStream stream = new ModuleIdAndVersionStream(module
+				.startRebuildSession(Tweet.class), 2, mapping);
 		stream.open();
 
-		ModuleIdAndVersionStreamIterator iter = (ModuleIdAndVersionStreamIterator) stream.iterator();
+		final ModuleIdAndVersionStreamIterator iter = (ModuleIdAndVersionStreamIterator) stream.iterator();
 
 		while (iter.hasNext()) {
-			ObjectIdAndVersion next = (ObjectIdAndVersion) iter.next();
+			final ObjectIdAndVersion next = (ObjectIdAndVersion) iter.next();
 			assertNotNull(next);
 			processed[0]++;
 		}

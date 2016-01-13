@@ -15,7 +15,7 @@
  */
 package at.molindo.esi4j.mapping.impl;
 
-import static org.elasticsearch.common.xcontent.ToXContent.EMPTY_PARAMS;
+import static org.elasticsearch.common.xcontent.ToXContent.*;
 
 import java.io.IOException;
 import java.util.List;
@@ -35,20 +35,18 @@ import org.elasticsearch.index.mapper.object.RootObjectMapper.Builder;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHitField;
 
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Maps;
+
 import at.molindo.esi4j.mapping.MappingSource;
 import at.molindo.esi4j.mapping.ObjectSource;
 import at.molindo.esi4j.mapping.TypeMapping;
 import at.molindo.utils.collections.CollectionUtils;
 
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Maps;
-
 /**
- * generic version of {@link TypeMapping}. All subclasses should extend this
- * class instead of {@link TypeMapping} while it's generally better to use
- * {@link TypeMapping} where the exact type of mapping is not known or not
- * relevant
- * 
+ * generic version of {@link TypeMapping}. All subclasses should extend this class instead of {@link TypeMapping} while
+ * it's generally better to use {@link TypeMapping} where the exact type of mapping is not known or not relevant
+ *
  * @param <Type>
  *            class of mapped type
  * @param <Id>
@@ -61,7 +59,7 @@ public abstract class GenericTypeMapping<Type, Id> extends TypeMapping {
 
 	private String _mapping;
 
-	public GenericTypeMapping(String typeAlias, Class<Type> typeClass, Class<Id> idClass) {
+	public GenericTypeMapping(final String typeAlias, final Class<Type> typeClass, final Class<Id> idClass) {
 		super(typeAlias);
 		if (typeClass == null) {
 			throw new NullPointerException("typeClass");
@@ -77,21 +75,20 @@ public abstract class GenericTypeMapping<Type, Id> extends TypeMapping {
 	public final MappingSource getMappingSource(final Settings settings) {
 		try {
 			if (_mapping == null || isDynamicMapping()) {
-				Builder mapperBuilder = new RootObjectMapper.Builder(getTypeAlias());
+				final Builder mapperBuilder = new RootObjectMapper.Builder(getTypeAlias());
 
 				buildMapping(mapperBuilder);
 
-				XContentBuilder contentBuilder = JsonXContent.contentBuilder();
+				final XContentBuilder contentBuilder = JsonXContent.contentBuilder();
 
 				contentBuilder.startObject();
 
-				mapperBuilder.build(new BuilderContext(settings, new ContentPath())).toXContent(contentBuilder,
-						EMPTY_PARAMS, new ToXContent() {
+				mapperBuilder.build(new BuilderContext(settings, new ContentPath()))
+						.toXContent(contentBuilder, EMPTY_PARAMS, new ToXContent() {
 
 							@Override
-							public XContentBuilder toXContent(XContentBuilder builder, Params params)
-									throws IOException {
-								ImmutableMap<String, Object> meta = meta();
+							public XContentBuilder toXContent(final XContentBuilder builder, final Params params) throws IOException {
+								final ImmutableMap<String, Object> meta = meta();
 								if (meta != null && !meta.isEmpty()) {
 									builder.field("_meta", meta);
 								}
@@ -104,7 +101,7 @@ public abstract class GenericTypeMapping<Type, Id> extends TypeMapping {
 				_mapping = contentBuilder.string();
 			}
 			return MappingSource.Builder.string(_mapping);
-		} catch (IOException e) {
+		} catch (final IOException e) {
 			throw new RuntimeException();
 		}
 	}
@@ -121,30 +118,30 @@ public abstract class GenericTypeMapping<Type, Id> extends TypeMapping {
 	}
 
 	@Override
-	public ObjectSource getObjectSource(Object o) {
+	public ObjectSource getObjectSource(final Object o) {
 		try {
 			return ObjectSource.Builder.builder(getContentBuilder(o));
-		} catch (IOException e) {
+		} catch (final IOException e) {
 			throw new RuntimeException(e);
 		}
 	}
 
 	/**
 	 * public for testing.
-	 * 
+	 *
 	 * @return a JsonXContent builder
 	 */
-	public final XContentBuilder getContentBuilder(Object o) throws IOException {
-		XContentBuilder contentBuilder = JsonXContent.contentBuilder();
+	public final XContentBuilder getContentBuilder(final Object o) throws IOException {
+		final XContentBuilder contentBuilder = JsonXContent.contentBuilder();
 		write(contentBuilder, o);
 		return contentBuilder;
 	}
 
-	public final void write(XContentBuilder contentBuilder, Object o) throws IOException {
+	public final void write(final XContentBuilder contentBuilder, final Object o) throws IOException {
 		contentBuilder.startObject();
 
 		// TODO why do we add the id to the document source?
-		String id = getIdString(o);
+		final String id = getIdString(o);
 		if (id != null) {
 			// skip empty id for id generation
 			contentBuilder.field(FIELD_ID).value(id);
@@ -155,12 +152,12 @@ public abstract class GenericTypeMapping<Type, Id> extends TypeMapping {
 	}
 
 	@Override
-	public final Type read(GetResponse response) {
+	public final Type read(final GetResponse response) {
 		return response.isExists() ? read(getSource(response)) : null;
 	}
 
 	@Override
-	public final Type read(SearchHit hit) {
+	public final Type read(final SearchHit hit) {
 		return read(getSource(hit));
 	}
 
@@ -168,12 +165,12 @@ public abstract class GenericTypeMapping<Type, Id> extends TypeMapping {
 	 * @return map containing all properties of a {@link GetResponse}
 	 * @see #getSource(SearchHit)
 	 */
-	protected Map<String, Object> getSource(GetResponse response) {
+	protected Map<String, Object> getSource(final GetResponse response) {
 		Map<String, Object> map = response.getSource();
 		if (map == null) {
 			map = Maps.newHashMap();
-			for (Entry<String, GetField> e : response.getFields().entrySet()) {
-				List<?> values = e.getValue().getValues();
+			for (final Entry<String, GetField> e : response.getFields().entrySet()) {
+				final List<?> values = e.getValue().getValues();
 				if (!CollectionUtils.empty(values)) {
 					map.put(e.getKey(), values.size() == 1 ? values.get(0) : values);
 				}
@@ -192,12 +189,12 @@ public abstract class GenericTypeMapping<Type, Id> extends TypeMapping {
 	 * @return map containing all properties of a {@link SearchHit}
 	 * @see #getSource(GetResponse)
 	 */
-	protected Map<String, Object> getSource(SearchHit hit) {
+	protected Map<String, Object> getSource(final SearchHit hit) {
 		Map<String, Object> map = hit.sourceAsMap();
 		if (map == null) {
 			map = Maps.newHashMap();
-			for (Entry<String, SearchHitField> e : hit.getFields().entrySet()) {
-				List<?> values = e.getValue().getValues();
+			for (final Entry<String, SearchHitField> e : hit.getFields().entrySet()) {
+				final List<?> values = e.getValue().getValues();
 				if (!CollectionUtils.empty(values)) {
 					map.put(e.getKey(), values.size() == 1 ? values.get(0) : values);
 				}
@@ -222,35 +219,35 @@ public abstract class GenericTypeMapping<Type, Id> extends TypeMapping {
 		return _idClass;
 	}
 
-	protected Type cast(Object o) {
+	protected Type cast(final Object o) {
 		return getTypeClass().cast(o);
 	}
 
-	protected Id castId(Object o) {
+	protected Id castId(final Object o) {
 		return getIdClass().cast(o);
 	}
 
 	@Override
-	public final boolean isFiltered(Object entity) {
+	public final boolean isFiltered(final Object entity) {
 		return filter(cast(entity));
 	}
 
 	@Override
-	public final Id getId(Object o) {
+	public final Id getId(final Object o) {
 		return id(cast(o));
 	}
 
 	@Override
-	public Long getVersion(Object o) {
+	public Long getVersion(final Object o) {
 		return version(cast(o));
 	}
 
-	protected boolean filter(Type o) {
+	protected boolean filter(final Type o) {
 		return false;
 	}
 
 	@Override
-	public final String toIdString(Object id) {
+	public final String toIdString(final Object id) {
 		return toString(castId(id));
 	}
 
@@ -261,14 +258,14 @@ public abstract class GenericTypeMapping<Type, Id> extends TypeMapping {
 
 	/**
 	 * get Id from object
-	 * 
+	 *
 	 * @see #getId(Object)
 	 */
 	protected abstract Id id(Type o);
 
 	/**
 	 * get version from object
-	 * 
+	 *
 	 * @see #getVersion(Object)
 	 */
 	protected abstract Long version(Type o);

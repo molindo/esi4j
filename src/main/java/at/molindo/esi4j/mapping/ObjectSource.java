@@ -39,12 +39,12 @@ public interface ObjectSource {
 			return new ObjectSource() {
 
 				@Override
-				public void setSource(IndexRequestBuilder request) {
+				public void setSource(final IndexRequestBuilder request) {
 					request.setSource(source);
 				}
 
 				@Override
-				public void setSource(IndexRequest request) {
+				public void setSource(final IndexRequest request) {
 					request.source(source);
 				}
 			};
@@ -54,12 +54,12 @@ public interface ObjectSource {
 			return new ObjectSource() {
 
 				@Override
-				public void setSource(IndexRequestBuilder request) {
+				public void setSource(final IndexRequestBuilder request) {
 					request.setSource(source);
 				}
 
 				@Override
-				public void setSource(IndexRequest request) {
+				public void setSource(final IndexRequest request) {
 					request.source(source);
 				}
 			};
@@ -69,12 +69,12 @@ public interface ObjectSource {
 			return new ObjectSource() {
 
 				@Override
-				public void setSource(IndexRequestBuilder request) {
+				public void setSource(final IndexRequestBuilder request) {
 					request.setSource(source);
 				}
 
 				@Override
-				public void setSource(IndexRequest request) {
+				public void setSource(final IndexRequest request) {
 					request.source(source);
 				}
 			};
@@ -84,12 +84,12 @@ public interface ObjectSource {
 			return new ObjectSource() {
 
 				@Override
-				public void setSource(IndexRequestBuilder request) {
+				public void setSource(final IndexRequestBuilder request) {
 					request.setSource(source, contentType);
 				}
 
 				@Override
-				public void setSource(IndexRequest request) {
+				public void setSource(final IndexRequest request) {
 					request.source(source);
 				}
 			};

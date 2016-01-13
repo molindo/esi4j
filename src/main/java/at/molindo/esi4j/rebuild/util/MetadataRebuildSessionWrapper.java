@@ -24,7 +24,7 @@ public class MetadataRebuildSessionWrapper implements Esi4JRebuildSession {
 	private final Esi4JRebuildSession _wrapped;
 	private final Object _metadata;
 
-	public MetadataRebuildSessionWrapper(Esi4JRebuildSession wrapped, Object metadata) {
+	public MetadataRebuildSessionWrapper(final Esi4JRebuildSession wrapped, final Object metadata) {
 		if (wrapped == null) {
 			throw new NullPointerException("wrapped");
 		}
@@ -43,7 +43,7 @@ public class MetadataRebuildSessionWrapper implements Esi4JRebuildSession {
 	}
 
 	@Override
-	public List<?> getNext(int batchSize) {
+	public List<?> getNext(final int batchSize) {
 		return _wrapped.getNext(batchSize);
 	}
 

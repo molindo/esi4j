@@ -18,8 +18,7 @@ package at.molindo.esi4j.core;
 import java.util.List;
 
 /**
- * Facade for elasticsearch integration. Usually only one instance per
- * application.
+ * Facade for elasticsearch integration. Usually only one instance per application.
  */
 public interface Esi4J {
 
@@ -29,8 +28,7 @@ public interface Esi4J {
 	public static final String DEFAULT_INDEX = "default";
 
 	/**
-	 * default client name used in settings (prefix "esi4j.client." +
-	 * {@value #DEFAULT_CLIENT})
+	 * default client name used in settings (prefix "esi4j.client." + {@value #DEFAULT_CLIENT})
 	 */
 	public static final String DEFAULT_CLIENT = "default";
 

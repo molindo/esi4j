@@ -18,9 +18,8 @@ package at.molindo.esi4j.rebuild;
 import at.molindo.esi4j.core.internal.InternalIndex;
 
 /**
- * A strategy to rebuild the index from the given module. Different strategies
- * might include concurrency, might choose to clear and rebuild the index,
- * replace an existing index after rebuilding, etc.
+ * A strategy to rebuild the index from the given module. Different strategies might include concurrency, might choose
+ * to clear and rebuild the index, replace an existing index after rebuilding, etc.
  */
 public interface Esi4JRebuildProcessor {
 
@@ -30,8 +29,7 @@ public interface Esi4JRebuildProcessor {
 	boolean isSupported(Esi4JRebuildSession rebuildSession);
 
 	/**
-	 * rebuild all types in index using data from module. returns after indexing
-	 * has finished
+	 * rebuild all types in index using data from module. returns after indexing has finished
 	 */
 	void rebuild(InternalIndex index, Esi4JRebuildSession rebuildSession);
 

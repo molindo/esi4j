@@ -23,14 +23,13 @@ import at.molindo.esi4j.core.Esi4JIndex;
 import at.molindo.utils.collections.ArrayUtils;
 
 /**
- * {@link Esi4JTaskProcessor} that uses a {@link QueuedTaskExecutor} to process
- * tasks asynchronously
+ * {@link Esi4JTaskProcessor} that uses a {@link QueuedTaskExecutor} to process tasks asynchronously
  */
 public class QueuedTaskProcessor extends AbstractTaskProcessor implements Esi4JTaskProcessor {
 
 	private final QueuedTaskExecutor _executor;
 
-	public QueuedTaskProcessor(Esi4JIndex index, Esi4JBatchedEntityResolver entityResolver) {
+	public QueuedTaskProcessor(final Esi4JIndex index, final Esi4JBatchedEntityResolver entityResolver) {
 		super(index);
 		_executor = new QueuedTaskExecutor(this, entityResolver);
 	}
@@ -50,7 +49,7 @@ public class QueuedTaskProcessor extends AbstractTaskProcessor implements Esi4JT
 	}
 
 	@Override
-	public <T> T execute(SerializableEsi4JOperation<T> operation) {
+	public <T> T execute(final SerializableEsi4JOperation<T> operation) {
 		return _executor.submit(operation);
 	}
 
@@ -58,14 +57,14 @@ public class QueuedTaskProcessor extends AbstractTaskProcessor implements Esi4JT
 	 * make sure to always call {@link #onAfterBulkIndex()} afterwards
 	 */
 	protected void onBeforeBulkIndex() {
-		Esi4JBatchedEntityResolver resolver = getEntityResolver();
+		final Esi4JBatchedEntityResolver resolver = getEntityResolver();
 		if (resolver instanceof Esi4JSessionEntityResolver) {
 			((Esi4JSessionEntityResolver) resolver).startResolveSession();
 		}
 	}
 
 	protected void onAfterBulkIndex() {
-		Esi4JBatchedEntityResolver resolver = getEntityResolver();
+		final Esi4JBatchedEntityResolver resolver = getEntityResolver();
 		if (resolver instanceof Esi4JSessionEntityResolver) {
 			((Esi4JSessionEntityResolver) resolver).closeResolveSession();
 		}

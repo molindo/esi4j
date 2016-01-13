@@ -15,9 +15,7 @@
  */
 package at.molindo.esi4j.chain.impl;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
+import static org.junit.Assert.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -37,13 +35,13 @@ public class QueuedTaskExecutorTest {
 	@Test
 	public void resolveDuplicates() {
 
-		Esi4JEntityTask[] tasks = new TasksBuilder().index("foo").update("foo").delete("foo").tasks();
+		final Esi4JEntityTask[] tasks = new TasksBuilder().index("foo").update("foo").delete("foo").tasks();
 		assertEquals(3, tasks.length);
 		assertNotNull(tasks[0]);
 		assertNotNull(tasks[1]);
 		assertNotNull(tasks[2]);
 
-		QueuedTaskExecutor.ObjectKeyListMap map = toMap(tasks);
+		final QueuedTaskExecutor.ObjectKeyListMap map = toMap(tasks);
 		assertEquals(1, map.size());
 		assertEquals(3, CollectionUtils.firstValue(map).size());
 
@@ -56,12 +54,12 @@ public class QueuedTaskExecutorTest {
 		assertNotNull(tasks[2]);
 	}
 
-	private ObjectKeyListMap toMap(Esi4JEntityTask[] tasks) {
-		ObjectKeyListMap map = new QueuedTaskExecutor.ObjectKeyListMap(tasks.length);
+	private ObjectKeyListMap toMap(final Esi4JEntityTask[] tasks) {
+		final ObjectKeyListMap map = new QueuedTaskExecutor.ObjectKeyListMap(tasks.length);
 
-		StringEntityResolver resolver = new StringEntityResolver();
+		final StringEntityResolver resolver = new StringEntityResolver();
 		for (int i = 0; i < tasks.length; i++) {
-			Esi4JEntityTask task = tasks[i];
+			final Esi4JEntityTask task = tasks[i];
 			map.add(task.toObjectKey(resolver), i);
 		}
 
@@ -71,17 +69,17 @@ public class QueuedTaskExecutorTest {
 	private static class StringEntityResolver implements Esi4JEntityResolver {
 
 		@Override
-		public ObjectKey toObjectKey(Object entity) {
+		public ObjectKey toObjectKey(final Object entity) {
 			return new ObjectKey(String.class, (String) entity);
 		}
 
 		@Override
-		public Object replaceEntity(Object entity) {
+		public Object replaceEntity(final Object entity) {
 			return toObjectKey(entity);
 		}
 
 		@Override
-		public Object resolveEntity(Object replacedEntity) throws EntityNotResolveableException {
+		public Object resolveEntity(final Object replacedEntity) throws EntityNotResolveableException {
 			if (replacedEntity instanceof String) {
 				return replacedEntity;
 			} else {
@@ -94,23 +92,23 @@ public class QueuedTaskExecutorTest {
 	private static class TasksBuilder {
 		private final List<Esi4JEntityTask> _tasks = new ArrayList<>();
 
-		public TasksBuilder index(String entity) {
+		public TasksBuilder index(final String entity) {
 			_tasks.add(new IndexEntityTask(entity));
 			return this;
 		}
 
-		public TasksBuilder delete(String entity) {
+		public TasksBuilder delete(final String entity) {
 			_tasks.add(new DeleteEntityTask(entity));
 			return this;
 		}
 
-		public TasksBuilder update(String entity) {
+		public TasksBuilder update(final String entity) {
 			_tasks.add(new UpdateEntityTask(entity) {
 
 				private static final long serialVersionUID = 1L;
 
 				@Override
-				protected UpdateRequest updateRequest(Object entity) {
+				protected UpdateRequest updateRequest(final Object entity) {
 					return null;
 				}
 			});

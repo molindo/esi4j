@@ -31,7 +31,7 @@ public class DefaultMultiSearchItemResponseWrapper implements MultiSearchItemRes
 
 	private DefaultSearchResponseWrapper _responseWrapper;
 
-	public DefaultMultiSearchItemResponseWrapper(MultiSearchResponse.Item reps, SearchHitReader reader) {
+	public DefaultMultiSearchItemResponseWrapper(final MultiSearchResponse.Item reps, final SearchHitReader reader) {
 		if (reps == null) {
 			throw new NullPointerException("response");
 		}
@@ -66,7 +66,7 @@ public class DefaultMultiSearchItemResponseWrapper implements MultiSearchItemRes
 	}
 
 	@Override
-	public <T> List<T> getObjects(Class<T> type) {
+	public <T> List<T> getObjects(final Class<T> type) {
 		return getSearchResponseWrapper().getObjects(type);
 	}
 

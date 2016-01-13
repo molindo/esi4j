@@ -19,8 +19,8 @@ import org.elasticsearch.action.get.GetResponse;
 
 /**
  * wraps a {@link GetResponse}, allows to get the result as an object
- * 
- * 
+ *
+ *
  * @author stf
  */
 public interface GetResponseWrapper {

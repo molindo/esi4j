@@ -15,12 +15,11 @@
  */
 package at.molindo.esi4j.module.hibernate.scrolling;
 
-
 public abstract class AbstractScrollingSessionProvider implements ScrollingSessionProvider {
 
 	private final Class<?> _type;
 
-	public AbstractScrollingSessionProvider(Class<?> type) {
+	public AbstractScrollingSessionProvider(final Class<?> type) {
 		if (type == null) {
 			throw new NullPointerException("type");
 		}

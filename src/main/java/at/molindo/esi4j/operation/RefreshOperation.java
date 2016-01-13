@@ -23,7 +23,7 @@ public final class RefreshOperation implements SerializableEsi4JOperation<Void> 
 	private static final long serialVersionUID = 1L;
 
 	@Override
-	public Void execute(Client client, String indexName, OperationContext helper) {
+	public Void execute(final Client client, final String indexName, final OperationContext helper) {
 		client.admin().indices().prepareRefresh(indexName).execute().actionGet();
 		return null;
 	}

@@ -23,7 +23,7 @@ public class DefaultDeleteResponseWrapper implements DeleteResponseWrapper {
 
 	private final DeleteResponse _response;
 
-	public DefaultDeleteResponseWrapper(DeleteResponse response) {
+	public DefaultDeleteResponseWrapper(final DeleteResponse response) {
 		if (response == null) {
 			throw new NullPointerException("response");
 		}

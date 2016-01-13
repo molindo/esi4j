@@ -25,17 +25,17 @@ public abstract class AbstractEntityTask implements Esi4JEntityTask {
 
 	private Object _entity;
 
-	public AbstractEntityTask(Object entity) {
+	public AbstractEntityTask(final Object entity) {
 		setEntity(entity);
 	}
 
 	@Override
 	public Esi4JEntityTask clone() {
 		try {
-			Esi4JEntityTask clone = (Esi4JEntityTask) super.clone();
+			final Esi4JEntityTask clone = (Esi4JEntityTask) super.clone();
 			initClone(clone);
 			return clone;
-		} catch (CloneNotSupportedException e) {
+		} catch (final CloneNotSupportedException e) {
 			throw new RuntimeException("clone not supported by Cloneable class", e);
 		}
 	}
@@ -47,7 +47,7 @@ public abstract class AbstractEntityTask implements Esi4JEntityTask {
 		return _entity;
 	}
 
-	protected final void setEntity(Object entity) {
+	protected final void setEntity(final Object entity) {
 		if (entity == null) {
 			throw new NullPointerException("entity");
 		}
@@ -55,8 +55,8 @@ public abstract class AbstractEntityTask implements Esi4JEntityTask {
 	}
 
 	@Override
-	public final ObjectKey toObjectKey(Esi4JEntityResolver entityResolver) {
-		Object entity = getEntity();
+	public final ObjectKey toObjectKey(final Esi4JEntityResolver entityResolver) {
+		final Object entity = getEntity();
 		if (entity instanceof ObjectKey) {
 			return (ObjectKey) entity;
 		} else {

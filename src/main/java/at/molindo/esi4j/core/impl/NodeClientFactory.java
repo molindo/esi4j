@@ -24,15 +24,14 @@ import at.molindo.esi4j.core.Esi4JClient;
 import at.molindo.esi4j.core.Esi4JClientFactory;
 
 /**
- * uses a {@link NodeBuilder} to construct a {@link Node}. All settings are
- * directly passed to the {@link NodeBuilder}.
+ * uses a {@link NodeBuilder} to construct a {@link Node}. All settings are directly passed to the {@link NodeBuilder}.
  */
 public class NodeClientFactory implements Esi4JClientFactory {
 
 	private final Settings _settings;
 	private final String _clusterName;
 
-	public NodeClientFactory(Settings settings) {
+	public NodeClientFactory(final Settings settings) {
 		_settings = settings;
 		_clusterName = settings.get("cluster.name", ClusterName.DEFAULT.value());
 	}

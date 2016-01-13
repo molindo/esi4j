@@ -16,8 +16,7 @@
 package at.molindo.esi4j.chain;
 
 /**
- * listens for entity inserts, updates and deletions in a primary store (e.g.
- * database)
+ * listens for entity inserts, updates and deletions in a primary store (e.g. database)
  */
 public interface Esi4JEventListener {
 	void onPostInsert(Object object);

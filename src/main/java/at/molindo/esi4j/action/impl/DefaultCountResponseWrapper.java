@@ -23,7 +23,7 @@ public class DefaultCountResponseWrapper implements CountResponseWrapper {
 
 	private final CountResponse _response;
 
-	public DefaultCountResponseWrapper(CountResponse response) {
+	public DefaultCountResponseWrapper(final CountResponse response) {
 		if (response == null) {
 			throw new NullPointerException("response");
 		}

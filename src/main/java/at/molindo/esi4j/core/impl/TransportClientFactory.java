@@ -26,8 +26,8 @@ import at.molindo.utils.collections.ArrayUtils;
 import at.molindo.utils.data.StringUtils;
 
 /**
- * Creates an {@link Esi4JClient} that uses a {@link TransportClient}. All
- * settings are directly passed to the {@link NodeBuilder}.
+ * Creates an {@link Esi4JClient} that uses a {@link TransportClient}. All settings are directly passed to the
+ * {@link NodeBuilder}.
  */
 public class TransportClientFactory implements Esi4JClientFactory {
 
@@ -35,7 +35,7 @@ public class TransportClientFactory implements Esi4JClientFactory {
 	private final String _clusterName;
 	private final String[] _hosts;
 
-	public TransportClientFactory(Settings settings) {
+	public TransportClientFactory(final Settings settings) {
 		_settings = settings;
 		_clusterName = settings.get("cluster.name", ClusterName.DEFAULT.value());
 		// TODO make use of settings.getComponentSettings(..)
@@ -48,11 +48,10 @@ public class TransportClientFactory implements Esi4JClientFactory {
 
 	@Override
 	public Esi4JClient create() {
-		org.elasticsearch.client.transport.TransportClient client = new org.elasticsearch.client.transport.TransportClient(
-				_settings);
+		final org.elasticsearch.client.transport.TransportClient client = new org.elasticsearch.client.transport.TransportClient(_settings);
 
-		String[] parts = new String[2];
-		for (String host : _hosts) {
+		final String[] parts = new String[2];
+		for (final String host : _hosts) {
 			if (StringUtils.split(host, ":", parts) == 1) {
 				parts[1] = "9300";
 			}

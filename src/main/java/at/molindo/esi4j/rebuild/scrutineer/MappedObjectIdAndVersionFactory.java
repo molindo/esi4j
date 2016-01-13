@@ -18,17 +18,17 @@ package at.molindo.esi4j.rebuild.scrutineer;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 
-import at.molindo.esi4j.mapping.TypeMapping;
-
 import com.aconex.scrutineer.IdAndVersion;
 import com.aconex.scrutineer.IdAndVersionFactory;
+
+import at.molindo.esi4j.mapping.TypeMapping;
 
 public class MappedObjectIdAndVersionFactory implements IdAndVersionFactory {
 
 	private final TypeMapping _mapping;
 	private final boolean _convertIds;
 
-	public MappedObjectIdAndVersionFactory(TypeMapping mapping) {
+	public MappedObjectIdAndVersionFactory(final TypeMapping mapping) {
 		if (mapping == null) {
 			throw new NullPointerException("mapping");
 		}
@@ -37,7 +37,7 @@ public class MappedObjectIdAndVersionFactory implements IdAndVersionFactory {
 	}
 
 	@Override
-	public IdAndVersion create(Object id, long version) {
+	public IdAndVersion create(Object id, final long version) {
 		if (_convertIds && id instanceof String) {
 			id = _mapping.toId((String) id);
 		}
@@ -45,15 +45,15 @@ public class MappedObjectIdAndVersionFactory implements IdAndVersionFactory {
 	}
 
 	@Override
-	public IdAndVersion readFromStream(ObjectInputStream inputStream) throws IOException {
-		boolean isString = inputStream.readBoolean();
+	public IdAndVersion readFromStream(final ObjectInputStream inputStream) throws IOException {
+		final boolean isString = inputStream.readBoolean();
 		Object id;
 		if (isString) {
 			id = inputStream.readUTF();
 		} else {
 			id = inputStream.readLong();
 		}
-		long version = inputStream.readLong();
+		final long version = inputStream.readLong();
 		return new ObjectIdAndVersion(id, version);
 	}
 

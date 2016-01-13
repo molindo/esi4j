@@ -22,15 +22,15 @@ import java.util.concurrent.ConcurrentMap;
 import org.hibernate.SessionFactory;
 import org.hibernate.metadata.ClassMetadata;
 
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+
 import at.molindo.esi4j.module.Esi4JModule;
 import at.molindo.esi4j.module.hibernate.scrolling.DefaultQueryScrollingSession;
 import at.molindo.esi4j.module.hibernate.scrolling.ScrollingSession;
 import at.molindo.esi4j.module.hibernate.scrolling.ScrollingSessionProvider;
 import at.molindo.esi4j.rebuild.Esi4JRebuildSession;
 import at.molindo.thirdparty.org.compass.core.util.concurrent.ConcurrentHashSet;
-
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 
 public class HibernateModule implements Esi4JModule {
 
@@ -44,16 +44,16 @@ public class HibernateModule implements Esi4JModule {
 
 	private final ConcurrentMap<Class<?>, ScrollingSessionProvider> _scrollingProviders = Maps.newConcurrentMap();
 
-	public HibernateModule(SessionFactory sessionFactory) {
+	public HibernateModule(final SessionFactory sessionFactory) {
 		if (sessionFactory == null) {
 			throw new NullPointerException("sessionFactory");
 		}
 		_sessionFactory = sessionFactory;
 
 		// calculate types
-		List<Class<?>> list = Lists.newArrayList();
-		for (ClassMetadata classMetadata : sessionFactory.getAllClassMetadata().values()) {
-			Class<?> type = classMetadata.getMappedClass();
+		final List<Class<?>> list = Lists.newArrayList();
+		for (final ClassMetadata classMetadata : sessionFactory.getAllClassMetadata().values()) {
+			final Class<?> type = classMetadata.getMappedClass();
 			if (type != null) {
 				list.add(type);
 			}
@@ -73,18 +73,18 @@ public class HibernateModule implements Esi4JModule {
 	}
 
 	private ScrollingSession newScrollingSession(final Class<?> type) {
-		ScrollingSessionProvider scrollingSessionProvider = _scrollingProviders.get(type);
+		final ScrollingSessionProvider scrollingSessionProvider = _scrollingProviders.get(type);
 		return scrollingSessionProvider == null ? new DefaultQueryScrollingSession(type) : scrollingSessionProvider
 				.newScrollingSession();
 	}
 
-	void unsetRebuilding(Class<?> type) {
+	void unsetRebuilding(final Class<?> type) {
 		if (!_rebuilding.remove(type)) {
 			log.warn("type " + type.getName() + " not currently indexing");
 		}
 	}
 
-	public void putScrollingProvider(ScrollingSessionProvider scrollingProvider) {
+	public void putScrollingProvider(final ScrollingSessionProvider scrollingProvider) {
 		if (scrollingProvider == null) {
 			throw new NullPointerException("scrollingProvider");
 		}

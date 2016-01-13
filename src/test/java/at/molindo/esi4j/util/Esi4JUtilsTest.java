@@ -15,8 +15,7 @@
  */
 package at.molindo.esi4j.util;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 import org.elasticsearch.common.settings.ImmutableSettings;
 import org.elasticsearch.common.settings.Settings;
@@ -26,9 +25,9 @@ public class Esi4JUtilsTest {
 
 	@Test
 	public void getSettings() {
-		Settings s1 = ImmutableSettings.settingsBuilder().put("foo.bar.baz", true).build();
+		final Settings s1 = ImmutableSettings.settingsBuilder().put("foo.bar.baz", true).build();
 
-		Settings s2 = Esi4JUtils.getSettings(s1, "foo.bar.", "foo.");
+		final Settings s2 = Esi4JUtils.getSettings(s1, "foo.bar.", "foo.");
 		assertTrue(s1.getAsBoolean("foo.bar.baz", false));
 		assertFalse(s2.getAsBoolean("foo.bar.baz", false));
 		assertFalse(s1.getAsBoolean("foo.baz", false));

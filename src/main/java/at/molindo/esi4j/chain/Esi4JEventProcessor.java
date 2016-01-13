@@ -16,8 +16,7 @@
 package at.molindo.esi4j.chain;
 
 /**
- * processes object inserts, updates and deletions by passing them to an
- * {@link Esi4JTaskProcessor}
+ * processes object inserts, updates and deletions by passing them to an {@link Esi4JTaskProcessor}
  */
 public interface Esi4JEventProcessor extends Esi4JEventListener {
 
@@ -27,8 +26,7 @@ public interface Esi4JEventProcessor extends Esi4JEventListener {
 	Esi4JTaskProcessor getTaskProcessor();
 
 	/**
-	 * @return true if an {@link Esi4JTaskSource} is registered for this class
-	 *         or one of its supertypes
+	 * @return true if an {@link Esi4JTaskSource} is registered for this class or one of its supertypes
 	 */
 	boolean isProcessing(Class<?> type);
 
@@ -38,8 +36,7 @@ public interface Esi4JEventProcessor extends Esi4JEventListener {
 	void putTaskSource(Class<?> type, Esi4JTaskSource taskSource);
 
 	/**
-	 * remove the currently registered {@link Esi4JTaskSource} for the given
-	 * class
+	 * remove the currently registered {@link Esi4JTaskSource} for the given class
 	 */
 	void removeTaskSource(Class<?> type);
 

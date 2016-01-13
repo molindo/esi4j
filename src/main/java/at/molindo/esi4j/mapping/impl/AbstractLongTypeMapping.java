@@ -16,22 +16,21 @@
 package at.molindo.esi4j.mapping.impl;
 
 /**
- * {@link AbstractTypeMapping} implementation for objects with ids of type
- * {@link Long}
+ * {@link AbstractTypeMapping} implementation for objects with ids of type {@link Long}
  */
 public abstract class AbstractLongTypeMapping<T> extends AbstractTypeMapping<T, Long> {
 
-	public AbstractLongTypeMapping(String typeAlias, Class<T> typeClass) {
+	public AbstractLongTypeMapping(final String typeAlias, final Class<T> typeClass) {
 		super(typeAlias, typeClass, Long.class);
 	}
 
 	@Override
-	public final String toString(Long id) {
+	public final String toString(final Long id) {
 		return id.toString();
 	}
 
 	@Override
-	public final Long toId(String id) {
+	public final Long toId(final String id) {
 		// TODO parse errors
 		return Long.parseLong(id);
 	}

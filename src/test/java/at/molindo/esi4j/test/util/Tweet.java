@@ -26,18 +26,18 @@ public final class Tweet {
 	public Tweet() {
 	}
 
-	public Tweet(Integer id, String user, String message) {
+	public Tweet(final Integer id, final String user, final String message) {
 		setId(id);
 		setUser(user);
 		setMessage(message);
 	}
 
-	public Tweet(Integer id, Integer version, String user, String message) {
+	public Tweet(final Integer id, final Integer version, final String user, final String message) {
 		this(id, user, message);
 		setVersion(version == null ? null : version.longValue());
 	}
 
-	public Tweet(Integer id, Long version, String user, String message) {
+	public Tweet(final Integer id, final Long version, final String user, final String message) {
 		this(id, user, message);
 		setVersion(version);
 	}
@@ -46,7 +46,7 @@ public final class Tweet {
 		return _id;
 	}
 
-	public void setId(Integer id) {
+	public void setId(final Integer id) {
 		_id = id;
 	}
 
@@ -54,7 +54,7 @@ public final class Tweet {
 		return _version;
 	}
 
-	public void setVersion(Long version) {
+	public void setVersion(final Long version) {
 		_version = version;
 	}
 
@@ -62,7 +62,7 @@ public final class Tweet {
 		return _user;
 	}
 
-	public void setUser(String user) {
+	public void setUser(final String user) {
 		_user = user;
 	}
 
@@ -70,7 +70,7 @@ public final class Tweet {
 		return _message;
 	}
 
-	public void setMessage(String message) {
+	public void setMessage(final String message) {
 		_message = message;
 	}
 
@@ -80,9 +80,9 @@ public final class Tweet {
 	}
 
 	@Override
-	public boolean equals(Object obj) {
+	public boolean equals(final Object obj) {
 		if (obj instanceof Tweet) {
-			Tweet t = (Tweet) obj;
+			final Tweet t = (Tweet) obj;
 			return Objects.equal(_id, t._id) && Objects.equal(_user, t._user) && Objects.equal(_message, t._message);
 		} else {
 			return false;

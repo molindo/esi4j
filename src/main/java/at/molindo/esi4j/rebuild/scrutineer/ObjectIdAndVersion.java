@@ -31,20 +31,20 @@ public class ObjectIdAndVersion extends AbstractIdAndVersion {
 	private final Object _object;
 	private final Comparable<?> _id;
 
-	public static boolean isIdSupported(Class<?> idClass) {
+	public static boolean isIdSupported(final Class<?> idClass) {
 		return String.class.equals(idClass) || Number.class.isAssignableFrom(idClass);
 	}
 
-	public static boolean isIdSupported(Object id) {
+	public static boolean isIdSupported(final Object id) {
 		return id instanceof Number || id instanceof String;
 	}
 
 	/**
 	 * used for id and version coming from current index
-	 * 
+	 *
 	 * @see MappedObjectIdAndVersionFactory
 	 */
-	public ObjectIdAndVersion(Object id, long version) {
+	public ObjectIdAndVersion(final Object id, final long version) {
 		this(id, version, null);
 	}
 
@@ -54,7 +54,7 @@ public class ObjectIdAndVersion extends AbstractIdAndVersion {
 	 * @param object
 	 *            may be null when coming from index
 	 */
-	public ObjectIdAndVersion(Object id, long version, @Nullable Object object) {
+	public ObjectIdAndVersion(Object id, final long version, @Nullable final Object object) {
 		super(version);
 		if (id instanceof Number) {
 			id = ((Number) id).longValue();
@@ -81,17 +81,17 @@ public class ObjectIdAndVersion extends AbstractIdAndVersion {
 	}
 
 	@Override
-	protected HashCodeBuilder appendId(HashCodeBuilder appender) {
+	protected HashCodeBuilder appendId(final HashCodeBuilder appender) {
 		return appender.append(_id);
 	}
 
 	@Override
-	protected CompareToBuilder appendId(CompareToBuilder appender, IdAndVersion other) {
+	protected CompareToBuilder appendId(final CompareToBuilder appender, final IdAndVersion other) {
 		return appender.append(_id, ((ObjectIdAndVersion) other)._id);
 	}
 
 	@Override
-	protected void writeId(ObjectOutputStream objectOutputStream) throws IOException {
+	protected void writeId(final ObjectOutputStream objectOutputStream) throws IOException {
 		if (_id instanceof String) {
 			objectOutputStream.writeBoolean(true);
 			objectOutputStream.writeUTF((String) _id);

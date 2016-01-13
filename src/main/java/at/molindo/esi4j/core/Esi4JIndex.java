@@ -32,7 +32,7 @@ import at.molindo.esi4j.action.IndexResponseWrapper;
 public interface Esi4JIndex extends Esi4JManagedIndex {
 
 	/**
-	 * 
+	 *
 	 * @return
 	 */
 	@Override
@@ -40,30 +40,25 @@ public interface Esi4JIndex extends Esi4JManagedIndex {
 
 	ListenableActionFuture<IndexResponseWrapper> index(Object o);
 
-	ListenableActionFuture<IndexResponseWrapper> executeIndex(
-			Esi4JOperation<ListenableActionFuture<IndexResponse>> indexOperation);
+	ListenableActionFuture<IndexResponseWrapper> executeIndex(Esi4JOperation<ListenableActionFuture<IndexResponse>> indexOperation);
 
 	ListenableActionFuture<GetResponseWrapper> get(Class<?> type, Object id);
 
-	ListenableActionFuture<GetResponseWrapper> executeGet(
-			Esi4JOperation<ListenableActionFuture<GetResponse>> getOperation);
+	ListenableActionFuture<GetResponseWrapper> executeGet(Esi4JOperation<ListenableActionFuture<GetResponse>> getOperation);
 
 	ListenableActionFuture<DeleteResponseWrapper> delete(Object object);
 
 	ListenableActionFuture<DeleteResponseWrapper> delete(Class<?> type, Object id);
 
-	ListenableActionFuture<DeleteResponseWrapper> executeDelete(
-			Esi4JOperation<ListenableActionFuture<DeleteResponse>> deleteOperation);
+	ListenableActionFuture<DeleteResponseWrapper> executeDelete(Esi4JOperation<ListenableActionFuture<DeleteResponse>> deleteOperation);
 
 	ListenableActionFuture<BulkResponseWrapper> bulkIndex(Iterable<?> iterable);
 
-	ListenableActionFuture<BulkResponseWrapper> executeBulk(
-			Esi4JOperation<ListenableActionFuture<BulkResponse>> bulkOperation);
+	ListenableActionFuture<BulkResponseWrapper> executeBulk(Esi4JOperation<ListenableActionFuture<BulkResponse>> bulkOperation);
 
 	/**
-	 * refresh elasticsearch index, see <a href=
-	 * "http://www.elasticsearch.org/guide/reference/api/admin-indices-refresh.html"
-	 * >Refresh API</a>
+	 * refresh elasticsearch index, see
+	 * <a href= "http://www.elasticsearch.org/guide/reference/api/admin-indices-refresh.html" >Refresh API</a>
 	 */
 	void refresh();
 

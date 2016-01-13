@@ -18,8 +18,7 @@ package at.molindo.esi4j.core;
 import org.elasticsearch.client.Client;
 
 /**
- * Manages a {@link Client}. Created by a {@link Esi4JClientFactory}. There must
- * only be one instance per ES cluster.
+ * Manages a {@link Client}. Created by a {@link Esi4JClientFactory}. There must only be one instance per ES cluster.
  */
 public interface Esi4JClient {
 

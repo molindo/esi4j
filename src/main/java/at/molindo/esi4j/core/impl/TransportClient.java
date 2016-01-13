@@ -23,11 +23,11 @@ import at.molindo.utils.collections.IdentityHashSet;
 
 public class TransportClient implements Esi4JClient {
 
-	private String _id;
-	private Client _client;
-	private IdentityHashSet<Esi4JStore> _referrers = new IdentityHashSet<Esi4JStore>();
+	private final String _id;
+	private final Client _client;
+	private final IdentityHashSet<Esi4JStore> _referrers = new IdentityHashSet<Esi4JStore>();
 
-	public TransportClient(String clusterName, Client client) {
+	public TransportClient(final String clusterName, final Client client) {
 		if (client == null) {
 			throw new NullPointerException("node");
 		}
@@ -40,17 +40,18 @@ public class TransportClient implements Esi4JClient {
 		return _id;
 	}
 
+	@Override
 	public Client getClient() {
 		return _client;
 	}
 
 	@Override
-	public void addStore(Esi4JStore store) {
+	public void addStore(final Esi4JStore store) {
 		_referrers.add(store);
 	}
 
 	@Override
-	public void removeStore(Esi4JStore store) {
+	public void removeStore(final Esi4JStore store) {
 		_referrers.remove(store);
 		if (_referrers.size() == 0) {
 			// TODO close client?

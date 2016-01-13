@@ -26,7 +26,7 @@ public final class DefaultSearchHitWrapper implements SearchHitWrapper {
 
 	private Object _object;
 
-	public DefaultSearchHitWrapper(SearchHit hit, SearchHitReader reader) {
+	public DefaultSearchHitWrapper(final SearchHit hit, final SearchHitReader reader) {
 		if (hit == null) {
 			throw new NullPointerException("hit");
 		}
@@ -43,7 +43,7 @@ public final class DefaultSearchHitWrapper implements SearchHitWrapper {
 	}
 
 	@Override
-	public synchronized <T> T getObject(Class<T> type) {
+	public synchronized <T> T getObject(final Class<T> type) {
 		if (_object == null) {
 			_object = _reader.read(_hit);
 		}

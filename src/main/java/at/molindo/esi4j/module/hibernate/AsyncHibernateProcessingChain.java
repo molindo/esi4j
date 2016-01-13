@@ -30,12 +30,11 @@ public class AsyncHibernateProcessingChain implements Esi4JBatchedProcessingChai
 	private final QueuedTaskProcessor _taksProcessor;
 	private final DefaultBatchedEventProcessor _batchedEventProcessor;
 
-	public AsyncHibernateProcessingChain(Esi4JIndex index, HibernateEntityResolver entityResolver) {
+	public AsyncHibernateProcessingChain(final Esi4JIndex index, final HibernateEntityResolver entityResolver) {
 		this(index, entityResolver, null);
 	}
 
-	public AsyncHibernateProcessingChain(Esi4JIndex index, HibernateEntityResolver entityResolver,
-			Map<Class<?>, Esi4JTaskSource> taskSources) {
+	public AsyncHibernateProcessingChain(final Esi4JIndex index, final HibernateEntityResolver entityResolver, final Map<Class<?>, Esi4JTaskSource> taskSources) {
 
 		if (entityResolver == null) {
 			throw new NullPointerException("entityResolver");

@@ -31,17 +31,16 @@ public class IdAndVersionStreamVerifier {
 
 	private static final Logger LOG = LogUtils.loggerForThisClass();
 
-	public void verify(IdAndVersionStream primaryStream, IdAndVersionStream secondayStream,
-			IdAndVersionStreamVerifierListener idAndVersionStreamVerifierListener) {
+	public void verify(final IdAndVersionStream primaryStream, final IdAndVersionStream secondayStream, final IdAndVersionStreamVerifierListener idAndVersionStreamVerifierListener) {
 		long numItems = 0;
-		long begin = System.currentTimeMillis();
+		final long begin = System.currentTimeMillis();
 
 		try {
 
 			parallelOpenStreamsAndWait(primaryStream, secondayStream);
 
-			Iterator<IdAndVersion> primaryIterator = primaryStream.iterator();
-			Iterator<IdAndVersion> secondaryIterator = secondayStream.iterator();
+			final Iterator<IdAndVersion> primaryIterator = primaryStream.iterator();
+			final Iterator<IdAndVersion> secondaryIterator = secondayStream.iterator();
 
 			IdAndVersion primaryItem = next(primaryIterator);
 			IdAndVersion secondaryItem = next(secondaryIterator);
@@ -84,23 +83,23 @@ public class IdAndVersionStreamVerifier {
 
 	// CHECKSTYLE:ON
 
-	private void parallelOpenStreamsAndWait(IdAndVersionStream primaryStream, IdAndVersionStream secondaryStream) {
+	private void parallelOpenStreamsAndWait(final IdAndVersionStream primaryStream, final IdAndVersionStream secondaryStream) {
 		try {
-			ExecutorService executorService = Executors.newFixedThreadPool(1);
-			Future<?> secondaryStreamFuture = executorService.submit(new OpenStreamRunner(secondaryStream));
+			final ExecutorService executorService = Executors.newFixedThreadPool(1);
+			final Future<?> secondaryStreamFuture = executorService.submit(new OpenStreamRunner(secondaryStream));
 
 			primaryStream.open();
 			secondaryStreamFuture.get();
 
 			executorService.shutdown();
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			throw new IllegalStateException("Failed to open one or both of the streams in parallel", e);
 		}
 	}
 
-	private IdAndVersion verifiedNext(Iterator<IdAndVersion> iterator, IdAndVersion previous) {
+	private IdAndVersion verifiedNext(final Iterator<IdAndVersion> iterator, final IdAndVersion previous) {
 		if (iterator.hasNext()) {
-			IdAndVersion next = iterator.next();
+			final IdAndVersion next = iterator.next();
 			if (next == null) {
 				throw new IllegalStateException("primary stream must not return null");
 			} else if (previous.compareTo(next) > 0) {
@@ -114,7 +113,7 @@ public class IdAndVersionStreamVerifier {
 		}
 	}
 
-	private IdAndVersion next(Iterator<IdAndVersion> iterator) {
+	private IdAndVersion next(final Iterator<IdAndVersion> iterator) {
 		if (iterator.hasNext()) {
 			return iterator.next();
 		} else {
@@ -122,10 +121,10 @@ public class IdAndVersionStreamVerifier {
 		}
 	}
 
-	private void closeWithoutThrowingException(IdAndVersionStream idAndVersionStream) {
+	private void closeWithoutThrowingException(final IdAndVersionStream idAndVersionStream) {
 		try {
 			idAndVersionStream.close();
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			LogUtils.warn(LOG, "Unable to close IdAndVersionStream", e);
 		}
 	}
@@ -133,7 +132,7 @@ public class IdAndVersionStreamVerifier {
 	private static class OpenStreamRunner implements Runnable {
 		private final IdAndVersionStream primaryStream;
 
-		public OpenStreamRunner(IdAndVersionStream primaryStream) {
+		public OpenStreamRunner(final IdAndVersionStream primaryStream) {
 			this.primaryStream = primaryStream;
 		}
 

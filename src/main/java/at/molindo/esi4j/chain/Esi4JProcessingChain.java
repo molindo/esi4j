@@ -19,12 +19,13 @@ import at.molindo.esi4j.rebuild.Esi4JRebuildProcessor;
 
 /**
  * A processing chain consists of
- * 
- * <ul> <li>an {@link Esi4JEventProcessor} that turns inserts, updates and
- * deletions of objects into tasks</li> <li>an {@link Esi4JTaskProcessor} that
- * processes generated tasks</li> <li>an {@link Esi4JRebuildProcessor} to
- * rebuild indexes</li> </ul>
- * 
+ *
+ * <ul>
+ * <li>an {@link Esi4JEventProcessor} that turns inserts, updates and deletions of objects into tasks</li>
+ * <li>an {@link Esi4JTaskProcessor} that processes generated tasks</li>
+ * <li>an {@link Esi4JRebuildProcessor} to rebuild indexes</li>
+ * </ul>
+ *
  */
 public interface Esi4JProcessingChain {
 

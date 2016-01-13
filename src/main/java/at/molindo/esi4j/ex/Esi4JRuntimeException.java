@@ -22,15 +22,15 @@ public abstract class Esi4JRuntimeException extends RuntimeException {
 	public Esi4JRuntimeException() {
 	}
 
-	public Esi4JRuntimeException(String message) {
+	public Esi4JRuntimeException(final String message) {
 		super(message);
 	}
 
-	public Esi4JRuntimeException(Throwable cause) {
+	public Esi4JRuntimeException(final Throwable cause) {
 		super(cause);
 	}
 
-	public Esi4JRuntimeException(String message, Throwable cause) {
+	public Esi4JRuntimeException(final String message, final Throwable cause) {
 		super(message, cause);
 	}
 

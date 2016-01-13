@@ -20,43 +20,43 @@ import at.molindo.esi4j.chain.Esi4JEventListener;
 public abstract class AbstractEventListener implements Esi4JEventListener {
 
 	@Override
-	public void onPostInsert(Object... objects) {
-		for (int i = 0; i < objects.length; i++) {
-			onPostInsert(objects[i]);
-		}
-	}
-
-	@Override
-	public void onPostInsert(Iterable<Object> objects) {
-		for (Object object : objects) {
+	public void onPostInsert(final Object... objects) {
+		for (final Object object : objects) {
 			onPostInsert(object);
 		}
 	}
 
 	@Override
-	public void onPostUpdate(Object... objects) {
-		for (int i = 0; i < objects.length; i++) {
-			onPostUpdate(objects[i]);
+	public void onPostInsert(final Iterable<Object> objects) {
+		for (final Object object : objects) {
+			onPostInsert(object);
 		}
 	}
 
 	@Override
-	public void onPostUpdate(Iterable<Object> objects) {
-		for (Object object : objects) {
+	public void onPostUpdate(final Object... objects) {
+		for (final Object object : objects) {
 			onPostUpdate(object);
 		}
 	}
 
 	@Override
-	public void onPostDelete(Object... objects) {
-		for (int i = 0; i < objects.length; i++) {
-			onPostDelete(objects[i]);
+	public void onPostUpdate(final Iterable<Object> objects) {
+		for (final Object object : objects) {
+			onPostUpdate(object);
 		}
 	}
 
 	@Override
-	public void onPostDelete(Iterable<Object> objects) {
-		for (Object object : objects) {
+	public void onPostDelete(final Object... objects) {
+		for (final Object object : objects) {
+			onPostDelete(object);
+		}
+	}
+
+	@Override
+	public void onPostDelete(final Iterable<Object> objects) {
+		for (final Object object : objects) {
 			onPostDelete(object);
 		}
 	}

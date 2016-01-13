@@ -20,13 +20,6 @@ import org.elasticsearch.client.Client;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import at.molindo.esi4j.core.Esi4JOperation;
-import at.molindo.esi4j.core.internal.InternalIndex;
-import at.molindo.esi4j.mapping.TypeMapping;
-import at.molindo.esi4j.rebuild.Esi4JRebuildProcessor;
-import at.molindo.esi4j.rebuild.Esi4JRebuildSession;
-import at.molindo.esi4j.rebuild.util.BulkIndexHelper;
-
 import com.aconex.scrutineer.IdAndVersion;
 import com.aconex.scrutineer.IdAndVersionFactory;
 import com.aconex.scrutineer.IdAndVersionStream;
@@ -43,6 +36,13 @@ import com.fasterxml.sort.SortConfig;
 import com.fasterxml.sort.Sorter;
 import com.fasterxml.sort.util.NaturalComparator;
 
+import at.molindo.esi4j.core.Esi4JOperation;
+import at.molindo.esi4j.core.internal.InternalIndex;
+import at.molindo.esi4j.mapping.TypeMapping;
+import at.molindo.esi4j.rebuild.Esi4JRebuildProcessor;
+import at.molindo.esi4j.rebuild.Esi4JRebuildSession;
+import at.molindo.esi4j.rebuild.util.BulkIndexHelper;
+
 public class ScrutineerRebuildProcessor implements Esi4JRebuildProcessor {
 
 	private static final int DEFAULT_SORT_MEM = 256 * 1024 * 1024;
@@ -51,41 +51,39 @@ public class ScrutineerRebuildProcessor implements Esi4JRebuildProcessor {
 	private static final Logger log = LoggerFactory.getLogger(ScrutineerRebuildProcessor.class);
 
 	@Override
-	public boolean isSupported(Esi4JRebuildSession rebuildSession) {
+	public boolean isSupported(final Esi4JRebuildSession rebuildSession) {
 		return rebuildSession.isOrdered();
 	}
 
 	@Override
-	public void rebuild(InternalIndex index, final Esi4JRebuildSession rebuildSession) {
+	public void rebuild(final InternalIndex index, final Esi4JRebuildSession rebuildSession) {
 		index.updateMapping(rebuildSession.getType());
 
 		index.execute(new Esi4JOperation<Void>() {
 
 			@Override
-			public Void execute(Client client, String indexName, Esi4JOperation.OperationContext context) {
+			public Void execute(final Client client, final String indexName, final Esi4JOperation.OperationContext context) {
 
 				final TypeMapping mapping = context.findTypeMapping(rebuildSession.getType());
 
-				ModuleIdAndVersionStream moduleStream = new ModuleIdAndVersionStream(rebuildSession,
-						DEFAULT_BATCH_SIZE, mapping);
+				final ModuleIdAndVersionStream moduleStream = new ModuleIdAndVersionStream(rebuildSession, DEFAULT_BATCH_SIZE, mapping);
 
-				IdAndVersionFactory factory = new MappedObjectIdAndVersionFactory(mapping);
+				final IdAndVersionFactory factory = new MappedObjectIdAndVersionFactory(mapping);
 
-				ElasticSearchSorter elasticSearchSorter = new ElasticSearchSorter(createSorter(factory));
-				IteratorFactory iteratorFactory = new IteratorFactory(factory);
-				String workingDirectory = SystemUtils.getJavaIoTmpDir().getAbsolutePath();
+				final ElasticSearchSorter elasticSearchSorter = new ElasticSearchSorter(createSorter(factory));
+				final IteratorFactory iteratorFactory = new IteratorFactory(factory);
+				final String workingDirectory = SystemUtils.getJavaIoTmpDir().getAbsolutePath();
 
-				ElasticSearchIdAndVersionStream esStream = new ElasticSearchIdAndVersionStream(
-						new ElasticSearchDownloader(client, indexName, "_type:" + mapping.getTypeAlias(), factory),
-						elasticSearchSorter, iteratorFactory, workingDirectory);
+				final ElasticSearchIdAndVersionStream esStream = new ElasticSearchIdAndVersionStream(new ElasticSearchDownloader(client, indexName, "_type:"
+						+ mapping.getTypeAlias(), factory), elasticSearchSorter, iteratorFactory, workingDirectory);
 
-				long start = System.currentTimeMillis();
+				final long start = System.currentTimeMillis();
 
-				BulkIndexHelper h = new BulkIndexHelper().setMaxRunning(2);
+				final BulkIndexHelper h = new BulkIndexHelper().setMaxRunning(2);
 				h.setResponseHandler(new BulkIndexHelper.IResponseHandler() {
 
 					@Override
-					public void handle(String id, String type) {
+					public void handle(final String id, final String type) {
 						if ("delete".equals(type)) {
 							onDelete(mapping.getTypeClass(), mapping.toId(id));
 						} else {
@@ -95,15 +93,13 @@ public class ScrutineerRebuildProcessor implements Esi4JRebuildProcessor {
 
 				});
 
-				VerifierListener listener = new VerifierListener(client, indexName, context, mapping, h,
-						DEFAULT_BATCH_SIZE);
+				final VerifierListener listener = new VerifierListener(client, indexName, context, mapping, h, DEFAULT_BATCH_SIZE);
 
 				try {
 					verify(moduleStream, esStream, listener);
 				} finally {
 					/*
-					 * TODO let IdAndVersionStreamVerifier do that as it does
-					 * with streams
+					 * TODO let IdAndVersionStreamVerifier do that as it does with streams
 					 */
 					listener.close();
 				}
@@ -111,10 +107,10 @@ public class ScrutineerRebuildProcessor implements Esi4JRebuildProcessor {
 				try {
 					h.await();
 
-					long seconds = (System.currentTimeMillis() - start) / 1000;
+					final long seconds = (System.currentTimeMillis() - start) / 1000;
 
 					// logging
-					StringBuilder logMsg = new StringBuilder("finished indexing of ").append(h.getSucceeded())
+					final StringBuilder logMsg = new StringBuilder("finished indexing of ").append(h.getSucceeded())
 							.append(" objects of type ").append(rebuildSession.getType().getName()).append(" in ")
 							.append(seconds).append(" seconds");
 
@@ -125,7 +121,7 @@ public class ScrutineerRebuildProcessor implements Esi4JRebuildProcessor {
 						log.info(logMsg.toString());
 					}
 
-				} catch (InterruptedException e) {
+				} catch (final InterruptedException e) {
 					log.error("awaiting completion of indexing has been interrupted", e);
 				}
 
@@ -134,23 +130,21 @@ public class ScrutineerRebuildProcessor implements Esi4JRebuildProcessor {
 		});
 	}
 
-	private Sorter<IdAndVersion> createSorter(IdAndVersionFactory factory) {
-		SortConfig sortConfig = new SortConfig().withMaxMemoryUsage(DEFAULT_SORT_MEM);
-		DataReaderFactory<IdAndVersion> dataReaderFactory = new IdAndVersionDataReaderFactory(factory);
-		DataWriterFactory<IdAndVersion> dataWriterFactory = new IdAndVersionDataWriterFactory();
-		return new Sorter<IdAndVersion>(sortConfig, dataReaderFactory, dataWriterFactory,
-				new NaturalComparator<IdAndVersion>());
+	private Sorter<IdAndVersion> createSorter(final IdAndVersionFactory factory) {
+		final SortConfig sortConfig = new SortConfig().withMaxMemoryUsage(DEFAULT_SORT_MEM);
+		final DataReaderFactory<IdAndVersion> dataReaderFactory = new IdAndVersionDataReaderFactory(factory);
+		final DataWriterFactory<IdAndVersion> dataWriterFactory = new IdAndVersionDataWriterFactory();
+		return new Sorter<IdAndVersion>(sortConfig, dataReaderFactory, dataWriterFactory, new NaturalComparator<IdAndVersion>());
 	}
 
-	private void verify(IdAndVersionStream primaryStream, IdAndVersionStream secondaryStream,
-			IdAndVersionStreamVerifierListener listener) {
+	private void verify(final IdAndVersionStream primaryStream, final IdAndVersionStream secondaryStream, final IdAndVersionStreamVerifierListener listener) {
 		new IdAndVersionStreamVerifier().verify(primaryStream, secondaryStream, listener);
 	}
 
-	protected void onIndex(Class<?> type, Object id) {
+	protected void onIndex(final Class<?> type, final Object id) {
 	}
 
-	protected void onDelete(Class<?> type, Object id) {
+	protected void onDelete(final Class<?> type, final Object id) {
 	}
 
 }

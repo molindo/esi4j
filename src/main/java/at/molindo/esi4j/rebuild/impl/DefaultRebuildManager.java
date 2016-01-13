@@ -23,6 +23,8 @@ import org.elasticsearch.action.admin.cluster.health.ClusterHealthStatus;
 import org.elasticsearch.client.Client;
 import org.elasticsearch.common.unit.TimeValue;
 
+import com.google.common.collect.Lists;
+
 import at.molindo.esi4j.core.Esi4JOperation;
 import at.molindo.esi4j.core.internal.InternalIndex;
 import at.molindo.esi4j.mapping.TypeMapping;
@@ -34,8 +36,6 @@ import at.molindo.esi4j.rebuild.scrutineer.ScrutineerRebuildProcessor;
 import at.molindo.esi4j.rebuild.simple.SimpleRebuildProcessor;
 import at.molindo.utils.collections.ArrayUtils;
 
-import com.google.common.collect.Lists;
-
 public class DefaultRebuildManager implements Esi4JRebuildManager {
 
 	private final List<Esi4JRebuildProcessor> _processors;
@@ -46,7 +46,7 @@ public class DefaultRebuildManager implements Esi4JRebuildManager {
 		this(new ScrutineerRebuildProcessor(), new SimpleRebuildProcessor());
 	}
 
-	public DefaultRebuildManager(Esi4JRebuildProcessor... processors) {
+	public DefaultRebuildManager(final Esi4JRebuildProcessor... processors) {
 		if (ArrayUtils.empty(processors)) {
 			throw new IllegalArgumentException("processors must not be empty");
 		}
@@ -54,8 +54,8 @@ public class DefaultRebuildManager implements Esi4JRebuildManager {
 	}
 
 	@Override
-	public void rebuild(Esi4JModule module, InternalIndex index, Class<?>... types) {
-		for (Class<?> type : types) {
+	public void rebuild(final Esi4JModule module, final InternalIndex index, final Class<?>... types) {
+		for (final Class<?> type : types) {
 			// validate types before continuing
 			index.findTypeMapping(type);
 		}
@@ -66,14 +66,14 @@ public class DefaultRebuildManager implements Esi4JRebuildManager {
 
 		// TODO how to handle events while rebuilding clone?
 
-		for (Class<?> type : types) {
-			Esi4JRebuildSession rebuildSession = module.startRebuildSession(type);
+		for (final Class<?> type : types) {
+			final Esi4JRebuildSession rebuildSession = module.startRebuildSession(type);
 			try {
 				waitForGreenStatus(index);
 				findRebuildProcessor(rebuildSession).rebuild(index, rebuildSession);
 
 				// update metadata after succesful build
-				Object meta = rebuildSession.getMetadata();
+				final Object meta = rebuildSession.getMetadata();
 				if (meta != null) {
 					index.index(meta);
 				}
@@ -88,25 +88,25 @@ public class DefaultRebuildManager implements Esi4JRebuildManager {
 		index.execute(new Esi4JOperation<Void>() {
 
 			@Override
-			public Void execute(Client client, String indexName, OperationContext context) {
+			public Void execute(final Client client, final String indexName, final OperationContext context) {
 				client.admin().indices().prepareOptimize(indexName).execute().actionGet();
 				return null;
 			}
 		});
 	}
 
-	private void waitForGreenStatus(InternalIndex index) {
+	private void waitForGreenStatus(final InternalIndex index) {
 		if (_healthTimeout != null && _healthTimeout.seconds() > 0) {
 			// make sure the index is ready
 			index.execute(new Esi4JOperation<Void>() {
 
 				@Override
-				public Void execute(Client client, String indexName, OperationContext helper) {
-					ClusterHealthRequestBuilder request = client.admin().cluster().prepareHealth(indexName);
+				public Void execute(final Client client, final String indexName, final OperationContext helper) {
+					final ClusterHealthRequestBuilder request = client.admin().cluster().prepareHealth(indexName);
 
 					request.setWaitForGreenStatus().setTimeout(_healthTimeout);
 
-					ClusterHealthResponse response = request.execute().actionGet();
+					final ClusterHealthResponse response = request.execute().actionGet();
 
 					if (response.getStatus() != ClusterHealthStatus.GREEN) {
 						throw new IllegalStateException("cluster not ready for rebuild (status " + response.getStatus()
@@ -120,11 +120,10 @@ public class DefaultRebuildManager implements Esi4JRebuildManager {
 	}
 
 	/**
-	 * @return first {@link Esi4JRebuildProcessor} that supports this
-	 *         {@link TypeMapping}
+	 * @return first {@link Esi4JRebuildProcessor} that supports this {@link TypeMapping}
 	 */
-	private Esi4JRebuildProcessor findRebuildProcessor(Esi4JRebuildSession rebuildSession) {
-		for (Esi4JRebuildProcessor processor : _processors) {
+	private Esi4JRebuildProcessor findRebuildProcessor(final Esi4JRebuildSession rebuildSession) {
+		for (final Esi4JRebuildProcessor processor : _processors) {
 			if (processor.isSupported(rebuildSession)) {
 				return processor;
 			}
@@ -141,7 +140,7 @@ public class DefaultRebuildManager implements Esi4JRebuildManager {
 		return _healthTimeout;
 	}
 
-	public DefaultRebuildManager setHealthTimeout(TimeValue healthTimeout) {
+	public DefaultRebuildManager setHealthTimeout(final TimeValue healthTimeout) {
 		_healthTimeout = healthTimeout;
 		return this;
 	}

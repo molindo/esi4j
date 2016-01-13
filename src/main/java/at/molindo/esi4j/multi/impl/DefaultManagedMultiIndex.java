@@ -21,6 +21,9 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 
+import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
+
 import at.molindo.esi4j.core.Esi4JIndex;
 import at.molindo.esi4j.core.Esi4JIndexManager;
 import at.molindo.esi4j.core.impl.AbstractIndex;
@@ -30,9 +33,6 @@ import at.molindo.esi4j.multi.Esi4JManagedMultiIndex;
 import at.molindo.esi4j.multi.Esi4JMultiStore;
 import at.molindo.utils.data.StringUtils;
 
-import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
-
 public class DefaultManagedMultiIndex extends AbstractIndex implements Esi4JManagedMultiIndex {
 
 	private final String _name;
@@ -40,8 +40,8 @@ public class DefaultManagedMultiIndex extends AbstractIndex implements Esi4JMana
 	private Esi4JIndexManager _indexManager;
 	private final Esi4JMultiStore _store;
 
-	public DefaultManagedMultiIndex(Iterable<? extends InternalIndex> indices) {
-		for (InternalIndex index : indices) {
+	public DefaultManagedMultiIndex(final Iterable<? extends InternalIndex> indices) {
+		for (final InternalIndex index : indices) {
 			// keep insertion order
 			_indices.put(index.getName(), index);
 		}
@@ -58,8 +58,8 @@ public class DefaultManagedMultiIndex extends AbstractIndex implements Esi4JMana
 	}
 
 	@Override
-	public boolean isMapped(Class<?> type) {
-		for (InternalIndex index : _indices.values()) {
+	public boolean isMapped(final Class<?> type) {
+		for (final InternalIndex index : _indices.values()) {
 			if (index.isMapped(type)) {
 				return true;
 			}
@@ -68,8 +68,8 @@ public class DefaultManagedMultiIndex extends AbstractIndex implements Esi4JMana
 	}
 
 	@Override
-	public boolean isMapped(Object o) {
-		for (InternalIndex index : _indices.values()) {
+	public boolean isMapped(final Object o) {
+		for (final InternalIndex index : _indices.values()) {
 			if (index.isMapped(o)) {
 				return true;
 			}
@@ -78,10 +78,10 @@ public class DefaultManagedMultiIndex extends AbstractIndex implements Esi4JMana
 	}
 
 	@Override
-	public String findIndexName(Class<?> type) {
+	public String findIndexName(final Class<?> type) {
 		Esi4JIndex mappedIndex = null;
 
-		for (InternalIndex index : _indices.values()) {
+		for (final InternalIndex index : _indices.values()) {
 			if (index.isMapped(type)) {
 				if (mappedIndex != null) {
 					throw new IllegalArgumentException("can't find index for type mapped on multiple indices: "
@@ -100,9 +100,9 @@ public class DefaultManagedMultiIndex extends AbstractIndex implements Esi4JMana
 	}
 
 	@Override
-	public TypeMapping findTypeMapping(Object o) {
+	public TypeMapping findTypeMapping(final Object o) {
 		// return first match
-		for (InternalIndex index : _indices.values()) {
+		for (final InternalIndex index : _indices.values()) {
 			if (index.isMapped(o)) {
 				return index.findTypeMapping(o);
 			}
@@ -111,9 +111,9 @@ public class DefaultManagedMultiIndex extends AbstractIndex implements Esi4JMana
 	}
 
 	@Override
-	public TypeMapping findTypeMapping(Class<?> type) {
+	public TypeMapping findTypeMapping(final Class<?> type) {
 		// return first match
-		for (InternalIndex index : _indices.values()) {
+		for (final InternalIndex index : _indices.values()) {
 			if (index.isMapped(type)) {
 				return index.findTypeMapping(type);
 			}
@@ -122,8 +122,8 @@ public class DefaultManagedMultiIndex extends AbstractIndex implements Esi4JMana
 	}
 
 	@Override
-	public TypeMapping findTypeMapping(String indexName, String typeAlias) {
-		for (InternalIndex index : _indices.values()) {
+	public TypeMapping findTypeMapping(final String indexName, final String typeAlias) {
+		for (final InternalIndex index : _indices.values()) {
 			if (index.getStore().getIndexName().equals(indexName)) {
 				return index.findTypeMapping(indexName, typeAlias);
 			}
@@ -133,8 +133,8 @@ public class DefaultManagedMultiIndex extends AbstractIndex implements Esi4JMana
 
 	@Override
 	public Class<?>[] getMappedTypes() {
-		Set<Class<?>> types = Sets.newLinkedHashSet();
-		for (InternalIndex index : _indices.values()) {
+		final Set<Class<?>> types = Sets.newLinkedHashSet();
+		for (final InternalIndex index : _indices.values()) {
 			types.addAll(Arrays.asList(index.getMappedTypes()));
 		}
 		return types.toArray(new Class<?>[types.size()]);
@@ -151,7 +151,7 @@ public class DefaultManagedMultiIndex extends AbstractIndex implements Esi4JMana
 	}
 
 	@Override
-	public void setIndexManager(Esi4JIndexManager indexManager) {
+	public void setIndexManager(final Esi4JIndexManager indexManager) {
 		throw new IllegalStateException("index contains index manager by default");
 	}
 

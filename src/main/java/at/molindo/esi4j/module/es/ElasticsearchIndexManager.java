@@ -27,13 +27,11 @@ import at.molindo.esi4j.rebuild.impl.DefaultRebuildManager;
 
 public class ElasticsearchIndexManager extends AbstractIndexManager {
 
-	public ElasticsearchIndexManager(Settings transportClientSettings, Esi4JIndex index,
-			Esi4JBatchedProcessingChain processingChain) {
+	public ElasticsearchIndexManager(final Settings transportClientSettings, final Esi4JIndex index, final Esi4JBatchedProcessingChain processingChain) {
 		this(transportClientSettings, (InternalIndex) index, processingChain, new DefaultRebuildManager());
 	}
 
-	public ElasticsearchIndexManager(Settings transportClientSettings, InternalIndex index,
-			Esi4JProcessingChain processingChain, Esi4JRebuildManager rebuildManager) {
+	public ElasticsearchIndexManager(final Settings transportClientSettings, final InternalIndex index, final Esi4JProcessingChain processingChain, final Esi4JRebuildManager rebuildManager) {
 		super(new ElasticsearchModule(transportClientSettings, index), index, processingChain, rebuildManager);
 	}
 

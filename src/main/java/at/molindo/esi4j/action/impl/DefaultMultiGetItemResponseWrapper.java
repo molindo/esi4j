@@ -26,7 +26,7 @@ public class DefaultMultiGetItemResponseWrapper implements MultiGetItemResponseW
 
 	private Object _object;
 
-	public DefaultMultiGetItemResponseWrapper(MultiGetItemResponse response, MultiGetItemReader reader) {
+	public DefaultMultiGetItemResponseWrapper(final MultiGetItemResponse response, final MultiGetItemReader reader) {
 		if (response == null) {
 			throw new NullPointerException("response");
 		}
@@ -43,7 +43,7 @@ public class DefaultMultiGetItemResponseWrapper implements MultiGetItemResponseW
 	}
 
 	@Override
-	public synchronized <T> T getObject(Class<T> type) {
+	public synchronized <T> T getObject(final Class<T> type) {
 		if (_object == null) {
 			_object = _reader.read(_response);
 		}

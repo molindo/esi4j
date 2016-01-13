@@ -17,7 +17,7 @@ package at.molindo.esi4j.chain;
 
 /**
  * a {@link Esi4JProcessingChain} supporting batched idexing.
- * 
+ *
  * @see Esi4JBatchedEventProcessor
  * @see Esi4JProcessingChain
  */

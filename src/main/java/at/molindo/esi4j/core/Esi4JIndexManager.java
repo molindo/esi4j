@@ -32,8 +32,7 @@ public interface Esi4JIndexManager {
 	void rebuild(Class<?>... types);
 
 	/**
-	 * submits a refresh operation to the underlying processing chain and waits
-	 * for it to complete
+	 * submits a refresh operation to the underlying processing chain and waits for it to complete
 	 */
 	void refresh();
 

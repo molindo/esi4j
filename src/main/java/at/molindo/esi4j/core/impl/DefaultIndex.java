@@ -62,7 +62,7 @@ public class DefaultIndex extends AbstractIndex implements InternalIndex {
 	@Nonnull
 	private Esi4JStore _store;
 
-	public DefaultIndex(String name, Settings settings, Esi4JStore store) {
+	public DefaultIndex(final String name, final Settings settings, final Esi4JStore store) {
 		if (name == null) {
 			throw new NullPointerException("id");
 		}
@@ -89,14 +89,14 @@ public class DefaultIndex extends AbstractIndex implements InternalIndex {
 	}
 
 	@Override
-	public void setStore(Esi4JStore store) {
+	public void setStore(final Esi4JStore store) {
 		if (store == null) {
 			throw new NullPointerException("store");
 		}
 		store.setIndex(this);
 		_store = store;
 
-		for (TypeMapping typeMapping : _mappings.getTypeMappings()) {
+		for (final TypeMapping typeMapping : _mappings.getTypeMappings()) {
 			putMapping(typeMapping);
 		}
 	}
@@ -110,7 +110,7 @@ public class DefaultIndex extends AbstractIndex implements InternalIndex {
 	}
 
 	@Override
-	public String findIndexName(Class<?> type) {
+	public String findIndexName(final Class<?> type) {
 		if (!isMapped(type)) {
 			throw new IllegalArgumentException("unmapped type " + type.getName() + " for index " + getName());
 		}
@@ -118,17 +118,17 @@ public class DefaultIndex extends AbstractIndex implements InternalIndex {
 	}
 
 	@Override
-	public TypeMapping findTypeMapping(Object o) {
+	public TypeMapping findTypeMapping(final Object o) {
 		return _mappings.findTypeMapping(o);
 	}
 
 	@Override
-	public TypeMapping findTypeMapping(Class<?> type) {
+	public TypeMapping findTypeMapping(final Class<?> type) {
 		return _mappings.findTypeMapping(type);
 	}
 
 	@Override
-	public TypeMapping findTypeMapping(String indexName, String typeAlias) {
+	public TypeMapping findTypeMapping(final String indexName, final String typeAlias) {
 		if (!getStore().getIndexName().equals(indexName)) {
 			throw new IllegalArgumentException("unexpected indexName, was " + indexName + ", expected "
 					+ getStore().getIndexName());
@@ -137,29 +137,29 @@ public class DefaultIndex extends AbstractIndex implements InternalIndex {
 	}
 
 	@Override
-	public DefaultIndex addTypeMapping(TypeMapping typeMapping) {
+	public DefaultIndex addTypeMapping(final TypeMapping typeMapping) {
 		_mappings.addMapping(typeMapping);
 		putMapping(typeMapping);
 		return this;
 	}
 
 	@Override
-	public void updateMapping(Class<?> type) {
+	public void updateMapping(final Class<?> type) {
 		putMapping(_mappings.findTypeMapping(type));
 	}
 
 	@Override
-	public boolean isMapped(Class<?> type) {
+	public boolean isMapped(final Class<?> type) {
 		return _mappings.getTypeMapping(type) != null;
 	}
 
 	@Override
-	public boolean isMapped(Object o) {
+	public boolean isMapped(final Object o) {
 		return _mappings.getTypeMapping(o) != null;
 	}
 
 	@Override
-	public void updateMapping(String typeAlias) {
+	public void updateMapping(final String typeAlias) {
 		putMapping(_mappings.findTypeMapping(typeAlias));
 	}
 
@@ -169,12 +169,12 @@ public class DefaultIndex extends AbstractIndex implements InternalIndex {
 	}
 
 	protected void putMapping(final TypeMapping typeMapping) {
-		ListenableActionFuture<PutMappingResponse> future = _store
+		final ListenableActionFuture<PutMappingResponse> future = _store
 				.execute(new StoreOperation<ListenableActionFuture<PutMappingResponse>>() {
 
 					@Override
-					public ListenableActionFuture<PutMappingResponse> execute(Client client, String indexName) {
-						PutMappingRequestBuilder request = client.admin().indices().preparePutMapping(indexName);
+					public ListenableActionFuture<PutMappingResponse> execute(final Client client, final String indexName) {
+						final PutMappingRequestBuilder request = client.admin().indices().preparePutMapping(indexName);
 						request.setType(typeMapping.getTypeAlias());
 						typeMapping.getMappingSource(getSettings()).setSource(request);
 						return request.execute();
@@ -192,63 +192,60 @@ public class DefaultIndex extends AbstractIndex implements InternalIndex {
 	}
 
 	@Override
-	public ListenableActionFuture<IndexResponseWrapper> executeIndex(
-			Esi4JOperation<ListenableActionFuture<IndexResponse>> indexOperation) {
+	public ListenableActionFuture<IndexResponseWrapper> executeIndex(final Esi4JOperation<ListenableActionFuture<IndexResponse>> indexOperation) {
 
-		return ListenableActionFutureWrapper.wrap(execute(indexOperation),
-				new Function<IndexResponse, IndexResponseWrapper>() {
+		return ListenableActionFutureWrapper
+				.wrap(execute(indexOperation), new Function<IndexResponse, IndexResponseWrapper>() {
 
 					@Override
-					public IndexResponseWrapper apply(IndexResponse input) {
-						TypeMapping typeMapping = _mappings.getTypeMapping(input.getType());
-						Object id = typeMapping.toId(input.getId());
+					public IndexResponseWrapper apply(final IndexResponse input) {
+						final TypeMapping typeMapping = _mappings.getTypeMapping(input.getType());
+						final Object id = typeMapping.toId(input.getId());
 						return new DefaultIndexResponseWrapper(input, id);
 					}
 				});
 	}
 
 	@Override
-	public ListenableActionFuture<GetResponseWrapper> get(Class<?> type, Object id) {
+	public ListenableActionFuture<GetResponseWrapper> get(final Class<?> type, final Object id) {
 		return executeGet(new Get(type, id));
 	}
 
 	@Override
-	public ListenableActionFuture<GetResponseWrapper> executeGet(
-			Esi4JOperation<ListenableActionFuture<GetResponse>> getOperation) {
+	public ListenableActionFuture<GetResponseWrapper> executeGet(final Esi4JOperation<ListenableActionFuture<GetResponse>> getOperation) {
 
-		return ListenableActionFutureWrapper.wrap(execute(getOperation),
-				new Function<GetResponse, GetResponseWrapper>() {
+		return ListenableActionFutureWrapper
+				.wrap(execute(getOperation), new Function<GetResponse, GetResponseWrapper>() {
 
 					@Override
-					public GetResponseWrapper apply(GetResponse input) {
-						TypeMapping typeMapping = _mappings.getTypeMapping(input.getType());
-						Object object = typeMapping.read(input);
+					public GetResponseWrapper apply(final GetResponse input) {
+						final TypeMapping typeMapping = _mappings.getTypeMapping(input.getType());
+						final Object object = typeMapping.read(input);
 						return new DefaultGetResponseWrapper(input, object);
 					}
 				});
 	}
 
 	@Override
-	public ListenableActionFuture<DeleteResponseWrapper> executeDelete(
-			Esi4JOperation<ListenableActionFuture<DeleteResponse>> deleteOperation) {
-		return ListenableActionFutureWrapper.wrap(execute(deleteOperation),
-				new Function<DeleteResponse, DeleteResponseWrapper>() {
+	public ListenableActionFuture<DeleteResponseWrapper> executeDelete(final Esi4JOperation<ListenableActionFuture<DeleteResponse>> deleteOperation) {
+		return ListenableActionFutureWrapper
+				.wrap(execute(deleteOperation), new Function<DeleteResponse, DeleteResponseWrapper>() {
 
 					@Override
-					public DeleteResponseWrapper apply(DeleteResponse input) {
+					public DeleteResponseWrapper apply(final DeleteResponse input) {
 						return new DefaultDeleteResponseWrapper(input);
 					}
 				});
 	}
 
 	@Override
-	public ListenableActionFuture<DeleteResponseWrapper> delete(Object object) {
-		TypeMapping typeMapping = _mappings.findTypeMapping(object);
+	public ListenableActionFuture<DeleteResponseWrapper> delete(final Object object) {
+		final TypeMapping typeMapping = _mappings.findTypeMapping(object);
 		return executeDelete(new Delete(typeMapping.getTypeClass(), typeMapping.getId(object)));
 	}
 
 	@Override
-	public ListenableActionFuture<DeleteResponseWrapper> delete(Class<?> type, Object id) {
+	public ListenableActionFuture<DeleteResponseWrapper> delete(final Class<?> type, final Object id) {
 		return executeDelete(new Delete(type, id));
 	}
 
@@ -257,12 +254,12 @@ public class DefaultIndex extends AbstractIndex implements InternalIndex {
 		return executeBulk(new Esi4JOperation<ListenableActionFuture<BulkResponse>>() {
 
 			@Override
-			public ListenableActionFuture<BulkResponse> execute(Client client, String indexName, OperationContext helper) {
-				BulkRequestBuilder request = client.prepareBulk();
+			public ListenableActionFuture<BulkResponse> execute(final Client client, final String indexName, final OperationContext helper) {
+				final BulkRequestBuilder request = client.prepareBulk();
 
-				for (Object o : iterable) {
-					TypeMapping mapping = helper.findTypeMapping(o);
-					IndexRequestBuilder index = mapping.indexRequest(client, indexName, o);
+				for (final Object o : iterable) {
+					final TypeMapping mapping = helper.findTypeMapping(o);
+					final IndexRequestBuilder index = mapping.indexRequest(client, indexName, o);
 					if (index != null) {
 						request.add(index);
 					}
@@ -274,13 +271,12 @@ public class DefaultIndex extends AbstractIndex implements InternalIndex {
 	}
 
 	@Override
-	public ListenableActionFuture<BulkResponseWrapper> executeBulk(
-			Esi4JOperation<ListenableActionFuture<BulkResponse>> bulkOperation) {
-		return ListenableActionFutureWrapper.wrap(execute(bulkOperation),
-				new Function<BulkResponse, BulkResponseWrapper>() {
+	public ListenableActionFuture<BulkResponseWrapper> executeBulk(final Esi4JOperation<ListenableActionFuture<BulkResponse>> bulkOperation) {
+		return ListenableActionFutureWrapper
+				.wrap(execute(bulkOperation), new Function<BulkResponse, BulkResponseWrapper>() {
 
 					@Override
-					public BulkResponseWrapper apply(BulkResponse response) {
+					public BulkResponseWrapper apply(final BulkResponse response) {
 						return new DefaultBulkResponseWrapper(response);
 					}
 				});
@@ -288,11 +284,11 @@ public class DefaultIndex extends AbstractIndex implements InternalIndex {
 
 	@Override
 	public void refresh() {
-		ListenableActionFuture<RefreshResponse> future = _store
+		final ListenableActionFuture<RefreshResponse> future = _store
 				.execute(new StoreOperation<ListenableActionFuture<RefreshResponse>>() {
 
 					@Override
-					public ListenableActionFuture<RefreshResponse> execute(Client client, String indexName) {
+					public ListenableActionFuture<RefreshResponse> execute(final Client client, final String indexName) {
 						return client.admin().indices().prepareRefresh(indexName).execute();
 					}
 
@@ -308,7 +304,7 @@ public class DefaultIndex extends AbstractIndex implements InternalIndex {
 	}
 
 	@Override
-	public void setIndexManager(Esi4JIndexManager indexManager) {
+	public void setIndexManager(final Esi4JIndexManager indexManager) {
 		if (_indexManager != null) {
 			throw new IllegalStateException("indexManager already assigned");
 		}
@@ -319,7 +315,7 @@ public class DefaultIndex extends AbstractIndex implements InternalIndex {
 	private static final class Index implements Esi4JOperation<ListenableActionFuture<IndexResponse>> {
 		private final Object _object;
 
-		private Index(Object object) {
+		private Index(final Object object) {
 			if (object == null) {
 				throw new NullPointerException("object");
 			}
@@ -327,10 +323,10 @@ public class DefaultIndex extends AbstractIndex implements InternalIndex {
 		}
 
 		@Override
-		public ListenableActionFuture<IndexResponse> execute(Client client, String indexName, OperationContext helper) {
+		public ListenableActionFuture<IndexResponse> execute(final Client client, final String indexName, final OperationContext helper) {
 			final TypeMapping typeMapping = helper.findTypeMapping(_object);
 
-			IndexRequestBuilder request = typeMapping.indexRequest(client, indexName, _object);
+			final IndexRequestBuilder request = typeMapping.indexRequest(client, indexName, _object);
 			if (request == null) {
 				throw new Esi4JObjectFilteredException(typeMapping, _object);
 			} else {
@@ -344,7 +340,7 @@ public class DefaultIndex extends AbstractIndex implements InternalIndex {
 		private final Class<?> _type;
 		private final Object _id;
 
-		private Get(Class<?> type, Object id) {
+		private Get(final Class<?> type, final Object id) {
 			if (type == null) {
 				throw new NullPointerException("type");
 			}
@@ -356,7 +352,7 @@ public class DefaultIndex extends AbstractIndex implements InternalIndex {
 		}
 
 		@Override
-		public ListenableActionFuture<GetResponse> execute(Client client, String indexName, OperationContext helper) {
+		public ListenableActionFuture<GetResponse> execute(final Client client, final String indexName, final OperationContext helper) {
 			final TypeMapping typeMapping = helper.findTypeMapping(_type);
 
 			final String type = typeMapping.getTypeAlias();
@@ -371,7 +367,7 @@ public class DefaultIndex extends AbstractIndex implements InternalIndex {
 		private final Class<?> _type;
 		private final Object _id;
 
-		private Delete(Class<?> type, Object id) {
+		private Delete(final Class<?> type, final Object id) {
 			if (type == null) {
 				throw new NullPointerException("type");
 			}
@@ -384,7 +380,7 @@ public class DefaultIndex extends AbstractIndex implements InternalIndex {
 
 		@Override
 		@SuppressWarnings(value = "NP_NULL_ON_SOME_PATH_FROM_RETURN_VALUE", justification = "_id not null at this point")
-		public ListenableActionFuture<DeleteResponse> execute(Client client, String indexName, OperationContext helper) {
+		public ListenableActionFuture<DeleteResponse> execute(final Client client, final String indexName, final OperationContext helper) {
 			final TypeMapping typeMapping = helper.findTypeMapping(_type);
 			return typeMapping.deleteRequest(client, indexName, typeMapping.toIdString(_id), null).execute();
 		}

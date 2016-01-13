@@ -20,9 +20,8 @@ import java.util.List;
 import org.elasticsearch.action.get.MultiGetResponse;
 
 /**
- * wraps a {@link MultiGetResponsee}, allows to get returned results as a
- * {@link List} of {@link MultiGetItemResponseWrapper} (similar to
- * {@link SearchResponseWrapper})
+ * wraps a {@link MultiGetResponsee}, allows to get returned results as a {@link List} of
+ * {@link MultiGetItemResponseWrapper} (similar to {@link SearchResponseWrapper})
  */
 public interface MultiGetResponseWrapper {
 
@@ -36,8 +35,7 @@ public interface MultiGetResponseWrapper {
 	List<?> getObjects();
 
 	/**
-	 * @return {@link List} of objects of cast to given type. may contain
-	 *         <code>null</code> if ID does not exist or
+	 * @return {@link List} of objects of cast to given type. may contain <code>null</code> if ID does not exist or
 	 *         {@link TypeMapping#read(GetResponse))} returns <code>null</code>
 	 */
 	<T> List<T> getObjects(Class<T> type);

@@ -51,9 +51,9 @@ public class TestUtils {
 		}
 
 		final File tmp = newTmpDir();
-		Settings settings = nodeSettings(tmp).put("cluster.name", clusterName).build();
+		final Settings settings = nodeSettings(tmp).put("cluster.name", clusterName).build();
 
-		Node node = NodeBuilder.nodeBuilder().settings(settings).build();
+		final Node node = NodeBuilder.nodeBuilder().settings(settings).build();
 
 		return new NodeClient(clusterName, node) {
 			@Override
@@ -73,7 +73,7 @@ public class TestUtils {
 		return tmp;
 	}
 
-	private static Builder nodeSettings(File tmp) {
+	private static Builder nodeSettings(final File tmp) {
 		return ImmutableSettings.settingsBuilder().put("path.data", new File(tmp, "data").toString())
 				.put("path.logs", new File(tmp, "logs").toString()).put("index.store.type", "ram")
 				.put("index.refresh_interval", "-1").put("node.data", true).put("node.local", true)

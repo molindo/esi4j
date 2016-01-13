@@ -41,7 +41,7 @@ public class ElasticsearchModule implements Esi4JModule {
 	private final TransportClient _client;
 	private final InternalIndex _index;
 
-	public ElasticsearchModule(Settings transportClientSettings, InternalIndex index) {
+	public ElasticsearchModule(final Settings transportClientSettings, final InternalIndex index) {
 		if (transportClientSettings == null) {
 			throw new NullPointerException("transportClientSettings");
 		}
@@ -57,7 +57,7 @@ public class ElasticsearchModule implements Esi4JModule {
 		return _index.execute(new Esi4JOperation<Esi4JRebuildSession>() {
 
 			@Override
-			public Esi4JRebuildSession execute(Client client, String indexName, OperationContext helper) {
+			public Esi4JRebuildSession execute(final Client client, final String indexName, final OperationContext helper) {
 				final TypeMapping mapping = helper.findTypeMapping(type);
 
 				return new Esi4JRebuildSession() {
@@ -78,11 +78,10 @@ public class ElasticsearchModule implements Esi4JModule {
 					}
 
 					/**
-					 * only uses the batchSize from the first invocation and
-					 * ignores changes
+					 * only uses the batchSize from the first invocation and ignores changes
 					 */
 					@Override
-					public List<?> getNext(int batchSize) {
+					public List<?> getNext(final int batchSize) {
 						if (_endReached) {
 							// TODO improve
 							throw new IllegalStateException("reached end");
@@ -91,29 +90,29 @@ public class ElasticsearchModule implements Esi4JModule {
 						ActionFuture<SearchResponse> responseFuture;
 						if (_scrollId == null) {
 							// first request
-							SearchRequestBuilder builder = new SearchRequestBuilder(_client)
+							final SearchRequestBuilder builder = new SearchRequestBuilder(_client)
 									.setIndices(mapping.getTypeAlias()).setPostFilter(FilterBuilders.matchAllFilter())
 									.setScroll(TimeValue.timeValueSeconds(_scrollTimeoutSeconds))
 									.addSort("_id", SortOrder.ASC).setSize(batchSize);
 
 							responseFuture = _client.search(builder.request());
 						} else {
-							responseFuture = _client.searchScroll(new SearchScrollRequestBuilder(_client, _scrollId)
-									.request());
+							responseFuture = _client
+									.searchScroll(new SearchScrollRequestBuilder(_client, _scrollId).request());
 						}
 
-						SearchResponse response = responseFuture.actionGet();
+						final SearchResponse response = responseFuture.actionGet();
 
-						SearchHit[] hits = response.getHits().getHits();
-						ArrayList<Object> list = new ArrayList<Object>(hits.length);
+						final SearchHit[] hits = response.getHits().getHits();
+						final ArrayList<Object> list = new ArrayList<Object>(hits.length);
 
 						if (hits.length == 0) {
 							_endReached = true;
 							_scrollId = null;
 						} else {
 							_scrollId = response.getScrollId();
-							for (int i = 0; i < hits.length; i++) {
-								Object o = mapping.read(hits[i]);
+							for (final SearchHit hit : hits) {
+								final Object o = mapping.read(hit);
 								if (o != null) {
 									list.add(o);
 								}

@@ -15,8 +15,7 @@
  */
 package at.molindo.esi4j.test.util;
 
-import static org.elasticsearch.index.mapper.MapperBuilders.all;
-import static org.elasticsearch.index.mapper.MapperBuilders.source;
+import static org.elasticsearch.index.mapper.MapperBuilders.*;
 
 import java.io.IOException;
 import java.util.Map;
@@ -34,17 +33,17 @@ public class TweetTypeMapping extends AbstractIntegerTypeMapping<Tweet> {
 	private static final String FIELD_MESSAGE = "message";
 	private static final String FIELD_USER = "user";
 
-	public TweetTypeMapping(String typeAlias) {
+	public TweetTypeMapping(final String typeAlias) {
 		super(typeAlias, Tweet.class);
 	}
 
 	@Override
-	protected Integer id(Tweet o) {
+	protected Integer id(final Tweet o) {
 		return o.getId();
 	}
 
 	@Override
-	protected void setId(Tweet o, Integer id) {
+	protected void setId(final Tweet o, final Integer id) {
 		o.setId(id);
 	}
 
@@ -54,30 +53,30 @@ public class TweetTypeMapping extends AbstractIntegerTypeMapping<Tweet> {
 	}
 
 	@Override
-	protected Long version(Tweet o) {
+	protected Long version(final Tweet o) {
 		return o.getVersion();
 	}
 
 	@Override
-	protected void setVersion(Tweet o, Long version) {
+	protected void setVersion(final Tweet o, final Long version) {
 		o.setVersion(version);
 	}
 
 	@Override
-	protected void buildMapping(Builder mapperBuilder) throws IOException {
+	protected void buildMapping(final Builder mapperBuilder) throws IOException {
 		mapperBuilder.dynamic(Dynamic.STRICT).add(source().enabled(true))
-		.add(all().enabled(EnabledAttributeMapper.ENABLED)).add(MapperBuilders.stringField(FIELD_MESSAGE))
-		.add(MapperBuilders.stringField(FIELD_USER));
+				.add(all().enabled(EnabledAttributeMapper.ENABLED)).add(MapperBuilders.stringField(FIELD_MESSAGE))
+				.add(MapperBuilders.stringField(FIELD_USER));
 	}
 
 	@Override
-	protected void writeObject(XContentBuilder contentBuilder, Tweet o) throws IOException {
+	protected void writeObject(final XContentBuilder contentBuilder, final Tweet o) throws IOException {
 		contentBuilder.field(FIELD_MESSAGE, o.getMessage()).field(FIELD_USER, o.getUser());
 	}
 
 	@Override
-	protected Tweet readObject(Map<String, Object> source) {
-		Tweet tweet = new Tweet();
+	protected Tweet readObject(final Map<String, Object> source) {
+		final Tweet tweet = new Tweet();
 		tweet.setMessage((String) source.get(FIELD_MESSAGE));
 		tweet.setUser((String) source.get(FIELD_USER));
 		return tweet;

@@ -60,7 +60,7 @@ public class DefaultStore implements Esi4JStore {
 
 	private Esi4JIndex _index;
 
-	public DefaultStore(Esi4JClient client, String indexName) {
+	public DefaultStore(final Esi4JClient client, final String indexName) {
 		if (client == null) {
 			throw new NullPointerException("client");
 		}
@@ -86,7 +86,7 @@ public class DefaultStore implements Esi4JStore {
 	}
 
 	@Override
-	public void setIndex(Esi4JIndex index) {
+	public void setIndex(final Esi4JIndex index) {
 		if (index == null) {
 			throw new NullPointerException("index");
 		}
@@ -100,28 +100,28 @@ public class DefaultStore implements Esi4JStore {
 
 	/**
 	 * called after assigning a store to a new index
-	 * 
+	 *
 	 * @param index
 	 *            the new index (same as {@link #_index})
 	 */
-	protected void init(Esi4JIndex index) {
+	protected void init(final Esi4JIndex index) {
 		// create index
 
 		assertIndex(index);
 		_client.addStore(this);
 	}
 
-	void assertIndex(Esi4JIndex index) {
+	void assertIndex(final Esi4JIndex index) {
 		if (!indexExists()) {
 			// create index
-			CreateIndexRequestBuilder request = _client.getClient().admin().indices().prepareCreate(_indexName);
+			final CreateIndexRequestBuilder request = _client.getClient().admin().indices().prepareCreate(_indexName);
 
-			Settings settings = getStoreSettings(index);
+			final Settings settings = getStoreSettings(index);
 			if (settings != null) {
 				request.setSettings(settings);
 			}
 
-			CreateIndexResponse response = request
+			final CreateIndexResponse response = request
 					.setTimeout(TimeValue.timeValueSeconds(INDEX_CREATION_TIMEOUT_SECONDS)).execute().actionGet();
 
 			if (!response.isAcknowledged()) {
@@ -132,27 +132,28 @@ public class DefaultStore implements Esi4JStore {
 
 		} else {
 			// update settings
-			Settings settings = getStoreSettings(index);
+			final Settings settings = getStoreSettings(index);
 			if (settings != null && settings.getAsMap().size() > 0) {
 
-				Settings storeSettings = toDynamicSettings(settings);
+				final Settings storeSettings = toDynamicSettings(settings);
 
 				_client.getClient().admin().indices().prepareUpdateSettings(_indexName).setSettings(storeSettings)
 						.execute().actionGet();
 
-				ClusterStateResponse state = _client.getClient().admin().cluster().prepareState()
+				final ClusterStateResponse state = _client.getClient().admin().cluster().prepareState()
 						.setIndices(_indexName).setMetaData(true).execute().actionGet();
 
-				Settings indexSettings = state.getState().getMetaData().getIndices().get(_indexName).getSettings();
+				final Settings indexSettings = state.getState().getMetaData().getIndices().get(_indexName)
+						.getSettings();
 
-				for (Entry<String, String> e : settings.getAsMap().entrySet()) {
-					String key = e.getKey();
-					String localValue = e.getValue();
-					String indexValue = indexSettings.get(key.startsWith("index.") ? key : "index." + key);
+				for (final Entry<String, String> e : settings.getAsMap().entrySet()) {
+					final String key = e.getKey();
+					final String localValue = e.getValue();
+					final String indexValue = indexSettings.get(key.startsWith("index.") ? key : "index." + key);
 					if (!StringUtils.equals(localValue, indexValue)) {
 						// TODO make behavior configurable: fail or warn
-						log.warn("could not update value for settings key '" + key + "' from ('" + indexValue
-								+ "' to '" + localValue + "') - delete and rebuild index " + _indexName);
+						log.warn("could not update value for settings key '" + key + "' from ('" + indexValue + "' to '"
+								+ localValue + "') - delete and rebuild index " + _indexName);
 					}
 				}
 
@@ -164,7 +165,7 @@ public class DefaultStore implements Esi4JStore {
 
 	/**
 	 * we don't use "indices exists" due to elasticsearch#8105
-	 * 
+	 *
 	 * @return true if the index exists
 	 */
 	private boolean indexExists() {
@@ -183,52 +184,47 @@ public class DefaultStore implements Esi4JStore {
 				// not recovering, no need to wait
 				return true;
 			}
-		} catch (MissingIndexException e) {
+		} catch (final MissingIndexException e) {
 			log.info("index missing: {}", _indexName);
 			return false;
 		}
 	}
 
 	private boolean waitForYellowStatus() {
-		ClusterHealthRequestBuilder request = _client.getClient().admin().cluster().prepareHealth(_indexName);
+		final ClusterHealthRequestBuilder request = _client.getClient().admin().cluster().prepareHealth(_indexName);
 
 		request.setWaitForYellowStatus().setTimeout(TimeValue.timeValueSeconds(INDEX_CREATION_TIMEOUT_SECONDS));
 
-		ClusterHealthResponse response = request.execute().actionGet();
+		final ClusterHealthResponse response = request.execute().actionGet();
 
 		return !response.isTimedOut() && response.getStatus() != ClusterHealthStatus.RED;
 	}
 
 	/**
-	 * @return <code>true</code> if index exists and is recovering,
-	 *         <code>false</code> if it exists but isn't recovering
+	 * @return <code>true</code> if index exists and is recovering, <code>false</code> if it exists but isn't recovering
 	 * @throws MissingIndexException
 	 *             if index does not exist
 	 */
 	private boolean isRecovering() throws MissingIndexException {
 		try {
 
-			RecoveryResponse recoveryRespone = _client
-					.getClient()
-					.admin()
-					.indices()
-					.recoveries(
-							new RecoveryRequestBuilder(_client.getClient().admin().indices()).setIndices(_indexName)
-									.request()).actionGet();
+			final RecoveryResponse recoveryRespone = _client.getClient().admin().indices()
+					.recoveries(new RecoveryRequestBuilder(_client.getClient().admin().indices()).setIndices(_indexName)
+							.request())
+					.actionGet();
 
-			Map<String, List<ShardRecoveryResponse>> shardResponses = recoveryRespone.shardResponses();
+			final Map<String, List<ShardRecoveryResponse>> shardResponses = recoveryRespone.shardResponses();
 
 			/*
-			 * TODO check response stage, currently allow all, the important
-			 * part here is that the service is available
+			 * TODO check response stage, currently allow all, the important part here is that the service is available
 			 */
 
-			List<ShardRecoveryResponse> responses = shardResponses.get(_indexName);
+			final List<ShardRecoveryResponse> responses = shardResponses.get(_indexName);
 			if (CollectionUtils.empty(responses)) {
 				log.warn("shard recovery response does not contain index: {}", _indexName);
 				return false;
 			} else {
-				for (ShardRecoveryResponse response : responses) {
+				for (final ShardRecoveryResponse response : responses) {
 					if (response.recoveryState().getStage() != RecoveryState.Stage.DONE) {
 						log.debug("cluster recovering: {}", _indexName);
 						return true;
@@ -237,7 +233,7 @@ public class DefaultStore implements Esi4JStore {
 				log.debug("cluster finished recovering: {}", _indexName);
 				return false;
 			}
-		} catch (ClusterBlockException ex) {
+		} catch (final ClusterBlockException ex) {
 			log.debug("recovery state not available");
 			if (ex.blocks().contains(GatewayService.STATE_NOT_RECOVERED_BLOCK)) {
 				log.debug("cluster blocked, indext not yet recovering: {}", _indexName);
@@ -246,23 +242,23 @@ public class DefaultStore implements Esi4JStore {
 				log.warn("unexpected cluster block, expect index does not exist", ex);
 				throw new MissingIndexException(_indexName);
 			}
-		} catch (IndexMissingException ex) {
+		} catch (final IndexMissingException ex) {
 			throw new MissingIndexException(_indexName, ex);
 		}
 	}
 
-	private Settings toDynamicSettings(Settings settings) {
+	private Settings toDynamicSettings(final Settings settings) {
 		// FIXME TransportClient?
-		InternalNode node = (InternalNode) ((NodeClient) getClient()).getNode();
+		final InternalNode node = (InternalNode) ((NodeClient) getClient()).getNode();
 
-		DynamicSettings indexDynamicSettings = node.injector().getInstance(DynamicSettingsBean.class)
+		final DynamicSettings indexDynamicSettings = node.injector().getInstance(DynamicSettingsBean.class)
 				.getIndexDynamicSettings();
 
-		ImmutableSettings.Builder dynamicSettings = ImmutableSettings.builder();
+		final ImmutableSettings.Builder dynamicSettings = ImmutableSettings.builder();
 
-		for (Map.Entry<String, String> e : settings.getAsMap().entrySet()) {
+		for (final Map.Entry<String, String> e : settings.getAsMap().entrySet()) {
 			if (indexDynamicSettings.hasDynamicSetting(e.getKey())) {
-				String error = indexDynamicSettings.validateDynamicSetting(e.getKey(), e.getValue());
+				final String error = indexDynamicSettings.validateDynamicSetting(e.getKey(), e.getValue());
 				if (error == null) {
 					dynamicSettings.put(e.getKey(), e.getValue());
 				} else {
@@ -276,13 +272,13 @@ public class DefaultStore implements Esi4JStore {
 		return dynamicSettings.build();
 	}
 
-	private Settings getStoreSettings(Esi4JIndex index) {
-		Settings indexSettings = ((InternalIndex) index).getSettings();
+	private Settings getStoreSettings(final Esi4JIndex index) {
+		final Settings indexSettings = ((InternalIndex) index).getSettings();
 		if (indexSettings == null) {
 			return null;
 		}
-		ImmutableSettings.Builder builder = ImmutableSettings.settingsBuilder();
-		for (Entry<String, String> e : indexSettings.getAsMap().entrySet()) {
+		final ImmutableSettings.Builder builder = ImmutableSettings.settingsBuilder();
+		for (final Entry<String, String> e : indexSettings.getAsMap().entrySet()) {
 			if (e.getKey().startsWith("index.")) {
 				builder.put(e.getKey(), e.getValue());
 			}
@@ -291,7 +287,7 @@ public class DefaultStore implements Esi4JStore {
 	}
 
 	@Override
-	public <T> T execute(StoreOperation<T> operation) {
+	public <T> T execute(final StoreOperation<T> operation) {
 		if (_index == null) {
 			throw new IllegalStateException("store not assigned to an index");
 		}
@@ -309,8 +305,7 @@ public class DefaultStore implements Esi4JStore {
 		private final DynamicSettings _indexDynamicSettings;
 
 		@Inject
-		public DynamicSettingsBean(@ClusterDynamicSettings DynamicSettings clusterDynamicSettings,
-				@IndexDynamicSettings DynamicSettings indexDynamicSettings) {
+		public DynamicSettingsBean(@ClusterDynamicSettings final DynamicSettings clusterDynamicSettings, @IndexDynamicSettings final DynamicSettings indexDynamicSettings) {
 
 			_clusterDynamicSettings = clusterDynamicSettings;
 			_indexDynamicSettings = indexDynamicSettings;
@@ -330,11 +325,11 @@ public class DefaultStore implements Esi4JStore {
 
 		private static final long serialVersionUID = 1L;
 
-		public MissingIndexException(String indexName) {
+		public MissingIndexException(final String indexName) {
 			this(indexName, null);
 		}
 
-		public MissingIndexException(String indexName, IndexMissingException cause) {
+		public MissingIndexException(final String indexName, final IndexMissingException cause) {
 			super("index missing: " + indexName, cause);
 		}
 

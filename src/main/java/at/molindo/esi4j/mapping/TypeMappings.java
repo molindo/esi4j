@@ -29,25 +29,25 @@ public class TypeMappings {
 	/**
 	 * maps mappings by mapped type
 	 */
-	private ConcurrentHashMap<Class<?>, TypeMapping> _mappingsByClass = new ConcurrentHashMap<Class<?>, TypeMapping>();
+	private final ConcurrentHashMap<Class<?>, TypeMapping> _mappingsByClass = new ConcurrentHashMap<Class<?>, TypeMapping>();
 
 	/**
 	 * maps mappings by type alias
 	 */
-	private ConcurrentHashMap<String, TypeMapping> _mappingsByAlias = new ConcurrentHashMap<String, TypeMapping>();
+	private final ConcurrentHashMap<String, TypeMapping> _mappingsByAlias = new ConcurrentHashMap<String, TypeMapping>();
 
 	/**
 	 * add a mapping for this {@link TypeMapping}'s type and alias
 	 */
-	public void addMapping(TypeMapping mapping) {
-		String typeAlias = mapping.getTypeAlias();
+	public void addMapping(final TypeMapping mapping) {
+		final String typeAlias = mapping.getTypeAlias();
 		if (StringUtils.empty(typeAlias)) {
 			throw new IllegalArgumentException("typeAlias must not be empty");
 		}
 
 		{
 			// put alias if unknown
-			TypeMapping prev = _mappingsByAlias.putIfAbsent(typeAlias, mapping);
+			final TypeMapping prev = _mappingsByAlias.putIfAbsent(typeAlias, mapping);
 			if (prev != null && prev != mapping) {
 				throw new IllegalArgumentException("duplicate type alias " + mapping.getTypeAlias());
 			}
@@ -55,7 +55,7 @@ public class TypeMappings {
 
 		{
 			// put class if unknown
-			TypeMapping prev = _mappingsByClass.putIfAbsent(mapping.getTypeClass(), mapping);
+			final TypeMapping prev = _mappingsByClass.putIfAbsent(mapping.getTypeClass(), mapping);
 			if (prev != null && prev != mapping) {
 				_mappingsByAlias.remove(typeAlias);
 				throw new IllegalArgumentException("duplicate type class " + mapping.getTypeClass().getName());
@@ -66,7 +66,7 @@ public class TypeMappings {
 	/**
 	 * @return {@link TypeMapping} for this alias or null
 	 */
-	public TypeMapping getTypeMapping(String typeAlias) {
+	public TypeMapping getTypeMapping(final String typeAlias) {
 		if (StringUtils.empty(typeAlias)) {
 			return null;
 		}
@@ -76,13 +76,12 @@ public class TypeMappings {
 	/**
 	 * @return {@link TypeMapping} for this object or null
 	 */
-	public TypeMapping getTypeMapping(Object o) {
+	public TypeMapping getTypeMapping(final Object o) {
 		return getTypeMapping(toType(o));
 	}
 
 	/**
-	 * @return {@link TypeMapping} for this type, one of its superclasses or
-	 *         null
+	 * @return {@link TypeMapping} for this type, one of its superclasses or null
 	 */
 	public TypeMapping getTypeMapping(Class<?> type) {
 		if (type == null) {
@@ -104,8 +103,8 @@ public class TypeMappings {
 	 * @throws IllegalArgumentException
 	 *             if type is not mapped
 	 */
-	public TypeMapping findTypeMapping(String typeAlias) {
-		TypeMapping mapping = getTypeMapping(typeAlias);
+	public TypeMapping findTypeMapping(final String typeAlias) {
+		final TypeMapping mapping = getTypeMapping(typeAlias);
 		if (mapping == null) {
 			throw new IllegalArgumentException("unknown type " + typeAlias);
 		}
@@ -117,7 +116,7 @@ public class TypeMappings {
 	 * @throws IllegalArgumentException
 	 *             if object's type is not mapped
 	 */
-	public TypeMapping findTypeMapping(Object o) {
+	public TypeMapping findTypeMapping(final Object o) {
 		return findTypeMapping(toType(o));
 	}
 
@@ -126,15 +125,15 @@ public class TypeMappings {
 	 * @throws IllegalArgumentException
 	 *             if type is not mapped
 	 */
-	public TypeMapping findTypeMapping(Class<?> type) {
-		TypeMapping mapping = getTypeMapping(type);
+	public TypeMapping findTypeMapping(final Class<?> type) {
+		final TypeMapping mapping = getTypeMapping(type);
 		if (mapping == null) {
 			throw new IllegalArgumentException("unknown class " + type.getName());
 		}
 		return mapping;
 	}
 
-	private Class<? extends Object> toType(Object o) {
+	private Class<? extends Object> toType(final Object o) {
 		return o == null ? null : o.getClass();
 	}
 
@@ -144,13 +143,13 @@ public class TypeMappings {
 
 	public Class<?>[] getMappedTypes() {
 		// not particularly pretty but thread safe
-		ArrayList<Class<?>> list = new ArrayList<Class<?>>(_mappingsByClass.keySet());
+		final ArrayList<Class<?>> list = new ArrayList<Class<?>>(_mappingsByClass.keySet());
 		return list.toArray(new Class<?>[list.size()]);
 	}
 
 	public String[] getMappedAliases() {
 		// not particularly pretty but thread safe
-		ArrayList<String> list = new ArrayList<String>(_mappingsByAlias.keySet());
+		final ArrayList<String> list = new ArrayList<String>(_mappingsByAlias.keySet());
 		return list.toArray(new String[list.size()]);
 	}
 }

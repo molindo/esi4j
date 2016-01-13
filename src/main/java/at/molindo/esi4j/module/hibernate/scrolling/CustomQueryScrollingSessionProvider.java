@@ -15,12 +15,11 @@
  */
 package at.molindo.esi4j.module.hibernate.scrolling;
 
-
 public class CustomQueryScrollingSessionProvider extends AbstractScrollingSessionProvider {
 
 	private final QueryProvider _provider;
 
-	public CustomQueryScrollingSessionProvider(Class<?> type, QueryProvider provider) {
+	public CustomQueryScrollingSessionProvider(final Class<?> type, final QueryProvider provider) {
 		super(type);
 		if (provider == null) {
 			throw new NullPointerException("provider");
