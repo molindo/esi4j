@@ -15,28 +15,41 @@
  */
 package at.molindo.esi4j.mapping;
 
+import java.io.IOException;
 import java.util.Map;
 
 import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.action.index.IndexRequestBuilder;
+import org.elasticsearch.client.Requests;
+import org.elasticsearch.common.bytes.BytesArray;
+import org.elasticsearch.common.bytes.BytesReference;
 import org.elasticsearch.common.xcontent.XContentBuilder;
+import org.elasticsearch.common.xcontent.XContentFactory;
 import org.elasticsearch.common.xcontent.XContentType;
+
+import com.google.common.base.Charsets;
 
 /**
  * generator for elasticsearch object sources
  */
-public interface ObjectSource {
+public interface ObjectWriteSource {
+
 	void setSource(IndexRequestBuilder request);
 
 	void setSource(IndexRequest request);
+
+	/**
+	 * get source as {@link Requests#INDEX_CONTENT_TYPE} ({@link XContentType#JSON JSON}) bytes
+	 */
+	BytesReference getSource();
 
 	public final class Builder {
 
 		private Builder() {
 		}
 
-		public static ObjectSource builder(final XContentBuilder source) {
-			return new ObjectSource() {
+		public static ObjectWriteSource builder(final XContentBuilder source) {
+			return new ObjectWriteSource() {
 
 				@Override
 				public void setSource(final IndexRequestBuilder request) {
@@ -47,11 +60,17 @@ public interface ObjectSource {
 				public void setSource(final IndexRequest request) {
 					request.source(source);
 				}
+
+				@Override
+				public BytesReference getSource() {
+					return source.bytes();
+				}
+
 			};
 		}
 
-		public static ObjectSource string(final String source) {
-			return new ObjectSource() {
+		public static ObjectWriteSource string(final String source) {
+			return new ObjectWriteSource() {
 
 				@Override
 				public void setSource(final IndexRequestBuilder request) {
@@ -62,11 +81,16 @@ public interface ObjectSource {
 				public void setSource(final IndexRequest request) {
 					request.source(source);
 				}
+
+				@Override
+				public BytesReference getSource() {
+					return new BytesArray(source.getBytes(Charsets.UTF_8));
+				}
 			};
 		}
 
-		public static ObjectSource map(final Map<String, Object> source) {
-			return new ObjectSource() {
+		public static ObjectWriteSource map(final Map<String, Object> source) {
+			return new ObjectWriteSource() {
 
 				@Override
 				public void setSource(final IndexRequestBuilder request) {
@@ -77,11 +101,22 @@ public interface ObjectSource {
 				public void setSource(final IndexRequest request) {
 					request.source(source);
 				}
+
+				@Override
+				public BytesReference getSource() {
+					try (final XContentBuilder builder = XContentFactory.contentBuilder(Requests.INDEX_CONTENT_TYPE)) {
+						builder.map(source);
+						return builder.bytes();
+					} catch (final IOException e) {
+						throw new RuntimeException("building source failed", e);
+					}
+				}
+
 			};
 		}
 
-		public static ObjectSource map(final Map<String, Object> source, final XContentType contentType) {
-			return new ObjectSource() {
+		public static ObjectWriteSource map(final Map<String, Object> source, final XContentType contentType) {
+			return new ObjectWriteSource() {
 
 				@Override
 				public void setSource(final IndexRequestBuilder request) {
@@ -90,8 +125,19 @@ public interface ObjectSource {
 
 				@Override
 				public void setSource(final IndexRequest request) {
-					request.source(source);
+					request.source(source, contentType);
 				}
+
+				@Override
+				public BytesReference getSource() {
+					try (final XContentBuilder builder = XContentFactory.contentBuilder(contentType)) {
+						builder.map(source);
+						return builder.bytes();
+					} catch (final IOException e) {
+						throw new RuntimeException("building source failed", e);
+					}
+				}
+
 			};
 		}
 	}

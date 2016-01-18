@@ -15,26 +15,9 @@
  */
 package at.molindo.esi4j.rebuild.scrutineer;
 
-import org.apache.commons.lang.SystemUtils;
 import org.elasticsearch.client.Client;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.aconex.scrutineer.IdAndVersion;
-import com.aconex.scrutineer.IdAndVersionFactory;
-import com.aconex.scrutineer.IdAndVersionStream;
-import com.aconex.scrutineer.IdAndVersionStreamVerifierListener;
-import com.aconex.scrutineer.elasticsearch.ElasticSearchDownloader;
-import com.aconex.scrutineer.elasticsearch.ElasticSearchIdAndVersionStream;
-import com.aconex.scrutineer.elasticsearch.ElasticSearchSorter;
-import com.aconex.scrutineer.elasticsearch.IdAndVersionDataReaderFactory;
-import com.aconex.scrutineer.elasticsearch.IdAndVersionDataWriterFactory;
-import com.aconex.scrutineer.elasticsearch.IteratorFactory;
-import com.fasterxml.sort.DataReaderFactory;
-import com.fasterxml.sort.DataWriterFactory;
-import com.fasterxml.sort.SortConfig;
-import com.fasterxml.sort.Sorter;
-import com.fasterxml.sort.util.NaturalComparator;
 
 import at.molindo.esi4j.core.Esi4JOperation;
 import at.molindo.esi4j.core.internal.InternalIndex;
@@ -42,17 +25,21 @@ import at.molindo.esi4j.mapping.TypeMapping;
 import at.molindo.esi4j.rebuild.Esi4JRebuildProcessor;
 import at.molindo.esi4j.rebuild.Esi4JRebuildSession;
 import at.molindo.esi4j.rebuild.util.BulkIndexHelper;
+import at.molindo.scrutineer.IdAndVersionFactory;
+import at.molindo.scrutineer.IdAndVersionStream;
+import at.molindo.scrutineer.IdAndVersionStreamVerifier;
+import at.molindo.scrutineer.IdAndVersionStreamVerifierListener;
+import at.molindo.scrutineer.sort.SortedIdAndVersionStream;
 
 public class ScrutineerRebuildProcessor implements Esi4JRebuildProcessor {
 
-	private static final int DEFAULT_SORT_MEM = 256 * 1024 * 1024;
 	private static final int DEFAULT_BATCH_SIZE = 1000;
 
 	private static final Logger log = LoggerFactory.getLogger(ScrutineerRebuildProcessor.class);
 
 	@Override
 	public boolean isSupported(final Esi4JRebuildSession rebuildSession) {
-		return rebuildSession.isOrdered();
+		return true;
 	}
 
 	@Override
@@ -65,17 +52,14 @@ public class ScrutineerRebuildProcessor implements Esi4JRebuildProcessor {
 			public Void execute(final Client client, final String indexName, final Esi4JOperation.OperationContext context) {
 
 				final TypeMapping mapping = context.findTypeMapping(rebuildSession.getType());
-
-				final ModuleIdAndVersionStream moduleStream = new ModuleIdAndVersionStream(rebuildSession, DEFAULT_BATCH_SIZE, mapping);
-
 				final IdAndVersionFactory factory = new MappedObjectIdAndVersionFactory(mapping);
 
-				final ElasticSearchSorter elasticSearchSorter = new ElasticSearchSorter(createSorter(factory));
-				final IteratorFactory iteratorFactory = new IteratorFactory(factory);
-				final String workingDirectory = SystemUtils.getJavaIoTmpDir().getAbsolutePath();
+				final IdAndVersionStream moduleStream = SortedIdAndVersionStream
+						.wrapIfNecessary(new ModuleIdAndVersionStream(rebuildSession, DEFAULT_BATCH_SIZE, mapping), factory);
 
-				final ElasticSearchIdAndVersionStream esStream = new ElasticSearchIdAndVersionStream(new ElasticSearchDownloader(client, indexName, "_type:"
-						+ mapping.getTypeAlias(), factory), elasticSearchSorter, iteratorFactory, workingDirectory);
+				final IdAndVersionStream esStream = SortedIdAndVersionStream
+						.wrapIfNecessary(new ElasticsearchIdAndVersionStream(client, indexName, mapping
+								.getTypeAlias(), factory), factory);
 
 				final long start = System.currentTimeMillis();
 
@@ -128,13 +112,6 @@ public class ScrutineerRebuildProcessor implements Esi4JRebuildProcessor {
 				return null;
 			}
 		});
-	}
-
-	private Sorter<IdAndVersion> createSorter(final IdAndVersionFactory factory) {
-		final SortConfig sortConfig = new SortConfig().withMaxMemoryUsage(DEFAULT_SORT_MEM);
-		final DataReaderFactory<IdAndVersion> dataReaderFactory = new IdAndVersionDataReaderFactory(factory);
-		final DataWriterFactory<IdAndVersion> dataWriterFactory = new IdAndVersionDataWriterFactory();
-		return new Sorter<IdAndVersion>(sortConfig, dataReaderFactory, dataWriterFactory, new NaturalComparator<IdAndVersion>());
 	}
 
 	private void verify(final IdAndVersionStream primaryStream, final IdAndVersionStream secondaryStream, final IdAndVersionStreamVerifierListener listener) {

@@ -15,16 +15,13 @@
  */
 package at.molindo.esi4j.rebuild.scrutineer;
 
-import java.io.IOException;
-import java.io.ObjectOutputStream;
-
 import javax.annotation.Nullable;
 
 import org.apache.commons.lang.builder.CompareToBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 
-import com.aconex.scrutineer.AbstractIdAndVersion;
-import com.aconex.scrutineer.IdAndVersion;
+import at.molindo.scrutineer.AbstractIdAndVersion;
+import at.molindo.scrutineer.IdAndVersion;
 
 public class ObjectIdAndVersion extends AbstractIdAndVersion {
 
@@ -88,17 +85,6 @@ public class ObjectIdAndVersion extends AbstractIdAndVersion {
 	@Override
 	protected CompareToBuilder appendId(final CompareToBuilder appender, final IdAndVersion other) {
 		return appender.append(_id, ((ObjectIdAndVersion) other)._id);
-	}
-
-	@Override
-	protected void writeId(final ObjectOutputStream objectOutputStream) throws IOException {
-		if (_id instanceof String) {
-			objectOutputStream.writeBoolean(true);
-			objectOutputStream.writeUTF((String) _id);
-		} else {
-			objectOutputStream.writeBoolean(false);
-			objectOutputStream.writeLong(((Number) _id).longValue());
-		}
 	}
 
 }

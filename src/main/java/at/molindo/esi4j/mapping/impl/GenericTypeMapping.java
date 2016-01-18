@@ -18,30 +18,23 @@ package at.molindo.esi4j.mapping.impl;
 import static org.elasticsearch.common.xcontent.ToXContent.*;
 
 import java.io.IOException;
-import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 
-import org.elasticsearch.action.get.GetResponse;
 import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.common.xcontent.ToXContent;
 import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.elasticsearch.common.xcontent.json.JsonXContent;
-import org.elasticsearch.index.get.GetField;
 import org.elasticsearch.index.mapper.ContentPath;
 import org.elasticsearch.index.mapper.Mapper.BuilderContext;
 import org.elasticsearch.index.mapper.object.RootObjectMapper;
 import org.elasticsearch.index.mapper.object.RootObjectMapper.Builder;
-import org.elasticsearch.search.SearchHit;
-import org.elasticsearch.search.SearchHitField;
 
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Maps;
 
 import at.molindo.esi4j.mapping.MappingSource;
-import at.molindo.esi4j.mapping.ObjectSource;
+import at.molindo.esi4j.mapping.ObjectReadSource;
+import at.molindo.esi4j.mapping.ObjectWriteSource;
 import at.molindo.esi4j.mapping.TypeMapping;
-import at.molindo.utils.collections.CollectionUtils;
 
 /**
  * generic version of {@link TypeMapping}. All subclasses should extend this class instead of {@link TypeMapping} while
@@ -118,9 +111,9 @@ public abstract class GenericTypeMapping<Type, Id> extends TypeMapping {
 	}
 
 	@Override
-	public ObjectSource getObjectSource(final Object o) {
+	public ObjectWriteSource getObjectSource(final Object o) {
 		try {
-			return ObjectSource.Builder.builder(getContentBuilder(o));
+			return ObjectWriteSource.Builder.builder(getContentBuilder(o));
 		} catch (final IOException e) {
 			throw new RuntimeException(e);
 		}
@@ -149,64 +142,6 @@ public abstract class GenericTypeMapping<Type, Id> extends TypeMapping {
 
 		writeObject(contentBuilder, cast(o));
 		contentBuilder.endObject();
-	}
-
-	@Override
-	public final Type read(final GetResponse response) {
-		return response.isExists() ? read(getSource(response)) : null;
-	}
-
-	@Override
-	public final Type read(final SearchHit hit) {
-		return read(getSource(hit));
-	}
-
-	/**
-	 * @return map containing all properties of a {@link GetResponse}
-	 * @see #getSource(SearchHit)
-	 */
-	protected Map<String, Object> getSource(final GetResponse response) {
-		Map<String, Object> map = response.getSource();
-		if (map == null) {
-			map = Maps.newHashMap();
-			for (final Entry<String, GetField> e : response.getFields().entrySet()) {
-				final List<?> values = e.getValue().getValues();
-				if (!CollectionUtils.empty(values)) {
-					map.put(e.getKey(), values.size() == 1 ? values.get(0) : values);
-				}
-			}
-		}
-		map.put(FIELD_INDEX, response.getIndex());
-		map.put(FIELD_TYPE, response.getType());
-		map.put(FIELD_ID, response.getId());
-		if (response.getVersion() != -1) {
-			map.put(FIELD_VERSION, response.getVersion());
-		}
-		return map;
-	}
-
-	/**
-	 * @return map containing all properties of a {@link SearchHit}
-	 * @see #getSource(GetResponse)
-	 */
-	protected Map<String, Object> getSource(final SearchHit hit) {
-		Map<String, Object> map = hit.sourceAsMap();
-		if (map == null) {
-			map = Maps.newHashMap();
-			for (final Entry<String, SearchHitField> e : hit.getFields().entrySet()) {
-				final List<?> values = e.getValue().getValues();
-				if (!CollectionUtils.empty(values)) {
-					map.put(e.getKey(), values.size() == 1 ? values.get(0) : values);
-				}
-			}
-		}
-		map.put(FIELD_INDEX, hit.getIndex());
-		map.put(FIELD_TYPE, hit.getType());
-		map.put(FIELD_ID, hit.getId());
-		if (hit.getVersion() != -1) {
-			map.put(FIELD_VERSION, hit.getVersion());
-		}
-		return map;
 	}
 
 	@Override
@@ -273,6 +208,12 @@ public abstract class GenericTypeMapping<Type, Id> extends TypeMapping {
 	protected abstract void buildMapping(RootObjectMapper.Builder mapperBuilder) throws IOException;
 
 	protected abstract void writeObject(XContentBuilder contentBuilder, Type o) throws IOException;
+
+	@Override
+	public Object read(final ObjectReadSource source) {
+		final Map<String, Object> map = source.map();
+		return map == null ? null : read(map);
+	}
 
 	/**
 	 * read object from source. Publicly accessible for testing

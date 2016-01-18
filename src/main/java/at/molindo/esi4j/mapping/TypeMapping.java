@@ -21,13 +21,11 @@ import javax.annotation.Nullable;
 
 import org.elasticsearch.action.delete.DeleteRequest;
 import org.elasticsearch.action.delete.DeleteRequestBuilder;
-import org.elasticsearch.action.get.GetResponse;
 import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.action.index.IndexRequestBuilder;
 import org.elasticsearch.client.Client;
 import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.index.VersionType;
-import org.elasticsearch.search.SearchHit;
 
 import at.molindo.utils.data.StringUtils;
 
@@ -119,21 +117,15 @@ public abstract class TypeMapping {
 	public abstract MappingSource getMappingSource(Settings indexSettings);
 
 	/**
-	 * @return a new {@link ObjectSource} for this object
+	 * @return a new {@link ObjectWriteSource} for this object
 	 */
-	public abstract ObjectSource getObjectSource(Object o);
+	public abstract ObjectWriteSource getObjectSource(Object o);
 
 	/**
-	 * @return the object returned by a {@link GetResponse} or null if not applicable or doc doesn't exist
+	 * @return the object returned by a {@link ObjectReadSource} or null if not applicable or doc doesn't exist
 	 */
 	@CheckForNull
-	public abstract Object read(GetResponse response);
-
-	/**
-	 * @return the object returned by a {@link SearchHit} or null if not applicable
-	 */
-	@CheckForNull
-	public abstract Object read(SearchHit hit);
+	public abstract Object read(ObjectReadSource source);
 
 	/**
 	 * @return null if object is filtered

@@ -19,11 +19,10 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
 
-import com.aconex.scrutineer.IdAndVersion;
-import com.aconex.scrutineer.IdAndVersionStream;
-
 import at.molindo.esi4j.mapping.TypeMapping;
 import at.molindo.esi4j.rebuild.Esi4JRebuildSession;
+import at.molindo.scrutineer.IdAndVersion;
+import at.molindo.scrutineer.IdAndVersionStream;
 
 public final class ModuleIdAndVersionStream implements IdAndVersionStream {
 
@@ -35,6 +34,11 @@ public final class ModuleIdAndVersionStream implements IdAndVersionStream {
 		_rebuildSession = rebuildSession;
 		_batchSize = batchSize;
 		_mapping = mapping;
+	}
+
+	@Override
+	public boolean isSorted() {
+		return _rebuildSession.isOrdered();
 	}
 
 	@Override

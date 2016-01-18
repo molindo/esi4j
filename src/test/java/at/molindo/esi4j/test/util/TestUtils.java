@@ -82,7 +82,10 @@ public class TestUtils {
 
 				.put("index.search.slowlog.threshold.query.debug", "0ms")
 				.put("index.search.slowlog.threshold.fetch.debug", "0ms")
-				.put("index.indexing.slowlog.threshold.index.debug", "0ms");
+				.put("index.indexing.slowlog.threshold.index.debug", "0ms")
+
+				.put("cluster.routing.allocation.disk.watermark.low", "99%")
+				.put("cluster.routing.allocation.disk.watermark.high", "99%");
 	}
 
 	public static Esi4J newEsi4j() {

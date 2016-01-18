@@ -1,4 +1,4 @@
-# esi4j - elasticSearch integration for Java
+# esi4j - Elasticsearch integration for Java
 
 esi4j helps integrating [elasticsearch](http://www.elasticsearch.org/) into Java projects.
 

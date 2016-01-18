@@ -17,13 +17,12 @@ package at.molindo.esi4j.rebuild.scrutineer;
 
 import org.elasticsearch.client.Client;
 
-import com.aconex.scrutineer.IdAndVersion;
-import com.aconex.scrutineer.IdAndVersionStreamVerifierListener;
-
 import at.molindo.esi4j.core.Esi4JOperation.OperationContext;
 import at.molindo.esi4j.mapping.TypeMapping;
 import at.molindo.esi4j.rebuild.util.BulkIndexHelper;
 import at.molindo.esi4j.rebuild.util.BulkIndexHelper.Session;
+import at.molindo.scrutineer.IdAndVersion;
+import at.molindo.scrutineer.IdAndVersionStreamVerifierListener;
 
 /**
  * primary stream is module, secondary is index
@@ -37,6 +36,7 @@ public class VerifierListener implements IdAndVersionStreamVerifierListener {
 
 	private int _index;
 	private int _update;
+	private int _ignored;
 	private int _delete;
 
 	public VerifierListener(final Client client, final String indexName, final OperationContext context, final TypeMapping mapping, final BulkIndexHelper bulkHelper, final int batchSize) {
@@ -54,8 +54,16 @@ public class VerifierListener implements IdAndVersionStreamVerifierListener {
 	@Override
 	public void onVersionMisMatch(final IdAndVersion primaryItem, final IdAndVersion secondaryItem) {
 		_update++;
-		// TODO use secondaryItem to support partial updates?
-		index(((ObjectIdAndVersion) primaryItem));
+		if (primaryItem.getVersion() > secondaryItem.getVersion()) {
+			// TODO use secondaryItem to support partial updates?
+			index(((ObjectIdAndVersion) primaryItem));
+		} else {
+			if (log.isTraceEnabled()) {
+				log.trace("ignoring older version {} for existing {} for item ", primaryItem.getVersion(), secondaryItem
+						.getVersion(), primaryItem.getId());
+			}
+			_ignored++;
+		}
 	}
 
 	@Override
@@ -75,6 +83,6 @@ public class VerifierListener implements IdAndVersionStreamVerifierListener {
 	public void close() {
 		_bulkSession.submit();
 		log.info("submitted " + (_index + _update + _delete) + " requests (" + _index + " index, " + _update
-				+ " update, " + _delete + " delete)");
+				+ " update, " + _delete + " delete), ignored " + _ignored + " version missmatches");
 	}
 }

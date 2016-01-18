@@ -9,7 +9,7 @@
 	</parent>
 
 	<artifactId>esi4j</artifactId>
-	<version>2.0.4-SNAPSHOT</version>
+	<version>3.0.0-SNAPSHOT</version>
 	<packaging>jar</packaging>
 
 	<name>esi4j - Elastic Search Integration for Java</name>
@@ -31,7 +31,7 @@
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<elasticsearch.version>1.4.5</elasticsearch.version>
+		<elasticsearch.version>1.7.4</elasticsearch.version>
 		<hibernate.version>4.2.21.Final</hibernate.version>
 		<spring.version>4.1.8.RELEASE</spring.version>
 	</properties>
@@ -58,7 +58,7 @@
 		<dependency>
 			<groupId>at.molindo</groupId>
 			<artifactId>scrutineer</artifactId>
-			<version>2.0.0</version>
+			<version>3.0.0-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>org.hibernate</groupId>
@@ -110,6 +110,13 @@
 		<dependency>
 			<groupId>com.google.code.findbugs</groupId>
 			<artifactId>annotations</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.projectlombok</groupId>
+			<artifactId>lombok</artifactId>
+			<version>1.16.6</version>
+			<scope>provided</scope>
 		</dependency>
 
 	</dependencies>

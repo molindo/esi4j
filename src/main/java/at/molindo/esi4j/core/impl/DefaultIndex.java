@@ -44,6 +44,7 @@ import at.molindo.esi4j.core.Esi4JStore;
 import at.molindo.esi4j.core.Esi4JStore.StoreOperation;
 import at.molindo.esi4j.core.internal.InternalIndex;
 import at.molindo.esi4j.ex.Esi4JObjectFilteredException;
+import at.molindo.esi4j.mapping.ObjectReadSource;
 import at.molindo.esi4j.mapping.TypeMapping;
 import at.molindo.esi4j.mapping.TypeMappings;
 import at.molindo.esi4j.util.ListenableActionFutureWrapper;
@@ -220,7 +221,7 @@ public class DefaultIndex extends AbstractIndex implements InternalIndex {
 					@Override
 					public GetResponseWrapper apply(final GetResponse input) {
 						final TypeMapping typeMapping = _mappings.getTypeMapping(input.getType());
-						final Object object = typeMapping.read(input);
+						final Object object = typeMapping.read(ObjectReadSource.Builder.get(input));
 						return new DefaultGetResponseWrapper(input, object);
 					}
 				});

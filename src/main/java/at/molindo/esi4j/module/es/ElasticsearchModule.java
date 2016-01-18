@@ -32,6 +32,7 @@ import org.elasticsearch.search.sort.SortOrder;
 
 import at.molindo.esi4j.core.Esi4JOperation;
 import at.molindo.esi4j.core.internal.InternalIndex;
+import at.molindo.esi4j.mapping.ObjectReadSource;
 import at.molindo.esi4j.mapping.TypeMapping;
 import at.molindo.esi4j.module.Esi4JModule;
 import at.molindo.esi4j.rebuild.Esi4JRebuildSession;
@@ -112,7 +113,7 @@ public class ElasticsearchModule implements Esi4JModule {
 						} else {
 							_scrollId = response.getScrollId();
 							for (final SearchHit hit : hits) {
-								final Object o = mapping.read(hit);
+								final Object o = mapping.read(ObjectReadSource.Builder.search(hit));
 								if (o != null) {
 									list.add(o);
 								}

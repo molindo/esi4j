@@ -44,6 +44,7 @@ import at.molindo.esi4j.core.Esi4JOperation.OperationContext;
 import at.molindo.esi4j.core.Esi4JSearchIndex;
 import at.molindo.esi4j.core.Esi4JStore;
 import at.molindo.esi4j.core.Esi4JStore.StoreOperation;
+import at.molindo.esi4j.mapping.ObjectReadSource;
 import at.molindo.esi4j.mapping.TypeMapping;
 import at.molindo.esi4j.util.ListenableActionFutureWrapper;
 import at.molindo.utils.data.Function;
@@ -133,12 +134,13 @@ public abstract class AbstractIndex implements Esi4JSearchIndex, Esi4JManagedInd
 
 	@Override
 	public final Object read(final SearchHit hit) {
-		return findTypeMapping(hit.index(), hit.type()).read(hit);
+		return findTypeMapping(hit.index(), hit.type()).read(ObjectReadSource.Builder.search(hit));
 	}
 
 	@Override
 	public Object read(final MultiGetItemResponse response) {
-		return findTypeMapping(response.getIndex(), response.getType()).read(response.getResponse());
+		return findTypeMapping(response.getIndex(), response.getType())
+				.read(ObjectReadSource.Builder.get(response.getResponse()));
 	}
 
 	protected abstract Esi4JStore getStore();

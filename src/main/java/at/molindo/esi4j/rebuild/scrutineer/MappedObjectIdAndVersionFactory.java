@@ -17,11 +17,17 @@ package at.molindo.esi4j.rebuild.scrutineer;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.util.Map;
 
-import com.aconex.scrutineer.IdAndVersion;
-import com.aconex.scrutineer.IdAndVersionFactory;
+import org.elasticsearch.client.Requests;
+import org.elasticsearch.common.bytes.BytesReference;
 
+import at.molindo.esi4j.mapping.ObjectReadSource;
+import at.molindo.esi4j.mapping.ObjectWriteSource;
 import at.molindo.esi4j.mapping.TypeMapping;
+import at.molindo.scrutineer.IdAndVersion;
+import at.molindo.scrutineer.IdAndVersionFactory;
 
 public class MappedObjectIdAndVersionFactory implements IdAndVersionFactory {
 
@@ -54,7 +60,50 @@ public class MappedObjectIdAndVersionFactory implements IdAndVersionFactory {
 			id = inputStream.readLong();
 		}
 		final long version = inputStream.readLong();
-		return new ObjectIdAndVersion(id, version);
+
+		final int length = inputStream.readInt();
+		if (length == 0) {
+			return new ObjectIdAndVersion(id, version);
+		} else {
+			final byte[] bytes = new byte[length];
+			inputStream.readFully(bytes);
+
+			final Map<String, Object> map = Requests.INDEX_CONTENT_TYPE.xContent().createParser(bytes).map();
+			final Object object = _mapping.read(ObjectReadSource.Builder.map(id, version, map));
+			return new ObjectIdAndVersion(id, version, object);
+		}
+
+	}
+
+	@Override
+	public void writeToStream(final IdAndVersion idAndVersion, final ObjectOutputStream objectOutputStream) throws IOException {
+		// write id - boolean flag to indicate string
+		final Object id = idAndVersion.getId();
+		if (id instanceof String) {
+			objectOutputStream.writeBoolean(true);
+			objectOutputStream.writeUTF((String) id);
+		} else {
+			objectOutputStream.writeBoolean(false);
+			objectOutputStream.writeLong(((Number) id).longValue());
+		}
+
+		// write version
+		objectOutputStream.writeLong(idAndVersion.getVersion());
+
+		// write object - start with byte array length
+		final Object object = ((ObjectIdAndVersion) idAndVersion).getObject();
+		if (object == null) {
+			objectOutputStream.writeInt(0);
+		} else {
+			final ObjectWriteSource src = _mapping.getObjectSource(object);
+			final BytesReference bytes = src.getSource();
+			if (bytes == null || bytes.length() == 0) {
+				objectOutputStream.writeInt(0);
+			} else {
+				objectOutputStream.writeInt(bytes.length());
+				objectOutputStream.write(bytes.array(), bytes.arrayOffset(), bytes.length());
+			}
+		}
 	}
 
 }

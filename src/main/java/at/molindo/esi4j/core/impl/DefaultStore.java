@@ -169,25 +169,40 @@ public class DefaultStore implements Esi4JStore {
 	 * @return true if the index exists
 	 */
 	private boolean indexExists() {
-		try {
-			if (isRecovering()) {
-				// index exists but is recovering
-				if (!waitForYellowStatus()) {
-					// waiting timed out, during recovery. not a good sign.
-					log.warn("cluster not ready for settings update, assume index {} missing", _indexName);
-					return false;
+		int attempts = 0;
+		do {
+			try {
+				if (isRecovering()) {
+					// index exists but is recovering
+					if (!waitForYellowStatus()) {
+						// waiting timed out, during recovery. not a good sign.
+						log.warn("cluster not ready for settings update, assume index {} missing", _indexName);
+						return false;
+					} else {
+						// existing and ready
+						return true;
+					}
 				} else {
-					// existing and ready
+					// not recovering, no need to wait
 					return true;
 				}
-			} else {
-				// not recovering, no need to wait
-				return true;
+			} catch (final MissingIndexException e) {
+				log.info("index missing: {}", _indexName);
+				return false;
+			} catch (final ClusterBlockedException e) {
+				log.info("cluster blocked, waiting");
+				attempts++;
+				try {
+					Thread.sleep(3000);
+				} catch (final InterruptedException e1) {
+					log.warn("waiting for cluster block interrupted, aborting");
+					return false;
+				}
 			}
-		} catch (final MissingIndexException e) {
-			log.info("index missing: {}", _indexName);
-			return false;
-		}
+		} while (attempts < 3);
+
+		log.warn("stop waiting for index existence after {} failed attempts", attempts);
+		return false;
 	}
 
 	private boolean waitForYellowStatus() {
@@ -205,7 +220,7 @@ public class DefaultStore implements Esi4JStore {
 	 * @throws MissingIndexException
 	 *             if index does not exist
 	 */
-	private boolean isRecovering() throws MissingIndexException {
+	private boolean isRecovering() throws MissingIndexException, ClusterBlockedException {
 		try {
 
 			final RecoveryResponse recoveryRespone = _client.getClient().admin().indices()
@@ -236,8 +251,8 @@ public class DefaultStore implements Esi4JStore {
 		} catch (final ClusterBlockException ex) {
 			log.debug("recovery state not available");
 			if (ex.blocks().contains(GatewayService.STATE_NOT_RECOVERED_BLOCK)) {
-				log.debug("cluster blocked, indext not yet recovering: {}", _indexName);
-				return true;
+				log.debug("cluster blocked, index not yet recovering: {}", _indexName);
+				throw new ClusterBlockedException(_indexName);
 			} else {
 				log.warn("unexpected cluster block, expect index does not exist", ex);
 				throw new MissingIndexException(_indexName);
@@ -331,6 +346,16 @@ public class DefaultStore implements Esi4JStore {
 
 		public MissingIndexException(final String indexName, final IndexMissingException cause) {
 			super("index missing: " + indexName, cause);
+		}
+
+	}
+
+	private static class ClusterBlockedException extends Exception {
+
+		private static final long serialVersionUID = 1L;
+
+		public ClusterBlockedException(final String indexName) {
+			super("cluster blocked for index: " + indexName);
 		}
 
 	}
