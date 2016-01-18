@@ -9,7 +9,7 @@
 	</parent>
 
 	<artifactId>esi4j</artifactId>
-	<version>3.0.0-SNAPSHOT</version>
+	<version>3.0.0</version>
 	<packaging>jar</packaging>
 
 	<name>esi4j - Elastic Search Integration for Java</name>
@@ -58,7 +58,7 @@
 		<dependency>
 			<groupId>at.molindo</groupId>
 			<artifactId>scrutineer</artifactId>
-			<version>3.0.0-SNAPSHOT</version>
+			<version>3.0.0</version>
 		</dependency>
 		<dependency>
 			<groupId>org.hibernate</groupId>
