@@ -1,4 +1,5 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
 	<modelVersion>4.0.0</modelVersion>
 
@@ -38,6 +39,41 @@
 
 	<build>
 		<plugins>
+			<plugin>
+				<artifactId>maven-enforcer-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>enforce-java7</id>
+						<goals>
+							<goal>enforce</goal>
+						</goals>
+						<configuration>
+							<rules>
+								<requireJavaVersion>
+									<version>[1.7,1.8)</version>
+								</requireJavaVersion>
+							</rules>
+							<requireSemanticVersioningConformance implementation="org.semver.enforcer.RequireSemanticVersioningConformance">
+								<includes>
+									<include>at/molindo/**</include>
+								</includes>
+								<excludes>
+									<exclude>at/molindo/**/impl/**</exclude>
+									<exclude>at/molindo/**/internal/**</exclude>
+								</excludes>
+								<dumpDetails>true</dumpDetails>
+							</requireSemanticVersioningConformance>
+						</configuration>
+					</execution>
+				</executions>
+				<dependencies>
+					<dependency>
+						<groupId>org.semver</groupId>
+						<artifactId>enforcer-rule</artifactId>
+						<version>0.9.33</version>
+					</dependency>
+				</dependencies>
+			</plugin>
 			<plugin>
 				<artifactId>maven-compiler-plugin</artifactId>
 				<configuration>
