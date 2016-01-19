@@ -36,6 +36,26 @@ public class ObjectIdAndVersion extends AbstractIdAndVersion {
 		return id instanceof Number || id instanceof String;
 	}
 
+	public static String toId(final Object id) {
+		return toStringId(toRawId(id));
+	}
+
+	private static Object toRawId(Object id) {
+		if (id instanceof Number) {
+			// TODO not every number should be turned into Long
+			id = ((Number) id).longValue();
+		}
+		if (id instanceof Long || id instanceof String) {
+			return id;
+		} else {
+			throw new IllegalArgumentException("unexpected id: " + id);
+		}
+	}
+
+	private static String toStringId(final Object rawId) {
+		return rawId.toString();
+	}
+
 	/**
 	 * used for id and version coming from current index
 	 *
@@ -51,17 +71,10 @@ public class ObjectIdAndVersion extends AbstractIdAndVersion {
 	 * @param object
 	 *            may be null when coming from index
 	 */
-	public ObjectIdAndVersion(Object id, final long version, @Nullable final Object object) {
+	public ObjectIdAndVersion(final Object id, final long version, @Nullable final Object object) {
 		super(version);
-		if (id instanceof Number) {
-			id = ((Number) id).longValue();
-		}
-		if (id instanceof Long || id instanceof String) {
-			_object = object;
-			_id = (Comparable<?>) id;
-		} else {
-			throw new IllegalArgumentException("unexpected id: " + id);
-		}
+		_object = object;
+		_id = (Comparable<?>) toRawId(id);
 	}
 
 	/**
@@ -74,7 +87,11 @@ public class ObjectIdAndVersion extends AbstractIdAndVersion {
 
 	@Override
 	public String getId() {
-		return _id.toString();
+		return toStringId(_id);
+	}
+
+	public Object getRawId() {
+		return _id;
 	}
 
 	@Override

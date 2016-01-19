@@ -102,7 +102,7 @@ public interface ObjectReadSource {
 			};
 		}
 
-		public static ObjectReadSource map(final Object id, final long version, final Map<String, Object> map) {
+		public static ObjectReadSource map(final String id, final long version, final Map<String, Object> map) {
 			return new ObjectReadSource() {
 
 				@Override

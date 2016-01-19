@@ -51,7 +51,7 @@ public class MappedObjectIdAndVersionFactory implements IdAndVersionFactory {
 	}
 
 	@Override
-	public IdAndVersion readFromStream(final ObjectInputStream inputStream) throws IOException {
+	public ObjectIdAndVersion readFromStream(final ObjectInputStream inputStream) throws IOException {
 		final boolean isString = inputStream.readBoolean();
 		Object id;
 		if (isString) {
@@ -69,7 +69,8 @@ public class MappedObjectIdAndVersionFactory implements IdAndVersionFactory {
 			inputStream.readFully(bytes);
 
 			final Map<String, Object> map = Requests.INDEX_CONTENT_TYPE.xContent().createParser(bytes).map();
-			final Object object = _mapping.read(ObjectReadSource.Builder.map(id, version, map));
+			final Object object = _mapping
+					.read(ObjectReadSource.Builder.map(ObjectIdAndVersion.toId(id), version, map));
 			return new ObjectIdAndVersion(id, version, object);
 		}
 
@@ -78,7 +79,7 @@ public class MappedObjectIdAndVersionFactory implements IdAndVersionFactory {
 	@Override
 	public void writeToStream(final IdAndVersion idAndVersion, final ObjectOutputStream objectOutputStream) throws IOException {
 		// write id - boolean flag to indicate string
-		final Object id = idAndVersion.getId();
+		final Object id = ((ObjectIdAndVersion) idAndVersion).getRawId();
 		if (id instanceof String) {
 			objectOutputStream.writeBoolean(true);
 			objectOutputStream.writeUTF((String) id);
