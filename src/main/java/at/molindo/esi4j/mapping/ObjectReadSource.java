@@ -17,12 +17,15 @@ package at.molindo.esi4j.mapping;
 
 import static at.molindo.esi4j.mapping.TypeMapping.*;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
 import org.elasticsearch.action.get.GetResponse;
+import org.elasticsearch.client.Requests;
+import org.elasticsearch.common.xcontent.XContentFactory;
 import org.elasticsearch.index.get.GetField;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHitField;
@@ -38,6 +41,8 @@ import at.molindo.utils.collections.CollectionUtils;
 public interface ObjectReadSource {
 
 	Map<String, Object> map();
+
+	String string();
 
 	public final class Builder {
 
@@ -66,6 +71,16 @@ public interface ObjectReadSource {
 						map.put(FIELD_VERSION, hit.getVersion());
 					}
 					return map;
+				}
+
+				@Override
+				public String string() {
+					return hit.sourceAsString();
+				}
+
+				@Override
+				public String toString() {
+					return string();
 				}
 
 			};
@@ -99,6 +114,16 @@ public interface ObjectReadSource {
 					return map;
 				}
 
+				@Override
+				public String string() {
+					return response.getSourceAsString();
+				}
+
+				@Override
+				public String toString() {
+					return string();
+				}
+
 			};
 		}
 
@@ -116,6 +141,23 @@ public interface ObjectReadSource {
 						m.put(FIELD_VERSION, version);
 					}
 					return m;
+				}
+
+				@Override
+				public String string() {
+					if (map == null) {
+						return null;
+					}
+					try {
+						return XContentFactory.contentBuilder(Requests.INDEX_CONTENT_TYPE).map(map).string();
+					} catch (final IOException e) {
+						throw new RuntimeException("failed to generate string from map", e);
+					}
+				}
+
+				@Override
+				public String toString() {
+					return string();
 				}
 
 			};
